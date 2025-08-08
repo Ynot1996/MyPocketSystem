@@ -1,0 +1,17 @@
+@{
+    ViewData["Title"] = "Login";
+}
+<h2>Login</h2>
+<form asp-action="Login" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label for="email">±b¸¹</label>
+        <input type="text" name="email" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="password">±K½X</label>
+        <input type="password" name="password" class="form-control" required />
+    </div>
+    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+    <button type="submit" class="btn btn-primary">µn¤J</button>
+</form>
