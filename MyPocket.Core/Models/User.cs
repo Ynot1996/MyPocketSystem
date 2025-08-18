@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,28 +9,20 @@ namespace MyPocket.Core.Models;
 public partial class User
 {
     [Key]
-    [Column("UserID")]
     public Guid UserId { get; set; }
 
-    [StringLength(250)]
     public string Email { get; set; } = null!;
 
-    [StringLength(100)]
     public string PasswordHash { get; set; } = null!;
 
-    [StringLength(50)]
     public string? Nickname { get; set; }
 
-    [StringLength(20)]
     public string Role { get; set; } = null!;
 
-    [Column(TypeName = "datetime")]
     public DateTime CreationDate { get; set; }
 
-    [Column(TypeName = "datetime")]
     public DateTime LastLoginDate { get; set; }
 
-    [Column(TypeName = "datetime")]
     public DateTime UpdatedAt { get; set; }
 
     public bool IsDeleted { get; set; }
