@@ -1,12 +1,22 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MyPocket.DataAccess.Data;
+using System.Security.Claims;
 
 namespace MyPocket.Web.Controllers
 {
+
     public class AccountController : Controller
     {
+        private readonly MyPocketDBContext _context;
+
+        public AccountController(MyPocketDBContext context)
+        {
+            _context = context;
+        }
+
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
@@ -18,25 +28,25 @@ namespace MyPocket.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
         {
-            // 管理者帳號驗證
-            if (email == "admin" && password == "12345678")
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
                 var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, email),
-                    new Claim(ClaimTypes.Role, "Admin")
-                };
+        {
+            new Claim(ClaimTypes.Name, user.Email),
+            new Claim(ClaimTypes.Role, user.Role)
+        };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties
-                {
-                    IsPersistent = true
-                };
+                var authProperties = new AuthenticationProperties { IsPersistent = true };
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity), authProperties);
-                // 登入成功預設導向管理員介面
+
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     return Redirect(returnUrl);
-                return RedirectToAction("Index", "Users", new { area = "Admin" });
+
+                if (user.Role == "Admin")
+                    return RedirectToAction("Index", "Users", new { area = "Admin" });
+                return RedirectToAction("Index", "Home");
             }
             ModelState.AddModelError(string.Empty, "帳號或密碼錯誤");
             ViewData["ReturnUrl"] = returnUrl;
