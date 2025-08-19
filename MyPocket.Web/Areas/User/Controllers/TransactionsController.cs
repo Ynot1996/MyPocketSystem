@@ -49,6 +49,11 @@ namespace MyPocket.Web.Areas.User.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CategoryId,Amount,TransactionDate,Description")] Transaction transaction)
         {
+            if (transaction.CategoryId == Guid.Empty)
+            {
+                ModelState.AddModelError("CategoryId", "請選擇類別");
+            }
+
             if (ModelState.IsValid)
             {
                 var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -70,7 +75,22 @@ namespace MyPocket.Web.Areas.User.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            return RedirectToAction(nameof(Index));
+            // 若驗證失敗，重新載入分類資料並回傳原表單
+            var userIdReload = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var categories = await _context.Categories
+                .Where(c => c.UserId == userIdReload && !c.IsDeleted)
+                .OrderBy(c => c.CategoryType)
+                .ThenBy(c => c.CategoryName)
+                .ToListAsync();
+            ViewBag.Categories = new SelectList(categories, "CategoryId", "CategoryName");
+
+            var transactions = await _context.Transactions
+                .Include(t => t.Category)
+                .Where(t => t.UserId == userIdReload && !t.IsDeleted)
+                .OrderByDescending(t => t.TransactionDate)
+                .ToListAsync();
+
+            return View("Index", transactions);
         }
 
         [HttpPost]

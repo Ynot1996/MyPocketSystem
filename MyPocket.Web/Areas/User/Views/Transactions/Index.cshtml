@@ -1,55 +1,53 @@
 @model IEnumerable<MyPocket.Core.Models.Transaction>
 @{
     ViewData["Title"] = "記帳";
+    var categoryError = ViewData.ModelState["CategoryId"]?.Errors.FirstOrDefault()?.ErrorMessage;
 }
 
 <div class="container py-4">
     <div class="row">
         <!-- 新增交易表單 -->
         <div class="col-md-4">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">新增交易</h5>
-                    <form asp-action="Create" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        
+                    <h5 class="card-title mb-3 fw-bold text-primary">新增交易</h5>
+                    <form asp-action="Create" method="post" autocomplete="off">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
                         <div class="mb-3">
-                            <label for="CategoryId" class="form-label">類別</label>
-                            <select name="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                            <label for="CategoryId" class="form-label">類別 <span class="text-danger">*</span></label>
+                            <select name="CategoryId" class="form-select" asp-items="ViewBag.Categories" required>
                                 <option value="">-- 選擇類別 --</option>
                             </select>
+                            @if (!string.IsNullOrEmpty(categoryError))
+                            {
+                                <span class="text-danger small">@categoryError</span>
+                            }
                         </div>
-
                         <div class="mb-3">
-                            <label for="Amount" class="form-label">金額</label>
-                            <input type="number" name="Amount" class="form-control" step="0.01" required />
+                            <label for="Amount" class="form-label">金額 <span class="text-danger">*</span></label>
+                            <input type="number" name="Amount" class="form-control" step="0.01" min="0" required />
                         </div>
-
                         <div class="mb-3">
-                            <label for="TransactionDate" class="form-label">交易日期</label>
-                            <input type="datetime-local" name="TransactionDate" class="form-control" 
-                                   value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
+                            <label for="TransactionDate" class="form-label">交易日期 <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="TransactionDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
                         </div>
-
                         <div class="mb-3">
                             <label for="Description" class="form-label">備註</label>
-                            <textarea name="Description" class="form-control"></textarea>
+                            <textarea name="Description" class="form-control" rows="2" maxlength="100"></textarea>
                         </div>
-
-                        <button type="submit" class="btn btn-primary">新增</button>
+                        <button type="submit" class="btn btn-primary w-100">新增</button>
                     </form>
                 </div>
             </div>
         </div>
-
         <!-- 交易列表 -->
         <div class="col-md-8">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">交易記錄</h5>
+                    <h5 class="card-title mb-3 fw-bold text-primary">交易記錄</h5>
                     <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
                                 <tr>
                                     <th>日期</th>
                                     <th>類別</th>
@@ -59,25 +57,34 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in Model)
+                                @if (!Model.Any())
                                 {
                                     <tr>
-                                        <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
-                                        <td>@item.Category.CategoryName</td>
-                                        <td class="@(item.TransactionType == "支出" ? "text-danger" : "text-success")">
-                                            @(item.TransactionType == "支出" ? "-" : "+")@item.Amount.ToString("N0")
-                                        </td>
-                                        <td>@item.Description</td>
-                                        <td>
-                                            <form asp-action="Delete" method="post" class="d-inline">
-                                                <input type="hidden" name="id" value="@item.TransactionId" />
-                                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                        onclick="return confirm('確定要刪除此筆交易?');">
-                                                    刪除
-                                                </button>
-                                            </form>
-                                        </td>
+                                        <td colspan="5" class="text-center text-muted">尚無交易紀錄</td>
                                     </tr>
+                                }
+                                else
+                                {
+                                    foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                            <td>@item.Category.CategoryName</td>
+                                            <td class="@(item.TransactionType == "支出" ? "text-danger" : "text-success") fw-bold">
+                                                @(item.TransactionType == "支出" ? "-" : "+")@item.Amount.ToString("N0")
+                                            </td>
+                                            <td>@item.Description</td>
+                                            <td>
+                                                <form asp-action="Delete" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@item.TransactionId" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                            onclick="return confirm('確定要刪除此筆交易?');">
+                                                        刪除
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
                                 }
                             </tbody>
                         </table>
