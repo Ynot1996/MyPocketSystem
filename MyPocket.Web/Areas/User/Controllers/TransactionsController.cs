@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace MyPocket.Web.Areas.User.Controllers
 {
     [Area("User")]
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = "FreeMember")]
     public class TransactionsController : Controller
     {
         private readonly MyPocketDBContext _context;
@@ -21,21 +21,25 @@ namespace MyPocket.Web.Areas.User.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
+            var userId = Guid.Parse(userIdString);
+
             var transactions = await _context.Transactions
                 .Include(t => t.Category)
                 .Where(t => t.UserId == userId && !t.IsDeleted)
                 .OrderByDescending(t => t.TransactionDate)
                 .ToListAsync();
 
-            // 取得使用者的類別，供新增交易時使用
             var categories = await _context.Categories
                 .Where(c => c.UserId == userId && !c.IsDeleted)
                 .OrderBy(c => c.CategoryType)
                 .ThenBy(c => c.CategoryName)
                 .ToListAsync();
-                
+
             ViewBag.Categories = new SelectList(categories, "CategoryId", "CategoryName");
 
             return View(transactions);
