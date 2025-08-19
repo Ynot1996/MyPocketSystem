@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyPocket.Core.Models;
 
+[Table("UserSubscription")]
 public partial class UserSubscription
 {
     [Key]

@@ -71,5 +71,41 @@ namespace MyPocket.Web.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(MyPocket.Web.ViewModels.RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            if (await _context.Users.AnyAsync(u => u.Email == model.Email && !u.IsDeleted))
+            {
+                ModelState.AddModelError("Email", "¦¹Email¤w³Qµù¥U");
+                return View(model);
+            }
+
+            var user = new MyPocket.Core.Models.User
+            {
+                UserId = Guid.NewGuid(),
+                Email = model.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                Role = "FreeMember",
+                Nickname = string.IsNullOrWhiteSpace(model.Nickname) ? model.Email.Split('@')[0] : model.Nickname,
+                CreationDate = DateTime.UtcNow,
+                LastLoginDate = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsDeleted = false
+            };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Login");
+        }
     }
 }
