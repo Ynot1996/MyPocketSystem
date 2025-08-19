@@ -1,4 +1,8 @@
-ï»¿<!DOCTYPE html>
+@* ¤@¯ë·|­û¥Î Layout *@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -10,13 +14,9 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MyPocket.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
@@ -25,26 +25,16 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="User" asp-controller="Transactions" asp-action="Index">§Úªº±b°È</a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav">
-                        @if (User.Identity?.IsAuthenticated ?? false)
-                        {
-                            <li class="nav-item">
-                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-link nav-link">ç™»å‡º (@User.Identity.Name)</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">è¨»å†Š</a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">ç™»å…¥</a>
-                            </li>
-                        }
+                        <li class="nav-item">
+                            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-link nav-link">µn¥X (@User.Identity.Name)</button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -55,10 +45,9 @@
             @RenderBody()
         </main>
     </div>
-
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - MyPocket.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - MyPocket.Web
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
