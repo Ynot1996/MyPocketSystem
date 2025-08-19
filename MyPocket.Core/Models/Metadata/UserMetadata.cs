@@ -67,7 +67,6 @@ namespace MyPocket.Core.Models.Metadata
         [Display(Name = "¥æ©ö")]
         public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 
-
         [Display(Name = "­q¾\")]
         public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
     }

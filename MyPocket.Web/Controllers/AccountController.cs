@@ -46,6 +46,10 @@ namespace MyPocket.Web.Controllers
 
                 if (user.Role == "Admin")
                     return RedirectToAction("Index", "Users", new { area = "Admin" });
+
+                else if (user.Role == "User")
+                    return RedirectToAction("Index", "Transaction");
+
                 return RedirectToAction("Index", "Home");
             }
             ModelState.AddModelError(string.Empty, "±b¸¹©Î±K½X¿ù»~");

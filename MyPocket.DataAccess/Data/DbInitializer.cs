@@ -9,29 +9,43 @@ namespace MyPocket.DataAccess.Data
         {
             await context.Database.EnsureCreatedAsync();
 
-            if (await context.Users.AnyAsync(u => u.Role == "Admin"))
+            bool hasUser = await context.Users.AnyAsync(u => u.Email == "freemember@example.com");
+            if (!hasUser)
             {
-                return; 
+                var normalUser = new User
+                {
+                    UserId = Guid.NewGuid(),
+                    Email = "freemember@example.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("12345678"),
+                    Nickname = "測試免費用戶",
+                    Role = "FreeMember",
+                    CreationDate = DateTime.UtcNow,
+                    LastLoginDate = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                await context.Users.AddAsync(normalUser);
             }
 
-            var adminPasswordHash = BCrypt.Net.BCrypt.HashPassword("12345678");
-
-            var adminUser = new User
+            bool hasAdmin = await context.Users.AnyAsync(u => u.Email == "admin@example.com");
+            if (!hasAdmin)
             {
-                UserId = Guid.NewGuid(),
-                Email = "admin@example.com",
-                PasswordHash = adminPasswordHash,
-                Nickname = "管理員",
-                Role = "Admin",
-                CreationDate = DateTime.UtcNow,
-                LastLoginDate = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsDeleted = false
-            };
-
-            await context.Users.AddAsync(adminUser);
+                var adminUser = new User
+                {
+                    UserId = Guid.NewGuid(),
+                    Email = "admin@example.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("12345678"),
+                    Nickname = "管理員",
+                    Role = "Admin",
+                    CreationDate = DateTime.UtcNow,
+                    LastLoginDate = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                await context.Users.AddAsync(adminUser);
+            }
+   
             await context.SaveChangesAsync();
-
         }
     }
 }
