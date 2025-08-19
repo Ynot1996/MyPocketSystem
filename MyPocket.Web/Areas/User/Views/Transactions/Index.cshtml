@@ -1,0 +1,93 @@
+@model IEnumerable<MyPocket.Core.Models.Transaction>
+@{
+    ViewData["Title"] = "記帳";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <!-- 新增交易表單 -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">新增交易</h5>
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="mb-3">
+                            <label for="CategoryId" class="form-label">類別</label>
+                            <select name="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                                <option value="">-- 選擇類別 --</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Amount" class="form-label">金額</label>
+                            <input type="number" name="Amount" class="form-control" step="0.01" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="TransactionDate" class="form-label">交易日期</label>
+                            <input type="datetime-local" name="TransactionDate" class="form-control" 
+                                   value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">備註</label>
+                            <textarea name="Description" class="form-control"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">新增</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 交易列表 -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">交易記錄</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>類別</th>
+                                    <th>金額</th>
+                                    <th>備註</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                        <td>@item.Category.CategoryName</td>
+                                        <td class="@(item.TransactionType == "支出" ? "text-danger" : "text-success")">
+                                            @(item.TransactionType == "支出" ? "-" : "+")@item.Amount.ToString("N0")
+                                        </td>
+                                        <td>@item.Description</td>
+                                        <td>
+                                            <form asp-action="Delete" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@item.TransactionId" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                        onclick="return confirm('確定要刪除此筆交易?');">
+                                                    刪除
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

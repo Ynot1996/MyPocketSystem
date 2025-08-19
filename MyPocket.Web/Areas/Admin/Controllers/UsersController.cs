@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MyPocket.Core.Models;
 using MyPocket.DataAccess.Data;
 using Microsoft.AspNetCore.Authorization;
 
@@ -57,7 +51,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserId,Email,PasswordHash,Nickname,Role,CreationDate,LastLoginDate,UpdatedAt,IsDeleted")] User user)
+        public async Task<IActionResult> Create([Bind("UserId,Email,PasswordHash,Nickname,Role,CreationDate,LastLoginDate,UpdatedAt,IsDeleted")] MyPocket.Core.Models.User user)
         {
             if (ModelState.IsValid)
             {
@@ -90,7 +84,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("UserId,Email,PasswordHash,Nickname,Role,CreationDate,LastLoginDate,UpdatedAt,IsDeleted")] User user)
+        public async Task<IActionResult> Edit(Guid id, [Bind("UserId,Email,PasswordHash,Nickname,Role,CreationDate,LastLoginDate,UpdatedAt,IsDeleted")] MyPocket.Core.Models.User user)
         {
             if (id != user.UserId)
             {

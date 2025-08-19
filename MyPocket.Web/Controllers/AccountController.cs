@@ -32,10 +32,12 @@ namespace MyPocket.Web.Controllers
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
                 var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.Email),
-            new Claim(ClaimTypes.Role, user.Role)
-        };
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                    new Claim(ClaimTypes.Name, user.Email),
+                    new Claim(ClaimTypes.Role, user.Role)
+                };
+
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var authProperties = new AuthenticationProperties { IsPersistent = true };
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
@@ -46,6 +48,10 @@ namespace MyPocket.Web.Controllers
 
                 if (user.Role == "Admin")
                     return RedirectToAction("Index", "Users", new { area = "Admin" });
+
+                else if (user.Role == "FreeMember")
+                    return RedirectToAction("Index", "Transactions", new { area = "User"});
+
                 return RedirectToAction("Index", "Home");
             }
             ModelState.AddModelError(string.Empty, "±b¸¹©Î±K½X¿ù»~");
