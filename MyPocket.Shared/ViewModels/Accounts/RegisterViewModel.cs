@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MyPocket.Web.ViewModels
+namespace MyPocket.Shared.ViewModels.Accounts
 {
     public class RegisterViewModel
     {
