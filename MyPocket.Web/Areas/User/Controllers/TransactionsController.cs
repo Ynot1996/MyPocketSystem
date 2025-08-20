@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MyPocket.Core.Models;
 using MyPocket.DataAccess.Data;
-using MyPocket.Web.ViewModels;
+using MyPocket.Shared.ViewModels.Transactions;
 using System.Security.Claims;
 
 namespace MyPocket.Web.Areas.User.Controllers

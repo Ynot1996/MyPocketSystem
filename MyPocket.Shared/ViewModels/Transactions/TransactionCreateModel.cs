@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MyPocket.Web.ViewModels
+namespace MyPocket.Shared.ViewModels.Transactions
 {
     public class TransactionCreateModel
     {
