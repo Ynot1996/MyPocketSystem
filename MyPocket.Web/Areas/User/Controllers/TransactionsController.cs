@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MyPocket.Core.Models;
 using MyPocket.DataAccess.Data;
+using MyPocket.Web.ViewModels;
 using System.Security.Claims;
 
 namespace MyPocket.Web.Areas.User.Controllers
@@ -56,51 +57,90 @@ namespace MyPocket.Web.Areas.User.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CategoryId,Amount,TransactionDate,Description")] Transaction transaction)
+        public async Task<IActionResult> Create(TransactionCreateModel model)
         {
-            if (transaction.CategoryId == Guid.Empty)
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // 修改 2: 現在 ModelState 會根據 ViewModel 的規則來驗證，不會有 TransactionType 的問題
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("CategoryId", "請選擇類別");
+                // 當驗證失敗時，需要重新準備畫面並返回
+                // 注意：ReloadIndexView 可能也需要調整以處理這種情況
+                return await ReloadIndexView(userId, null); // 或者傳入一個轉換後的 transaction 物件
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                transaction.UserId = userId;
-                transaction.TransactionId = Guid.NewGuid();
-                transaction.CreatedAt = DateTime.UtcNow;
-                transaction.UpdatedAt = DateTime.UtcNow;
+                var category = await _context.Categories
+                    .FirstOrDefaultAsync(c => c.CategoryId == model.CategoryId && !c.IsDeleted);
 
-                // 根據選擇的類別設置交易類型
-                var category = await _context.Categories.FindAsync(transaction.CategoryId);
-                if (category != null)
+                if (category == null)
                 {
-                    transaction.TransactionType = category.CategoryType;
+                    ModelState.AddModelError("CategoryId", "請選擇有效的類別");
+                    return await ReloadIndexView(userId, null);
                 }
+
+                // 修改 3: 手動建立 Transaction 物件，並從 ViewModel 和後端邏輯中填入資料
+                var transaction = new Transaction
+                {
+                    TransactionId = Guid.NewGuid(),
+                    UserId = userId,
+                    CategoryId = model.CategoryId,
+                    Amount = model.Amount,
+                    TransactionDate = model.TransactionDate,
+                    Description = model.Description,
+                    TransactionType = category.CategoryType, // 從後端邏輯賦值
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
 
                 _context.Transactions.Add(transaction);
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "儲存交易時發生錯誤，請稍後再試。");
+                return await ReloadIndexView(userId, null);
+            }
+        }
 
-            // 若驗證失敗，重新載入分類資料並回傳原表單
-            var userIdReload = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var categories = await _context.Categories
-                .Where(c => c.UserId == userIdReload && !c.IsDeleted)
-                .OrderBy(c => c.CategoryType)
-                .ThenBy(c => c.CategoryName)
-                .ToListAsync();
-            ViewBag.Categories = new SelectList(categories, "CategoryId", "CategoryName");
+        // 輔助方法：重新載入 Index 視圖所需的資料
+        // 接受額外的 'transaction' 參數，以便在錯誤時能保留用戶輸入
+        private async Task<IActionResult> ReloadIndexView(Guid userId, Transaction transaction = null)
+        {
+            // 獲取管理員用戶
+            var adminUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Role == "Admin");
 
+            // 重新載入交易記錄
             var transactions = await _context.Transactions
                 .Include(t => t.Category)
-                .Where(t => t.UserId == userIdReload && !t.IsDeleted)
+                .Where(t => t.UserId == userId && !t.IsDeleted)
                 .OrderByDescending(t => t.TransactionDate)
                 .ToListAsync();
 
+            // 重新載入類別選項（包括管理員的預設類別）
+            var categories = await _context.Categories
+                .Where(c => (c.UserId == userId || (adminUser != null && c.UserId == adminUser.UserId)) && !c.IsDeleted)
+                .OrderBy(c => c.CategoryType)
+                .ThenBy(c => c.CategoryName)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.CategoryId.ToString(),
+                    Text = $"{c.CategoryName}",
+                    Group = new SelectListGroup { Name = c.CategoryType }
+                })
+                .ToListAsync();
+
+            ViewBag.Categories = categories;
+
+            // 返回檢視，傳入交易清單
             return View("Index", transactions);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
