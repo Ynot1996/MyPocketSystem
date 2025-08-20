@@ -15,9 +15,19 @@
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
                         <div class="mb-3">
                             <label for="CategoryId" class="form-label">類別 <span class="text-danger">*</span></label>
-                            <select name="CategoryId" class="form-select" asp-items="ViewBag.Categories" required>
+                            <select name="CategoryId" id="CategoryId" class="form-select" required>
                                 <option value="">-- 選擇類別 --</option>
+                                @foreach (var categoryGroup in ((IEnumerable<SelectListItem>)ViewBag.Categories).GroupBy(c => c.Group.Name))
+                                {
+                                    <optgroup label="@categoryGroup.Key">
+                                        @foreach (var category in categoryGroup)
+                                        {
+                                            <option value="@category.Value">@category.Text</option>
+                                        }
+                                    </optgroup>
+                                }
                             </select>
+
                             @if (!string.IsNullOrEmpty(categoryError))
                             {
                                 <span class="text-danger small">@categoryError</span>

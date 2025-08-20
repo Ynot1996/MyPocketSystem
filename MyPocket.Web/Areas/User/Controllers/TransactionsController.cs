@@ -13,20 +13,23 @@ namespace MyPocket.Web.Areas.User.Controllers
     public class TransactionsController : Controller
     {
         private readonly MyPocketDBContext _context;
-
+        
         public TransactionsController(MyPocketDBContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index()
-        {
+        {          
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdString))
             {
                 return RedirectToAction("Login", "Account", new { area = "" });
             }
             var userId = Guid.Parse(userIdString);
+
+            var adminUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Role == "Admin");
 
             var transactions = await _context.Transactions
                 .Include(t => t.Category)
@@ -35,12 +38,18 @@ namespace MyPocket.Web.Areas.User.Controllers
                 .ToListAsync();
 
             var categories = await _context.Categories
-                .Where(c => c.UserId == userId && !c.IsDeleted)
+                .Where(c => (c.UserId == userId || (adminUser != null && c.UserId == adminUser.UserId)) && !c.IsDeleted)
                 .OrderBy(c => c.CategoryType)
                 .ThenBy(c => c.CategoryName)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.CategoryId.ToString(),
+                    Text = $"{c.CategoryName}",
+                    Group = new SelectListGroup { Name = c.CategoryType }
+                })
                 .ToListAsync();
 
-            ViewBag.Categories = new SelectList(categories, "CategoryId", "CategoryName");
+            ViewBag.Categories = categories;
 
             return View(transactions);
         }
