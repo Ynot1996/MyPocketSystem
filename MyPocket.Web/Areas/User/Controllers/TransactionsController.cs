@@ -59,7 +59,11 @@ namespace MyPocket.Web.Areas.User.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TransactionCreateModel model)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+            {
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
 
             // 修改 2: 現在 ModelState 會根據 ViewModel 的規則來驗證，不會有 TransactionType 的問題
             if (!ModelState.IsValid)
@@ -100,7 +104,7 @@ namespace MyPocket.Web.Areas.User.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ModelState.AddModelError("", "儲存交易時發生錯誤，請稍後再試。");
                 return await ReloadIndexView(userId, null);
@@ -109,7 +113,7 @@ namespace MyPocket.Web.Areas.User.Controllers
 
         // 輔助方法：重新載入 Index 視圖所需的資料
         // 接受額外的 'transaction' 參數，以便在錯誤時能保留用戶輸入
-        private async Task<IActionResult> ReloadIndexView(Guid userId, Transaction transaction = null)
+        private async Task<IActionResult> ReloadIndexView(Guid userId, Transaction? transaction = null)
         {
             // 獲取管理員用戶
             var adminUser = await _context.Users
@@ -146,7 +150,12 @@ namespace MyPocket.Web.Areas.User.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+            {
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
+
             var transaction = await _context.Transactions
                 .FirstOrDefaultAsync(t => t.TransactionId == id && t.UserId == userId);
 
