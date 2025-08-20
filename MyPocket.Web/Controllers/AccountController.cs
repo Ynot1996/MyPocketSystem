@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPocket.DataAccess.Data;
+using MyPocket.Shared.ViewModels.Accounts;
 using System.Security.Claims;
+
 
 namespace MyPocket.Web.Controllers
 {
@@ -80,7 +82,7 @@ namespace MyPocket.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(MyPocket.Web.ViewModels.RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
