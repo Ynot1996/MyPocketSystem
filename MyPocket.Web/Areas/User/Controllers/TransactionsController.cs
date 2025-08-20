@@ -151,6 +151,7 @@ namespace MyPocket.Web.Areas.User.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
             {
                 return RedirectToAction("Login", "Account", new { area = "" });
