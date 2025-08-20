@@ -48,6 +48,10 @@ namespace MyPocket.DataAccess.Data
             }
 
             var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "admin@example.com");
+            if (adminUser == null)
+            {
+                throw new InvalidOperationException("Admin user not found. Database initialization failed.");
+            }
 
             var defaultCategories = new List<Category>
             {

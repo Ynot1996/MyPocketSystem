@@ -6,17 +6,17 @@ namespace MyPocket.Shared.ViewModels.Accounts
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = null!; 
 
         [Required]
         [DataType(DataType.Password)]
         [MinLength(6, ErrorMessage = "密碼長度至少6碼")]
-        public string Password { get; set; }
+        public string Password { get; set; } = null!;
 
         [Required]
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "密碼與確認密碼不一致")]
-        public string ConfirmPassword { get; set; }
+        public string ConfirmPassword { get; set; } = null!;
 
         public string? Nickname { get; set; }
     }
