@@ -1,0 +1,22 @@
+{
+  "CategoryRequired": "請選擇類別",
+  "AmountRequired": "請輸入金額",
+  "AmountRange": "金額必須大於 0",
+  "DateRequired": "請選擇交易日期",
+  "DescriptionLength": "備註長度不可超過 100 字",
+  "SimpleBudgetManagement": "簡單．現代的財務管理",
+  "EasyManageDescription": "輕鬆管理您的收支、帳戶與報表，讓財務一目了然。",
+  "CloudDescription": "專為個人與小型企業打造的雲端記帳系統。",
+  "StartUsingNow": "開始使用",
+  "RealTimeReports": "即時報表",
+  "ReportsDescription": "隨時掌握收支狀況，圖表化呈現財務趨勢。",
+  "MultiAccountManagement": "多帳戶管理",
+  "AccountsDescription": "支援多個銀行帳戶、現金、信用卡等資產管理。",
+  "CloudSecurity": "雲端安全",
+  "SecurityDescription": "資料雲端儲存，安全可靠，隨時隨地存取。",
+  "Home": "首頁",
+  "Privacy": "隱私權政策",
+  "Login": "登入",
+  "Register": "註冊",
+  "Logout": "登出"
+}

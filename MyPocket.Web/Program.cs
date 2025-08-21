@@ -1,16 +1,22 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using MyPocket.DataAccess.Data;
+using MyPocket.Shared.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization(options => {
+        options.DataAnnotationLocalizerProvider = (type, factory) =>
+            factory.Create(typeof(MyPocket.Shared.Resources.JsonLocalizationService));
+    });
 
 builder.Services.AddDbContext<MyPocketDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyPocketDBConnection")));
 
-// 新增 Cookie Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -19,6 +25,23 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Account/AccessDenied";
     });
 
+// Add localization service
+builder.Services.AddSingleton<ILocalizationService, JsonLocalizationService>();
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[]
+    {
+        new CultureInfo("zh-TW"), 
+        new CultureInfo("en-US")  
+    };
+
+    options.DefaultRequestCulture = new RequestCulture("zh-TW");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -36,21 +59,22 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+app.UseRequestLocalization();
+
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-// 啟用 Authentication 與 Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 支援 Area 路由
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");

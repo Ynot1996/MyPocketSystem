@@ -1,0 +1,22 @@
+{
+  "CategoryRequired": "Please select a category",
+  "AmountRequired": "Please enter an amount",
+  "AmountRange": "Amount must be greater than 0",
+  "DateRequired": "Please select a transaction date",
+  "DescriptionLength": "Description cannot exceed 100 characters",
+  "SimpleBudgetManagement": "Simple Modern Budget Management",
+  "EasyManageDescription": "Easily manage your income, accounts, and reports for clear financial visibility.",
+  "CloudDescription": "A cloud-based accounting system designed for individuals and small businesses.",
+  "StartUsingNow": "Get Started",
+  "RealTimeReports": "Real-time Reports",
+  "ReportsDescription": "Monitor your financial status and visualize trends through charts.",
+  "MultiAccountManagement": "Multi-Account Management",
+  "AccountsDescription": "Support for multiple bank accounts, cash, credit cards, and asset management.",
+  "CloudSecurity": "Cloud Security",
+  "SecurityDescription": "Secure cloud storage with reliable access anytime, anywhere.",
+  "Home": "Home",
+  "Privacy": "Privacy",
+  "Login": "Login",
+  "Register": "Register",
+  "Logout": "Logout"
+}
