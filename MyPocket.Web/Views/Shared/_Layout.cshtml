@@ -27,6 +27,15 @@
                         </li>
                     </ul>
                     <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
+                                @System.Threading.Thread.CurrentThread.CurrentUICulture.NativeName
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="@Url.Action("SetLanguage", "Home", new { culture = "zh-TW", returnUrl = Context.Request.Path })">繁體中文</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("SetLanguage", "Home", new { culture = "en-US", returnUrl = Context.Request.Path })">English</a></li>
+                            </ul>
+                        </li>
                         @if (User.Identity?.IsAuthenticated ?? false)
                         {
                             <li class="nav-item">
