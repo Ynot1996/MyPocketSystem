@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.DataAccess", "MyPo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.Shared", "MyPocket.Shared\MyPocket.Shared.csproj", "{0C38A8F8-244C-BBC1-1083-2F76CE2559F7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.API", "MyPocket.API\MyPocket.API.csproj", "{58AFB20F-59BF-429A-9C79-151CBD79AE3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{0C38A8F8-244C-BBC1-1083-2F76CE2559F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C38A8F8-244C-BBC1-1083-2F76CE2559F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C38A8F8-244C-BBC1-1083-2F76CE2559F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58AFB20F-59BF-429A-9C79-151CBD79AE3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58AFB20F-59BF-429A-9C79-151CBD79AE3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58AFB20F-59BF-429A-9C79-151CBD79AE3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58AFB20F-59BF-429A-9C79-151CBD79AE3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
