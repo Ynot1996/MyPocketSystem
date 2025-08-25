@@ -1,0 +1,6 @@
+@MyPocket.API_HostAddress = http://localhost:5239
+
+GET {{MyPocket.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
