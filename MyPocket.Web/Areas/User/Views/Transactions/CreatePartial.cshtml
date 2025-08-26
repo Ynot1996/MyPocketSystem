@@ -1,0 +1,44 @@
+@model IEnumerable<MyPocket.Core.Models.Transaction>
+@{
+    var categoryError = ViewData.ModelState["CategoryId"]?.Errors.FirstOrDefault()?.ErrorMessage;
+}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-3 fw-bold text-primary">新增交易</h5>
+        <form asp-action="Create" method="post" autocomplete="off">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+            <div class="mb-3">
+                <label for="CategoryId" class="form-label">類別 <span class="text-danger">*</span></label>
+                <select name="CategoryId" id="CategoryId" class="form-select" required>
+                    <option value="">-- 選擇類別 --</option>
+                    @foreach (var categoryGroup in ((IEnumerable<SelectListItem>)ViewBag.Categories).GroupBy(c => c.Group.Name))
+                    {
+                        <optgroup label="@categoryGroup.Key">
+                            @foreach (var category in categoryGroup)
+                            {
+                                <option value="@category.Value">@category.Text</option>
+                            }
+                        </optgroup>
+                    }
+                </select>
+                @if (!string.IsNullOrEmpty(categoryError))
+                {
+                    <span class="text-danger small">@categoryError</span>
+                }
+            </div>
+            <div class="mb-3">
+                <label for="Amount" class="form-label">金額 <span class="text-danger">*</span></label>
+                <input type="number" name="Amount" class="form-control" step="0.01" min="0" required />
+            </div>
+            <div class="mb-3">
+                <label for="TransactionDate" class="form-label">交易日期 <span class="text-danger">*</span></label>
+                <input type="datetime-local" name="TransactionDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
+            </div>
+            <div class="mb-3">
+                <label for="Description" class="form-label">備註</label>
+                <textarea name="Description" class="form-control" rows="2" maxlength="100"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">新增</button>
+        </form>
+    </div>
+</div>
