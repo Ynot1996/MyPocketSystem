@@ -2,18 +2,19 @@
 @{
     ViewData["Title"] = "記帳";
     var categoryError = ViewData.ModelState["CategoryId"]?.Errors.FirstOrDefault()?.ErrorMessage;
+    var incomeList = Model.Where(x => x.TransactionType.Trim() == "收入").ToList();
+    var expenseList = Model.Where(x => x.TransactionType.Trim() == "支出").ToList();
 }
 
 <div class="container py-4">
     <div class="row">
-
         <!-- 新增交易表單 -->
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title mb-3 fw-bold text-primary">新增交易</h5>
                     <form asp-action="Create" method="post" autocomplete="off">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>                        
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
                         <div class="mb-3">
                             <label for="CategoryId" class="form-label">類別 <span class="text-danger">*</span></label>
                             <select name="CategoryId" id="CategoryId" class="form-select" required>
@@ -28,7 +29,6 @@
                                     </optgroup>
                                 }
                             </select>
-
                             @if (!string.IsNullOrEmpty(categoryError))
                             {
                                 <span class="text-danger small">@categoryError</span>
@@ -52,11 +52,11 @@
             </div>
         </div>
 
-        <!-- 交易列表 -->
+        <!-- 交易列表（收入/支出分開） -->
         <div class="col-md-8">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <h5 class="card-title mb-3 fw-bold text-primary">交易記錄</h5>
+                    <h5 class="card-title mb-3 fw-bold text-success">收入紀錄</h5>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead class="table-light">
@@ -69,22 +69,67 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (!Model.Any())
+                                @if (!incomeList.Any())
                                 {
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted">尚無交易紀錄</td>
+                                        <td colspan="5" class="text-center text-muted">尚無收入紀錄</td>
                                     </tr>
                                 }
                                 else
                                 {
-                                    foreach (var item in Model)
+                                    foreach (var item in incomeList)
                                     {
                                         <tr>
                                             <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
                                             <td>@item.Category.CategoryName</td>
-                                            <td class="@(item.TransactionType == "支出" ? "text-danger" : "text-success") fw-bold">
-                                                @(item.TransactionType == "支出" ? "-" : "+")@item.Amount.ToString("N0")
+                                            <td class="text-success fw-bold">+@item.Amount.ToString("N0")</td>
+                                            <td>@item.Description</td>
+                                            <td>
+                                                <form asp-action="Delete" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@item.TransactionId" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                            onclick="return confirm('確定要刪除此筆交易?');">
+                                                        刪除
+                                                    </button>
+                                                </form>
                                             </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3 fw-bold text-danger">支出紀錄</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>日期</th>
+                                    <th>類別</th>
+                                    <th>金額</th>
+                                    <th>備註</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!expenseList.Any())
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">尚無支出紀錄</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    foreach (var item in expenseList)
+                                    {
+                                        <tr>
+                                            <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                            <td>@item.Category.CategoryName</td>
+                                            <td class="text-danger fw-bold">-@item.Amount.ToString("N0")</td>
                                             <td>@item.Description</td>
                                             <td>
                                                 <form asp-action="Delete" method="post" class="d-inline">
