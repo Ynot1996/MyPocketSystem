@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using MyPocket.Shared.Resources;
+﻿using MyPocket.Shared.Resources;
+using MyPocket.Shared.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace MyPocket.Shared.ViewModels.Transactions
 {
@@ -22,21 +23,17 @@ namespace MyPocket.Shared.ViewModels.Transactions
 
     public class TransactionCreateModel
     {
-        [Required]
-        [LocalizedValidation("CategoryRequired")]
+        [LocalizedRequired("CategoryRequired")]
         public Guid CategoryId { get; set; }
 
-        [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "AmountRange")]
-        [LocalizedValidation("AmountRequired")]
+        [LocalizedRequired("AmountRequired")]
+        [LocalizedRange(0.01, double.MaxValue, "AmountRange")]
         public decimal Amount { get; set; }
 
-        [Required]
-        [LocalizedValidation("DateRequired")]
+        [LocalizedRequired("DateRequired")]
         public DateTime TransactionDate { get; set; }
 
-        [StringLength(100)]
-        [LocalizedValidation("DescriptionLength")]
+        [LocalizedStringLength(100, "DescriptionLength")]
         public string? Description { get; set; }
     }
 }
