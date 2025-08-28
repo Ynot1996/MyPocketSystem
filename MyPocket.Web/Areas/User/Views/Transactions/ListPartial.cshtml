@@ -1,0 +1,100 @@
+@model IEnumerable<MyPocket.Core.Models.Transaction>
+@{
+    var incomeList = Model.Where(x => x.TransactionType.Trim() == "收入").ToList();
+    var expenseList = Model.Where(x => x.TransactionType.Trim() == "支出").ToList();
+}
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3 fw-bold text-success">收入紀錄</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>日期</th>
+                        <th>類別</th>
+                        <th>金額</th>
+                        <th>備註</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!incomeList.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">尚無收入紀錄</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in incomeList)
+                        {
+                            <tr>
+                                <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                <td>@item.Category.CategoryName</td>
+                                <td class="text-success fw-bold">+@item.Amount.ToString("N0")</td>
+                                <td>@item.Description</td>
+                                <td>
+                                    <form asp-action="Delete" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@item.TransactionId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('確定要刪除此筆交易?');">
+                                            刪除
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-3 fw-bold text-danger">支出紀錄</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>日期</th>
+                        <th>類別</th>
+                        <th>金額</th>
+                        <th>備註</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!expenseList.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">尚無支出紀錄</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in expenseList)
+                        {
+                            <tr>
+                                <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                <td>@item.Category.CategoryName</td>
+                                <td class="text-danger fw-bold">-@item.Amount.ToString("N0")</td>
+                                <td>@item.Description</td>
+                                <td>
+                                    <form asp-action="Delete" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@item.TransactionId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('確定要刪除此筆交易?');">
+                                            刪除
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

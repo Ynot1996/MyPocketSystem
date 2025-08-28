@@ -16,4 +16,8 @@
 	    </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\MyPocket.Core\MyPocket.Core.csproj" />
+    </ItemGroup>
+
 </Project>
