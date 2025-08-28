@@ -1,0 +1,135 @@
+@model MyPocket.Shared.ViewModels.Categories.UserCategoryViewModel
+@{
+    ViewData["Title"] = "我的收支類別";
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                您可以在此頁面管理自己的收入與支出類別。預設類別僅供參考，無法修改或刪除。自訂類別可新增與刪除，僅自己可見。
+            </div>
+        </div>
+    </div>
+    <ul class="nav nav-pills mb-3" id="categoryTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="income-tab" data-bs-toggle="pill" data-bs-target="#income" type="button" role="tab" aria-controls="income" aria-selected="true">收入類別</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="expense-tab" data-bs-toggle="pill" data-bs-target="#expense" type="button" role="tab" aria-controls="expense" aria-selected="false">支出類別</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="categoryTabContent">
+        <div class="tab-pane fade show active" id="income" role="tabpanel" aria-labelledby="income-tab">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">預設收入類別</div>
+                        <ul class="list-group list-group-flush">
+                            @if (Model.DefaultIncomeCategories.Any())
+                            {
+                                foreach (var c in Model.DefaultIncomeCategories)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>@c.CategoryName</span>
+                                        <span class="badge bg-secondary">預設</span>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item text-muted">無預設收入類別</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">自訂收入類別</div>
+                        <ul class="list-group list-group-flush">
+                            @if (Model.UserIncomeCategories.Any())
+                            {
+                                foreach (var c in Model.UserIncomeCategories)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>@c.CategoryName</span>
+                                        <form asp-action="Delete" asp-route-id="@c.CategoryId" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">刪除</button>
+                                        </form>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item text-muted">尚未新增自訂收入類別</li>
+                            }
+                        </ul>
+                        <div class="card-footer bg-white">
+                            <form asp-action="Create" method="post" class="input-group">
+                                <input type="hidden" name="newCategoryType" value="收入" />
+                                <input type="text" name="newCategoryName" class="form-control" placeholder="新增收入類別..." required />
+                                <button class="btn btn-primary" type="submit">新增</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="expense" role="tabpanel" aria-labelledby="expense-tab">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">預設支出類別</div>
+                        <ul class="list-group list-group-flush">
+                            @if (Model.DefaultExpenseCategories.Any())
+                            {
+                                foreach (var c in Model.DefaultExpenseCategories)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>@c.CategoryName</span>
+                                        <span class="badge bg-secondary">預設</span>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item text-muted">無預設支出類別</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">自訂支出類別</div>
+                        <ul class="list-group list-group-flush">
+                            @if (Model.UserExpenseCategories.Any())
+                            {
+                                foreach (var c in Model.UserExpenseCategories)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>@c.CategoryName</span>
+                                        <form asp-action="Delete" asp-route-id="@c.CategoryId" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">刪除</button>
+                                        </form>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item text-muted">尚未新增自訂支出類別</li>
+                            }
+                        </ul>
+                        <div class="card-footer bg-white">
+                            <form asp-action="Create" method="post" class="input-group">
+                                <input type="hidden" name="newCategoryType" value="支出" />
+                                <input type="text" name="newCategoryName" class="form-control" placeholder="新增支出類別..." required />
+                                <button class="btn btn-primary" type="submit">新增</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
