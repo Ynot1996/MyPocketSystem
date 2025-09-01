@@ -1,0 +1,18 @@
+@model MyPocket.Shared.ViewModels.Budgets.BudgetViewModel
+@{
+    ViewData["Title"] = "刪除預算";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+<h2>刪除預算</h2>
+<div class="alert alert-warning">確定要刪除此預算嗎？此動作無法還原。</div>
+<dl class="row">
+    <dt class="col-sm-3">分類</dt>
+    <dd class="col-sm-9">@Model.CategoryName</dd>
+    <dt class="col-sm-3">預算金額</dt>
+    <dd class="col-sm-9">@Model.Amount.ToString("N0")</dd>
+</dl>
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="BudgetId" />
+    <button type="submit" class="btn btn-danger">刪除</button>
+    <a asp-action="Index" class="btn btn-secondary">取消</a>
+</form>

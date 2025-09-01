@@ -111,5 +111,132 @@ namespace MyPocket.Web.Areas.User.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+                return RedirectToAction("Login", "Account", new { area = "" });
+
+            var budget = await _context.Budgets.Include(b => b.Category)
+                .FirstOrDefaultAsync(b => b.BudgetId == id && b.UserId == userId && !b.IsDeleted);
+            if (budget == null) return NotFound();
+
+            int year = int.Parse(budget.BudgetYear);
+            int month = int.Parse(budget.BudgetMonth);
+            var spent = await _context.Transactions
+                .Where(t => t.UserId == userId && !t.IsDeleted && t.TransactionDate.Year == year && t.TransactionDate.Month == month && t.CategoryId == budget.CategoryId)
+                .SumAsync(t => t.Amount);
+
+            var vm = new BudgetViewModel
+            {
+                BudgetId = budget.BudgetId,
+                CategoryId = budget.CategoryId,
+                CategoryName = budget.Category?.CategoryName ?? "",
+                CategoryType = budget.Category?.CategoryType ?? "",
+                Amount = budget.Amount,
+                BudgetYear = budget.BudgetYear,
+                BudgetMonth = budget.BudgetMonth,
+                Spent = spent
+            };
+            return View(vm);
+        }
+
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+                return RedirectToAction("Login", "Account", new { area = "" });
+
+            var budget = await _context.Budgets.Include(b => b.Category)
+                .FirstOrDefaultAsync(b => b.BudgetId == id && b.UserId == userId && !b.IsDeleted);
+            if (budget == null) return NotFound();
+
+            int year = int.Parse(budget.BudgetYear);
+            int month = int.Parse(budget.BudgetMonth);
+            var spent = await _context.Transactions
+                .Where(t => t.UserId == userId && !t.IsDeleted && t.TransactionDate.Year == year && t.TransactionDate.Month == month && t.CategoryId == budget.CategoryId)
+                .SumAsync(t => t.Amount);
+
+            var vm = new BudgetViewModel
+            {
+                BudgetId = budget.BudgetId,
+                CategoryId = budget.CategoryId,
+                CategoryName = budget.Category?.CategoryName ?? "",
+                CategoryType = budget.Category?.CategoryType ?? "",
+                Amount = budget.Amount,
+                BudgetYear = budget.BudgetYear,
+                BudgetMonth = budget.BudgetMonth,
+                Spent = spent
+            };
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(BudgetViewModel model)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+                return RedirectToAction("Login", "Account", new { area = "" });
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var budget = await _context.Budgets.FirstOrDefaultAsync(b => b.BudgetId == model.BudgetId && b.UserId == userId && !b.IsDeleted);
+            if (budget == null) return NotFound();
+
+            budget.Amount = model.Amount;
+            budget.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+                return RedirectToAction("Login", "Account", new { area = "" });
+
+            var budget = await _context.Budgets.Include(b => b.Category)
+                .FirstOrDefaultAsync(b => b.BudgetId == id && b.UserId == userId && !b.IsDeleted);
+            if (budget == null) return NotFound();
+
+            int year = int.Parse(budget.BudgetYear);
+            int month = int.Parse(budget.BudgetMonth);
+            var spent = await _context.Transactions
+                .Where(t => t.UserId == userId && !t.IsDeleted && t.TransactionDate.Year == year && t.TransactionDate.Month == month && t.CategoryId == budget.CategoryId)
+                .SumAsync(t => t.Amount);
+
+            var vm = new BudgetViewModel
+            {
+                BudgetId = budget.BudgetId,
+                CategoryId = budget.CategoryId,
+                CategoryName = budget.Category?.CategoryName ?? "",
+                CategoryType = budget.Category?.CategoryType ?? "",
+                Amount = budget.Amount,
+                BudgetYear = budget.BudgetYear,
+                BudgetMonth = budget.BudgetMonth,
+                Spent = spent
+            };
+            return View(vm);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid BudgetId)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+                return RedirectToAction("Login", "Account", new { area = "" });
+
+            var budget = await _context.Budgets.FirstOrDefaultAsync(b => b.BudgetId == BudgetId && b.UserId == userId && !b.IsDeleted);
+            if (budget == null) return NotFound();
+
+            budget.IsDeleted = true;
+            budget.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
     }
 }

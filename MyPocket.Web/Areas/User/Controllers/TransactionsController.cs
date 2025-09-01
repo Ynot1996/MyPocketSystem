@@ -52,6 +52,28 @@ namespace MyPocket.Web.Areas.User.Controllers
 
             ViewBag.Categories = categories;
 
+            // 取得本月所有預算資訊
+            var now = DateTime.UtcNow;
+            var year = now.Year.ToString();
+            var month = now.Month.ToString("D2");
+
+            var budgets = await _context.Budgets
+                .Include(b => b.Category)
+                .Where(b => b.UserId == userId && !b.IsDeleted && b.BudgetYear == year && b.BudgetMonth == month)
+                .ToListAsync();
+            var budgetVMs = budgets.Select(b => new MyPocket.Shared.ViewModels.Budgets.BudgetViewModel
+            {
+                BudgetId = b.BudgetId,
+                CategoryId = b.CategoryId,
+                CategoryName = b.Category?.CategoryName ?? "",
+                CategoryType = b.Category?.CategoryType ?? "",
+                Amount = b.Amount,
+                BudgetYear = b.BudgetYear,
+                BudgetMonth = b.BudgetMonth,
+                Spent = transactions.Where(t => t.CategoryId == b.CategoryId).Sum(t => t.Amount)
+            }).ToList();
+            ViewBag.Budgets = budgetVMs;
+
             return View(transactions);
         }
 
