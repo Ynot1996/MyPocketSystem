@@ -1,0 +1,22 @@
+@model MyPocket.Shared.ViewModels.Users.UserProfileViewModel
+@{
+    ViewData["Title"] = "編輯個人資訊";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+<h2>編輯個人資訊</h2>
+<form asp-action="Edit" method="post">
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" readonly />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Nickname" class="form-label"></label>
+        <input asp-for="Nickname" class="form-control" />
+        <span asp-validation-for="Nickname" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-success">儲存</button>
+    <a asp-action="Index" class="btn btn-secondary">取消</a>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
