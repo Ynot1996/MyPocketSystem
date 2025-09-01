@@ -33,6 +33,9 @@ namespace MyPocket.Web.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
+                user.LastLoginDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),

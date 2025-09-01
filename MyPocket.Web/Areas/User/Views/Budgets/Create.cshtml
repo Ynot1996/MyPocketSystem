@@ -1,0 +1,47 @@
+@model MyPocket.Shared.ViewModels.Budgets.BudgetViewModel
+@{
+    ViewData["Title"] = "新增預算";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    var categories = ViewBag.Categories as List<MyPocket.Core.Models.Category>;
+    var selectedId = ViewBag.SelectedCategoryId as Guid?;
+}
+<h2>新增預算</h2>
+<div class="mb-3">
+    <label class="form-label">請選擇支出分類</label>
+    <div class="row g-3">
+        @if (categories != null)
+        {
+            foreach (var c in categories)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a asp-action="Create" asp-route-categoryId="@c.CategoryId"
+                       class="text-decoration-none">
+                        <div class="card text-center shadow-sm @(selectedId == c.CategoryId ? "border-primary border-3" : "")" style="cursor:pointer;">
+                            <div class="card-body py-3">
+                                <i class="bi bi-wallet2 fs-2 mb-2 text-primary"></i>
+                                <div class="fw-bold">@c.CategoryName</div>
+                                <div class="text-muted small">@c.CategoryType</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        }
+    </div>
+</div>
+@if (selectedId != null)
+{
+    <form asp-action="Create" method="post">
+        <input type="hidden" asp-for="CategoryId" value="@selectedId" />
+        <div class="mb-3">
+            <label asp-for="Amount" class="form-label">預算金額</label>
+            <input asp-for="Amount" class="form-control" type="number" min="1" required />
+            <span asp-validation-for="Amount" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-success">儲存</button>
+        <a asp-action="Index" class="btn btn-secondary">取消</a>
+    </form>
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
