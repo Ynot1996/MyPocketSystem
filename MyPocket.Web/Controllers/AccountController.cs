@@ -37,6 +37,7 @@ namespace MyPocket.Web.Controllers
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                     new Claim(ClaimTypes.Name, user.Email),
+                    new Claim("Nickname", user.Nickname ?? user.Email),
                     new Claim(ClaimTypes.Role, user.Role)
                 };
 
