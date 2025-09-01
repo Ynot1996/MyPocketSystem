@@ -10,10 +10,17 @@
         .GroupBy(x => x.Category.CategoryName)
         .Select(g => new { Category = g.Key, Amount = g.Sum(x => x.Amount) })
         .ToList();
+
+    // 預算資訊
+    var now = DateTime.UtcNow;
+    var budgets = ViewBag.Budgets as List<MyPocket.Shared.ViewModels.Budgets.BudgetViewModel>;
+    var totalBudget = budgets?.Sum(b => b.Amount) ?? 0;
+    var totalBudgetSpent = budgets?.Sum(b => b.Spent) ?? 0;
+    var totalBudgetRemaining = totalBudget - totalBudgetSpent;
+    var percent = totalBudget == 0 ? 0 : Math.Min(100, (int)((totalBudgetSpent / totalBudget) * 100));
 }
 
 <div class="container py-4">
-
     <div class="row mb-4">
         <div class="col-md-8 mb-3 mb-md-0">
             <div class="card shadow-sm">
@@ -27,13 +34,26 @@
                         <div class="fs-4 fw-bold text-danger">@totalExpense.ToString("N0")</div>
                     </div>
                     <div class="text-center">
-                        <div class="fw-bold text-primary" style="font-size:1.2rem">Balance</div>
+                        <div class="fw-bold text-primary" style="font-size:1.2rem">結餘</div>
                         <div class="fs-4 fw-bold text-primary">@balance.ToString("N0")</div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body text-center">
+                    <div class="fw-bold">本月總預算</div>
+                    <div class="fs-4 fw-bold">@totalBudget.ToString("N0")</div>
+                    <div class="mb-2">已花費：<span class="text-danger">@totalBudgetSpent.ToString("N0")</span>，剩餘：<span class="text-success">@totalBudgetRemaining.ToString("N0")</span></div>
+                    <div class="progress mb-2" style="height: 1.2rem;">
+                        <div class="progress-bar @(totalBudgetSpent > totalBudget ? "bg-danger" : "bg-primary")" role="progressbar" style="width: @percent%" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
+                            @percent%
+                        </div>
+                    </div>
+                    <a href="@Url.Action("Index", "Budgets", new { area = "User" })" class="btn btn-outline-primary btn-sm">預算管理</a>
+                </div>
+            </div>
             <div class="card shadow-sm">
                 <div class="card-body">
                     <canvas id="expensePieChart" width="200" height="200"></canvas>
@@ -43,11 +63,11 @@
     </div>
 
     <div class="row">
-        <!-- 新增交易表單 -->
+        <!-- 新增交易 -->
         <div class="col-md-4">
             @await Html.PartialAsync("CreatePartial", Model)
         </div>
-        <!-- 交易列表（收入/支出分開） -->
+        <!-- 交易列表 -->
         <div class="col-md-8">
             @await Html.PartialAsync("ListPartial", Model)
         </div>
@@ -75,7 +95,7 @@
                 responsive: false,
                 plugins: {
                     legend: { position: 'bottom' },
-                    title: { display: true, text: '各類別支出比例' }
+                    title: { display: true, text: '各分類支出' }
                 }
             }
         });
