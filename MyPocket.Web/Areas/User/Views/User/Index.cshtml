@@ -1,0 +1,21 @@
+@model MyPocket.Shared.ViewModels.Users.UserProfileViewModel
+@{
+    ViewData["Title"] = "個人資訊";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+<h2>個人資訊</h2>
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+            <dt class="col-sm-3">暱稱</dt>
+            <dd class="col-sm-9">@Model.Nickname</dd>
+            <dt class="col-sm-3">註冊日期</dt>
+            <dd class="col-sm-9">@Model.CreationDate.ToString("yyyy-MM-dd HH:mm")</dd>
+            <dt class="col-sm-3">最後登入</dt>
+            <dd class="col-sm-9">@Model.LastLoginDate.ToString("yyyy-MM-dd HH:mm")</dd>
+        </dl>
+        <a asp-action="Edit" class="btn btn-primary">編輯暱稱</a>
+    </div>
+</div>
