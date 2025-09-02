@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using MyPocket.DataAccess.Data;
 using MyPocket.Shared.Resources;
+using MyPocket.Services;
+using MyPocket.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +42,8 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
 });
+
+builder.Services.AddScoped<ISavingGoalService, SavingGoalService>();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();

@@ -1,0 +1,33 @@
+@model MyPocket.Core.Models.SavingGoal
+@{
+    ViewData["Title"] = "編輯儲蓄目標";
+}
+<h2>編輯儲蓄目標</h2>
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="GoalId" />
+    <div class="mb-3">
+        <label asp-for="GoalName" class="form-label"></label>
+        <input asp-for="GoalName" class="form-control" />
+        <span asp-validation-for="GoalName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="TargetAmount" class="form-label"></label>
+        <input asp-for="TargetAmount" class="form-control" />
+        <span asp-validation-for="TargetAmount" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="CurrentAmount" class="form-label"></label>
+        <input asp-for="CurrentAmount" class="form-control" />
+        <span asp-validation-for="CurrentAmount" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="TargetDate" class="form-label"></label>
+        <input asp-for="TargetDate" class="form-control" type="date" />
+        <span asp-validation-for="TargetDate" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">儲存變更</button>
+    <a asp-action="Index" class="btn btn-secondary">返回</a>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

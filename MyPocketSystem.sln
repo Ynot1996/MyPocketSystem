@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.Web", "MyPocket.Web\MyPocket.Web.csproj", "{7B0AF373-229A-4045-AD9F-25CAECE4F816}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0C38A8F8-244C-BBC1-1083-2F76CE2559F7} = {0C38A8F8-244C-BBC1-1083-2F76CE2559F7}
+		{BE8CE37D-82BC-452D-B583-67DDFF3F751F} = {BE8CE37D-82BC-452D-B583-67DDFF3F751F}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.Core", "MyPocket.Core\MyPocket.Core.csproj", "{96CD0C03-CCC9-4791-BD87-4E40DA800908}"
@@ -15,6 +16,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.Shared", "MyPocket.Shared\MyPocket.Shared.csproj", "{0C38A8F8-244C-BBC1-1083-2F76CE2559F7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.API", "MyPocket.API\MyPocket.API.csproj", "{58AFB20F-59BF-429A-9C79-151CBD79AE3C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.Services", "MyPocket.Services\MyPocket.Services.csproj", "{BE8CE37D-82BC-452D-B583-67DDFF3F751F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{96CD0C03-CCC9-4791-BD87-4E40DA800908} = {96CD0C03-CCC9-4791-BD87-4E40DA800908}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +48,10 @@ Global
 		{58AFB20F-59BF-429A-9C79-151CBD79AE3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58AFB20F-59BF-429A-9C79-151CBD79AE3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58AFB20F-59BF-429A-9C79-151CBD79AE3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE8CE37D-82BC-452D-B583-67DDFF3F751F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE8CE37D-82BC-452D-B583-67DDFF3F751F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE8CE37D-82BC-452D-B583-67DDFF3F751F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE8CE37D-82BC-452D-B583-67DDFF3F751F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

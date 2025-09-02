@@ -1,0 +1,23 @@
+@model MyPocket.Core.Models.SavingGoal
+@{
+    ViewData["Title"] = "儲蓄目標明細";
+}
+<h2>儲蓄目標明細</h2>
+<div class="mb-3">
+    <label class="form-label">名稱</label>
+    <div class="form-control-plaintext">@Model.GoalName</div>
+</div>
+<div class="mb-3">
+    <label class="form-label">目標金額</label>
+    <div class="form-control-plaintext">@Model.TargetAmount.ToString("N0")</div>
+</div>
+<div class="mb-3">
+    <label class="form-label">目前金額</label>
+    <div class="form-control-plaintext">@Model.CurrentAmount.ToString("N0")</div>
+</div>
+<div class="mb-3">
+    <label class="form-label">目標日期</label>
+    <div class="form-control-plaintext">@Model.TargetDate.ToString("yyyy-MM-dd")</div>
+</div>
+<a asp-action="Edit" asp-route-id="@Model.GoalId" class="btn btn-warning">編輯</a>
+<a asp-action="Index" class="btn btn-secondary">返回</a>
