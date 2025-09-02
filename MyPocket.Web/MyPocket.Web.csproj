@@ -10,6 +10,7 @@
     <ProjectReference Include="..\MyPocket.Core\MyPocket.Core.csproj" />
     <ProjectReference Include="..\MyPocket.DataAccess\MyPocket.DataAccess.csproj" />
     <ProjectReference Include="..\MyPocket.Shared\MyPocket.Shared.csproj" />
+	<ProjectReference Include="..\MyPocket.Services\MyPocket.Services.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
