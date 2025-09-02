@@ -1,0 +1,80 @@
+@{
+    ViewData["Title"] = "會員首頁";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    var user = ViewBag.User;
+    var recentTransactions = ViewBag.RecentTransactions as List<MyPocket.Shared.ViewModels.TransactionViewModel>;
+    var announcements = ViewBag.Announcements as List<MyPocket.Core.Models.Announcement>;
+}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="fw-bold">歡迎，@user?.Nickname！</h2>
+            <div class="text-muted">最近登入：@user?.LastLoginDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">快速入口</div>
+                <div class="card-body d-flex flex-wrap gap-3">
+                    <a class="btn btn-outline-success" asp-area="User" asp-controller="Transactions" asp-action="Index">記帳</a>
+                    <a class="btn btn-outline-info" asp-area="User" asp-controller="Categories" asp-action="Index">分類管理</a>
+                    <a class="btn btn-outline-warning" asp-area="User" asp-controller="Budgets" asp-action="Index">預算管理</a>
+                    <a class="btn btn-outline-secondary" asp-area="User" asp-controller="SavingGoals" asp-action="Index">儲蓄目標</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">最新公告</div>
+                <div class="card-body">
+                    @if (announcements != null && announcements.Count > 0)
+                    {
+                        foreach (var ann in announcements)
+                        {
+                            <div class="mb-3">
+                                <h5 class="fw-bold">@ann.Title</h5>
+                                <div class="text-muted small">發布時間：@ann.PublishDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+                                <div>@ann.Content</div>
+                                <hr />
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted">目前沒有公告。</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">近期交易</div>
+                <div class="card-body">
+                    @if (recentTransactions != null && recentTransactions.Count > 0)
+                    {
+                        <ul class="list-group">
+                        @foreach (var txVm in recentTransactions)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>@txVm.Transaction.TransactionDate.ToLocalTime().ToString("MM-dd HH:mm")</span>
+                                <span>@txVm.CategoryName</span>
+                                <span class="fw-bold">@txVm.Transaction.Amount.ToString("N0")</span>
+                                <span class="badge bg-@(txVm.Transaction.TransactionType == "收入" ? "success" : "danger")">@txVm.Transaction.TransactionType</span>
+                            </li>
+                        }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="text-muted">尚無交易紀錄</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

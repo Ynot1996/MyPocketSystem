@@ -13,9 +13,11 @@ namespace MyPocket.Services
     public class SavingGoalService : ISavingGoalService
     {
         private readonly MyPocketDBContext _context;
-        public SavingGoalService(MyPocketDBContext context)
+        private readonly ITransactionService _transactionService;
+        public SavingGoalService(MyPocketDBContext context, ITransactionService transactionService)
         {
             _context = context;
+            _transactionService = transactionService;
         }
 
         public async Task<SavingGoal> GetOrCreateMonthlyGoalAsync(Guid userId, int year, int month)
@@ -32,7 +34,7 @@ namespace MyPocket.Services
                     UserId = userId,
                     GoalName = name,
                     TargetAmount = 0, // 用戶可後續設定
-                    CurrentAmount = await CalculateCurrentSavingAsync(userId, start, end),
+                    CurrentAmount = await _transactionService.CalculateCurrentSavingAsync(userId, start, end),
                     TargetDate = end,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
@@ -43,7 +45,7 @@ namespace MyPocket.Services
             }
             else
             {
-                goal.CurrentAmount = await CalculateCurrentSavingAsync(userId, start, end);
+                goal.CurrentAmount = await _transactionService.CalculateCurrentSavingAsync(userId, start, end);
                 goal.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
@@ -64,7 +66,7 @@ namespace MyPocket.Services
                     UserId = userId,
                     GoalName = name,
                     TargetAmount = 0, // 用戶可後續設定
-                    CurrentAmount = await CalculateCurrentSavingAsync(userId, start, end),
+                    CurrentAmount = await _transactionService.CalculateCurrentSavingAsync(userId, start, end),
                     TargetDate = end,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
@@ -75,7 +77,7 @@ namespace MyPocket.Services
             }
             else
             {
-                goal.CurrentAmount = await CalculateCurrentSavingAsync(userId, start, end);
+                goal.CurrentAmount = await _transactionService.CalculateCurrentSavingAsync(userId, start, end);
                 goal.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
@@ -84,9 +86,8 @@ namespace MyPocket.Services
 
         public async Task<decimal> CalculateCurrentSavingAsync(Guid userId, DateTime start, DateTime end)
         {
-            var income = await _context.Transactions.Where(t => t.UserId == userId && !t.IsDeleted && t.TransactionType == "收入" && t.TransactionDate >= start && t.TransactionDate <= end).SumAsync(t => t.Amount);
-            var expense = await _context.Transactions.Where(t => t.UserId == userId && !t.IsDeleted && t.TransactionType == "支出" && t.TransactionDate >= start && t.TransactionDate <= end).SumAsync(t => t.Amount);
-            return income - expense;
+            // 已遷移到 TransactionService，這裡僅為相容性保留
+            return await _transactionService.CalculateCurrentSavingAsync(userId, start, end);
         }
 
         public async Task<List<SavingGoal>> GetUserGoalsAsync(Guid userId)

@@ -1,0 +1,5 @@
+{
+  "TitleRequired": "請輸入公告標題",
+  "TitleLength": "標題長度不能超過100個字元",
+  "ContentRequired": "請輸入公告內容"
+}

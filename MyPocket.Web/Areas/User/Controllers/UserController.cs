@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyPocket.DataAccess.Data;
+using MyPocket.Services.Interfaces;
 using MyPocket.Shared.ViewModels.Users;
 using System.Security.Claims;
 
@@ -11,10 +10,10 @@ namespace MyPocket.Web.Areas.User.Controllers
     [Authorize(Roles = "FreeMember")]
     public class UserController : Controller
     {
-        private readonly MyPocketDBContext _context;
-        public UserController(MyPocketDBContext context)
+        private readonly IUserService _userService;
+        public UserController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index()
@@ -23,17 +22,8 @@ namespace MyPocket.Web.Areas.User.Controllers
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
                 return RedirectToAction("Login", "Account", new { area = "" });
 
-            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId);
-            if (user == null) return NotFound();
-
-            var vm = new UserProfileViewModel
-            {
-                UserId = user.UserId,
-                Email = user.Email,
-                Nickname = user.Nickname,
-                CreationDate = user.CreationDate,
-                LastLoginDate = user.LastLoginDate
-            };
+            var vm = await _userService.GetUserProfileAsync(userId);
+            if (vm == null) return NotFound();
             return View(vm);
         }
 
@@ -43,17 +33,8 @@ namespace MyPocket.Web.Areas.User.Controllers
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
                 return RedirectToAction("Login", "Account", new { area = "" });
 
-            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId);
-            if (user == null) return NotFound();
-
-            var vm = new UserProfileViewModel
-            {
-                UserId = user.UserId,
-                Email = user.Email,
-                Nickname = user.Nickname,
-                CreationDate = user.CreationDate,
-                LastLoginDate = user.LastLoginDate
-            };
+            var vm = await _userService.GetUserProfileAsync(userId);
+            if (vm == null) return NotFound();
             return View(vm);
         }
 
@@ -62,11 +43,8 @@ namespace MyPocket.Web.Areas.User.Controllers
         public async Task<IActionResult> Edit(UserProfileViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == model.UserId);
-            if (user == null) return NotFound();
-            user.Nickname = model.Nickname;
-            user.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            var result = await _userService.UpdateUserProfileAsync(model);
+            if (!result) return NotFound();
             return RedirectToAction("Index");
         }
     }
