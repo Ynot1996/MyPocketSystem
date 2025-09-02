@@ -43,7 +43,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = supportedCultures;
 });
 
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ISavingGoalService, SavingGoalService>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();
