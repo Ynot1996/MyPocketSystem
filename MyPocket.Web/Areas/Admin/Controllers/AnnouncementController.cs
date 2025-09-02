@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPocket.DataAccess.Data;
 using MyPocket.Core.Models;
+using MyPocket.Shared.ViewModels.Announcements;
 
 namespace MyPocket.Web.Areas.Admin.Controllers
 {
@@ -42,29 +43,56 @@ namespace MyPocket.Web.Areas.Admin.Controllers
         // GET: Admin/Announcement/Create
         public IActionResult Create()
         {
-            return View();
+            return View(new AnnouncementCreateModel());
         }
 
         // POST: Admin/Announcement/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Content")] Announcement announcement)
+        public async Task<IActionResult> Create(AnnouncementCreateModel model)
         {
             if (ModelState.IsValid)
             {
-                var admin = await _context.Users.FirstOrDefaultAsync(u => u.Email == User.Identity.Name);
-                if (admin == null)
+                try
                 {
-                    return Unauthorized();
+                    var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid adminId))
+                    {
+                        ModelState.AddModelError("", "無法識別管理員身份");
+                        return View(model);
+                    }
+
+                    // 檢查用戶是否存在且是管理員
+                    var admin = await _context.Users
+                        .FirstOrDefaultAsync(u => u.UserId == adminId && u.Role == "Admin");
+                    if (admin == null)
+                    {
+                        ModelState.AddModelError("", "管理員帳戶不存在或權限不足");
+                        return View(model);
+                    }
+
+                    var announcement = new Announcement
+                    {
+                        AnnouncementId = Guid.NewGuid(),
+                        AdminId = adminId,
+                        Title = model.Title,
+                        Content = model.Content,
+                        PublishDate = DateTime.UtcNow
+                    };
+
+                    _context.Announcements.Add(announcement);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "公告已成功發布";
+                    return RedirectToAction(nameof(Index));
                 }
-                announcement.AnnouncementId = Guid.NewGuid();
-                announcement.AdminId = admin.UserId;
-                announcement.PublishDate = DateTime.UtcNow;
-                _context.Announcements.Add(announcement);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"發生錯誤: {ex.Message}");
+                }
             }
-            return View(announcement);
+
+            return View(model);
         }
 
         // GET: Admin/Announcement/Edit/5
