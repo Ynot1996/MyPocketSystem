@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MyPocket.Core.Models;
 using MyPocket.DataAccess.Data;
 using MyPocket.Shared.ViewModels.Transactions;
+using MyPocket.Services.Interfaces;
 using System.Security.Claims;
 
 namespace MyPocket.Web.Areas.User.Controllers
@@ -14,10 +15,11 @@ namespace MyPocket.Web.Areas.User.Controllers
     public class TransactionsController : Controller
     {
         private readonly MyPocketDBContext _context;
-        
-        public TransactionsController(MyPocketDBContext context)
+        private readonly ISavingGoalService _savingGoalService;
+        public TransactionsController(MyPocketDBContext context, ISavingGoalService savingGoalService)
         {
             _context = context;
+            _savingGoalService = savingGoalService;
         }
 
         public async Task<IActionResult> Index()
@@ -73,6 +75,10 @@ namespace MyPocket.Web.Areas.User.Controllers
                 Spent = transactions.Where(t => t.CategoryId == b.CategoryId).Sum(t => t.Amount)
             }).ToList();
             ViewBag.Budgets = budgetVMs;
+
+            // 取得所有儲蓄目標
+            var savingGoals = await _savingGoalService.GetUserGoalsAsync(userId);
+            ViewBag.SavingGoals = savingGoals;
 
             return View(transactions);
         }
