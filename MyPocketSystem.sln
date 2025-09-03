@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.Services", "MyPock
 		{96CD0C03-CCC9-4791-BD87-4E40DA800908} = {96CD0C03-CCC9-4791-BD87-4E40DA800908}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.Mobile", "MyPocket.Mobile\MyPocket.Mobile.csproj", "{4CBA8786-DB9A-4427-A659-E4206A7A8EEC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,12 @@ Global
 		{BE8CE37D-82BC-452D-B583-67DDFF3F751F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE8CE37D-82BC-452D-B583-67DDFF3F751F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE8CE37D-82BC-452D-B583-67DDFF3F751F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CBA8786-DB9A-4427-A659-E4206A7A8EEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CBA8786-DB9A-4427-A659-E4206A7A8EEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CBA8786-DB9A-4427-A659-E4206A7A8EEC}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{4CBA8786-DB9A-4427-A659-E4206A7A8EEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CBA8786-DB9A-4427-A659-E4206A7A8EEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CBA8786-DB9A-4427-A659-E4206A7A8EEC}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyPocket.Mobile.LoginPage"
+             Title="登入">
+    <Grid BackgroundColor="#fff">
+        <VerticalStackLayout Padding="30" Spacing="20" VerticalOptions="Center">
+            <Label Text="MyPocket 登入" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Entry x:Name="EmailEntry" Placeholder="Email" Keyboard="Email" />
+            <Entry x:Name="PasswordEntry" Placeholder="密碼" IsPassword="True" />
+            <Button Text="登入" Clicked="OnLoginClicked" BackgroundColor="#0078D7" TextColor="White" />
+            <Label x:Name="ErrorLabel" TextColor="Red" IsVisible="False" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

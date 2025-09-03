@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using MyPocket.Core.Models;
 
-namespace MyPocket.Core.Models.Metadata
+namespace MyPocket.Shared.Metadata
 {
     [ModelMetadataType(typeof(AnnouncementMetadata))]
-    public partial class Announcement
-    {
-    }
+    public partial class Announcement { }
 
     public class AnnouncementMetadata
     {

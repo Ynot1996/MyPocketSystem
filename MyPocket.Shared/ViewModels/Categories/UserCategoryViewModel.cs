@@ -13,7 +13,7 @@ namespace MyPocket.Shared.ViewModels.Categories
         public List<Category> DefaultExpenseCategories { get; set; } = new();
         public List<Category> UserIncomeCategories { get; set; } = new();
         public List<Category> UserExpenseCategories { get; set; } = new();
-        public string NewCategoryName { get; set; }
-        public string NewCategoryType { get; set; } 
+        public string? NewCategoryName { get; set; }
+        public string? NewCategoryType { get; set; } 
     }
 }

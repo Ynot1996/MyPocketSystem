@@ -1,55 +1,44 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using MyPocket.Core.Models;
 
-namespace MyPocket.Core.Models.Metadata
+namespace MyPocket.Shared.Metadata
 {
     [ModelMetadataType(typeof(UserMetadata))]
-    public partial class User
-    {
-    }
+    public partial class User { }
 
     public class UserMetadata
     {
-        [Required(ErrorMessage = "使用者ID為必填")]
-        [Display(Name = "使用者ID")]
+        [Required]
+        [Display(Name = "用戶ID")]
         public Guid UserId { get; set; }
 
-        [Required(ErrorMessage = "電子郵件為必填")]
-        [EmailAddress(ErrorMessage = "請輸入有效的電子郵件格式")]
+        [Required]
         [Display(Name = "電子郵件")]
-        [StringLength(250, ErrorMessage = "{0}長度不能超過{1}個字元")]
+        [EmailAddress]
         public string Email { get; set; } = null!;
 
-        [Required(ErrorMessage = "密碼為必填")]
-        [Display(Name = "密碼")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "密碼長度必須介於{2}到{1}個字元之間")]
+        [Required]
+        [Display(Name = "密碼雜湊")]
         public string PasswordHash { get; set; } = null!;
 
         [Display(Name = "暱稱")]
-        [StringLength(50, ErrorMessage = "{0}長度不能超過{1}個字元")]
         public string? Nickname { get; set; }
 
-        [Required(ErrorMessage = "角色為必填")]
+        [Required]
         [Display(Name = "角色")]
-        [StringLength(20, ErrorMessage = "{0}長度不能超過{1}個字元")]
         public string Role { get; set; } = null!;
 
-        [Required(ErrorMessage = "建立日期為必填")]
         [Display(Name = "建立日期")]
-        [DataType(DataType.DateTime)]
         public DateTime CreationDate { get; set; }
 
-        [Required(ErrorMessage = "最後登入日期為必填")]
         [Display(Name = "最後登入日期")]
-        [DataType(DataType.DateTime)]
         public DateTime LastLoginDate { get; set; }
 
-        [Required(ErrorMessage = "更新日期為必填")]
-        [Display(Name = "更新日期")]
-        [DataType(DataType.DateTime)]
+        [Display(Name = "更新時間")]
         public DateTime UpdatedAt { get; set; }
 
-        [Display(Name = "是否已刪除")]
+        [Display(Name = "已刪除")]
         public bool IsDeleted { get; set; }
 
         [Display(Name = "公告")]
