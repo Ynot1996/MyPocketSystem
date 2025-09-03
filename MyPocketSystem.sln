@@ -16,6 +16,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.Shared", "MyPocket.Shared\MyPocket.Shared.csproj", "{0C38A8F8-244C-BBC1-1083-2F76CE2559F7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.API", "MyPocket.API\MyPocket.API.csproj", "{58AFB20F-59BF-429A-9C79-151CBD79AE3C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0C38A8F8-244C-BBC1-1083-2F76CE2559F7} = {0C38A8F8-244C-BBC1-1083-2F76CE2559F7}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPocket.Services", "MyPocket.Services\MyPocket.Services.csproj", "{BE8CE37D-82BC-452D-B583-67DDFF3F751F}"
 	ProjectSection(ProjectDependencies) = postProject

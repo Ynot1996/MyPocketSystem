@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyPocket.DataAccess.Data;
+using MyPocket.API.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddDbContext<MyPocketDBContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 var app = builder.Build();
 
@@ -24,5 +26,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-
