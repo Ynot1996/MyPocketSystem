@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
@@ -14,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MyPocket.Core\MyPocket.Core.csproj" />
     <ProjectReference Include="..\MyPocket.DataAccess\MyPocket.DataAccess.csproj" />
+	<ProjectReference Include="..\MyPocket.Shared\MyPocket.Shared.csproj" />
   </ItemGroup>
 
 </Project>

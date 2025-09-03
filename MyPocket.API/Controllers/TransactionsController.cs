@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPocket.Core.Models;
 using MyPocket.DataAccess.Data;
+using MyPocket.Shared.DTOs;
+using AutoMapper;
 
 namespace MyPocket.API.Controllers
 {
@@ -10,49 +12,77 @@ namespace MyPocket.API.Controllers
     public class TransactionsController : ControllerBase
     {
         private readonly MyPocketDBContext _context;
-        public TransactionsController(MyPocketDBContext context)
+        private readonly IMapper _mapper;
+
+        public TransactionsController(MyPocketDBContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<TransactionDTO>>> GetAll()
         {
-            var transactions = await _context.Transactions.ToListAsync();
-            return Ok(transactions);
+            var transactions = await _context.Transactions
+                .Include(t => t.Category)
+                .Where(t => !t.IsDeleted)
+                .ToListAsync();
+            return Ok(_mapper.Map<IEnumerable<TransactionDTO>>(transactions));
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(Guid id)
+        public async Task<ActionResult<TransactionDTO>> Get(Guid id)
         {
-            var transaction = await _context.Transactions.FindAsync(id);
+            var transaction = await _context.Transactions
+                .Include(t => t.Category)
+                .FirstOrDefaultAsync(t => t.TransactionId == id && !t.IsDeleted);
+            
             if (transaction == null) return NotFound();
-            return Ok(transaction);
+            return Ok(_mapper.Map<TransactionDTO>(transaction));
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<TransactionDTO>>> GetByUser(Guid userId)
+        {
+            var transactions = await _context.Transactions
+                .Include(t => t.Category)
+                .Where(t => t.UserId == userId && !t.IsDeleted)
+                .OrderByDescending(t => t.TransactionDate)
+                .ToListAsync();
+            
+            return Ok(_mapper.Map<IEnumerable<TransactionDTO>>(transactions));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Transaction transaction)
+        public async Task<ActionResult<TransactionDTO>> Create([FromBody] CreateTransactionDTO dto)
         {
+            var transaction = _mapper.Map<Transaction>(dto);
             transaction.TransactionId = Guid.NewGuid();
             transaction.CreatedAt = DateTime.UtcNow;
             transaction.UpdatedAt = DateTime.UtcNow;
+            
             _context.Transactions.Add(transaction);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = transaction.TransactionId }, transaction);
+            
+            // 重新查詢以包含 Category 信息
+            var created = await _context.Transactions
+                .Include(t => t.Category)
+                .FirstAsync(t => t.TransactionId == transaction.TransactionId);
+            
+            return CreatedAtAction(nameof(Get), 
+                new { id = created.TransactionId }, 
+                _mapper.Map<TransactionDTO>(created));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Transaction transaction)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTransactionDTO dto)
         {
-            var existing = await _context.Transactions.FindAsync(id);
-            if (existing == null) return NotFound();
-            existing.Amount = transaction.Amount;
-            existing.CategoryId = transaction.CategoryId;
-            existing.TransactionType = transaction.TransactionType;
-            existing.TransactionDate = transaction.TransactionDate;
-            existing.Description = transaction.Description;
-            existing.UpdatedAt = DateTime.UtcNow;
-            existing.IsDeleted = transaction.IsDeleted;
+            var transaction = await _context.Transactions.FindAsync(id);
+            if (transaction == null) return NotFound();
+
+            _mapper.Map(dto, transaction);
+            transaction.UpdatedAt = DateTime.UtcNow;
+            
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -62,8 +92,11 @@ namespace MyPocket.API.Controllers
         {
             var transaction = await _context.Transactions.FindAsync(id);
             if (transaction == null) return NotFound();
-            _context.Transactions.Remove(transaction);
+            
+            transaction.IsDeleted = true;
+            transaction.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+            
             return NoContent();
         }
     }

@@ -10,6 +10,7 @@ builder.Services.AddDbContext<MyPocketDBContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 var app = builder.Build();
 
@@ -24,5 +25,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-
