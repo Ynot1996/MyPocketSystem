@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyPocket.Mobile.RegisterPage"
+             Title="註冊">
+    <Grid BackgroundColor="#fff">
+        <VerticalStackLayout Padding="30" Spacing="20" VerticalOptions="Center">
+            <Label Text="MyPocket 註冊" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Entry x:Name="EmailEntry" Placeholder="Email" Keyboard="Email" />
+            <Entry x:Name="PasswordEntry" Placeholder="密碼" IsPassword="True" />
+            <Entry x:Name="ConfirmPasswordEntry" Placeholder="確認密碼" IsPassword="True" />
+            <Entry x:Name="NicknameEntry" Placeholder="暱稱 (選填)" />
+            <Button Text="註冊" Clicked="OnRegisterClicked" BackgroundColor="#00B294" TextColor="White" />
+            <Label x:Name="ErrorLabel" TextColor="Red" IsVisible="False" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

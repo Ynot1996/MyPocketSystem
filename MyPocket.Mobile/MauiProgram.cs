@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-// API 專案無法直接參考，但可用 HttpClient 呼叫 API
 
 namespace MyPocket.Mobile
 {
