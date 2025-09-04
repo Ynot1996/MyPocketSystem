@@ -23,16 +23,14 @@ namespace MyPocket.Mobile
             }
             try
             {
-                // TODO: 請依 API 實際登入端點調整
-                string baseUrl = "http://10.0.2.2:5000";
+                string baseUrl = "http://10.0.2.2:5239";
                 var httpClient = new HttpClient();
                 var loginDto = new { Email = email, Password = password };
                 var response = await httpClient.PostAsJsonAsync($"{baseUrl}/api/Account/Login", loginDto);
                 if (response.IsSuccessStatusCode)
                 {
-                    // 登入成功，導向主頁
                     await DisplayAlert("成功", "登入成功！", "OK");
-                    // Application.Current.MainPage = new MainPage(); // 可切換主頁
+                    Application.Current.MainPage = new MainPage();
                 }
                 else
                 {
@@ -40,11 +38,14 @@ namespace MyPocket.Mobile
                     ErrorLabel.IsVisible = true;
                 }
             }
+
             catch (Exception ex)
             {
-                ErrorLabel.Text = $"錯誤: {ex.Message}";
+                ErrorLabel.Text = $"錯誤: {ex.ToString()}"; // 開發用
+                //ErrorLabel.Text = "系統錯誤，請稍後再試"; // 上線用
                 ErrorLabel.IsVisible = true;
             }
         }
     }
 }
+    
