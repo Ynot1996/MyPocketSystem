@@ -31,10 +31,15 @@ namespace MyPocket.Mobile
             }
             try
             {
-                string baseUrl = "http://10.0.2.2:5000";
+                string baseUrl = "http://10.0.2.2:5239";
                 var httpClient = new HttpClient();
-                var registerDto = new { Email = email, Password = password, ConfirmPassword = confirmPassword, Nickname = nickname };
-                var response = await httpClient.PostAsJsonAsync($"{baseUrl}/api/Account/Register", registerDto);
+                var form = new MultipartFormDataContent();
+                form.Add(new StringContent(email), "Email");
+                form.Add(new StringContent(password), "Password");
+                form.Add(new StringContent(confirmPassword), "ConfirmPassword");
+                form.Add(new StringContent(nickname ?? ""), "Nickname");
+
+                var response = await httpClient.PostAsync($"{baseUrl}/api/Users", form);
                 if (response.IsSuccessStatusCode)
                 {
                     await DisplayAlert("成功", "註冊成功，請登入！", "OK");

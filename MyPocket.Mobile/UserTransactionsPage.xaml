@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyPocket.Mobile.UserTransactionsPage"
+             Title="交易紀錄">  <Grid BackgroundColor="#fff">
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <Label Text="交易紀錄列表" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />  <CollectionView x:Name="TransactionsView" VerticalOptions="FillAndExpand">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="0,5" Padding="10" BackgroundColor="#F3F3F3" CornerRadius="8">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding TransactionDate, StringFormat='日期：{0:yyyy-MM-dd}'}" FontSize="16" />  <Label Text="{Binding CategoryName}" FontSize="16" />
+                                <Label Text="{Binding Amount, StringFormat='金額：{0:C}'}" FontSize="16" />  <Label Text="{Binding Description}" FontSize="14" />
+                                <Label Text="{Binding Type}" FontSize="14" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            </VerticalStackLayout>
+    </Grid>
+</ContentPage>

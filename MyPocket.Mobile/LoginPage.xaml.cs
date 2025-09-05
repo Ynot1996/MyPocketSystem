@@ -30,7 +30,16 @@ namespace MyPocket.Mobile
                 if (response.IsSuccessStatusCode)
                 {
                     await DisplayAlert("成功", "登入成功！", "OK");
-                    Application.Current.MainPage = new MainPage();
+                    var user = await response.Content.ReadFromJsonAsync<UserDTO>();
+                    if (user != null)
+                    {
+                        await Navigation.PushAsync(new UserTransactionsPage(user.UserId));
+                    }
+                    else
+                    {
+                        ErrorLabel.Text = "無法取得使用者資料";
+                        ErrorLabel.IsVisible = true;
+                    }
                 }
                 else
                 {

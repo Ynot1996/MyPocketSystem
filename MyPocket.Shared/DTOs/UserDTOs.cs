@@ -17,14 +17,11 @@ namespace MyPocket.Shared.DTOs
         [Required]
         [EmailAddress]
         public string Email { get; set; } = null!;
-
         [Required]
         [MinLength(8)]
         public string Password { get; set; } = null!;
 
         public string? Nickname { get; set; }
-        
-        public string Role { get; set; } = "FreeMember";
     }
 
     public class UpdateUserDTO
