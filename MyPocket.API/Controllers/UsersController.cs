@@ -36,10 +36,11 @@ namespace MyPocket.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<UserDTO>> Create([FromBody] CreateUserDTO dto)
+        public async Task<ActionResult<UserDTO>> Create([FromForm] CreateUserDTO dto)
         {
             var user = _mapper.Map<User>(dto);
             user.UserId = Guid.NewGuid();
+            user.Role = "FreeMember";
             user.CreationDate = DateTime.UtcNow;
             user.LastLoginDate = DateTime.UtcNow;
             user.UpdatedAt = DateTime.UtcNow;
