@@ -1,77 +1,50 @@
 ﻿@model IEnumerable<MyPocket.Core.Models.User>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "使用者管理";
 }
 
-<h1>Index</h1>
+<h1>使用者管理</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-success mb-2">新增使用者</a>
 </p>
-<table class="table">
+<table class="table table-striped align-middle">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PasswordHash)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Nickname)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Role)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreationDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastLoginDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsDeleted)
-            </th>
-            <th></th>
+            <th>@Html.DisplayNameFor(model => model.Email)</th>
+            <th>@Html.DisplayNameFor(model => model.Nickname)</th>
+            <th>@Html.DisplayNameFor(model => model.Role)</th>
+            <th>@Html.DisplayNameFor(model => model.CreationDate)</th>
+            <th>@Html.DisplayNameFor(model => model.IsDeleted)</th>
+            <th>操作</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PasswordHash)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nickname)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Role)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreationDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastLoginDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsDeleted)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.UserId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.UserId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.UserId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                <td>@Html.DisplayFor(modelItem => item.Nickname)</td>
+                <td>@Html.DisplayFor(modelItem => item.Role)</td>
+                <td>@Html.DisplayFor(modelItem => item.CreationDate)</td>
+                <td>
+                    @if (item.IsDeleted)
+                    {
+                        <span class="badge bg-danger">已停用</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">啟用中</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-primary">編輯</a>
+                    <a asp-action="Details" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-secondary">詳細</a>
+                    <a asp-action="Delete" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-danger">刪除</a>                    
+                    <a asp-area="Admin" asp-controller="UsersManagement" asp-action="UserSubscriptionHistory" asp-route-userId="@item.UserId" class="btn btn-sm btn-outline-info">訂閱管理</a>                    
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
