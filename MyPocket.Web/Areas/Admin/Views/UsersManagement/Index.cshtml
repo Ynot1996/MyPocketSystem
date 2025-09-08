@@ -1,0 +1,164 @@
+@model IEnumerable<MyPocket.Core.Models.User>
+@{
+    ViewData["Title"] = "用戶訂閱管理";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h1>用戶訂閱管理</h1>
+
+<div class="alert alert-info">
+    選擇用戶並更新其訂閱計劃。你可以：
+    <ul>
+        <li>點擊單一用戶的「詳細」查看其訂閱歷史</li>
+        <li>勾選多個用戶並選擇訂閱計劃進行批次更新</li>
+    </ul>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<form id="subscriptionForm">
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="selectAll" />
+                    </th>
+                    <th>電子郵件</th>
+                    <th>暱稱</th>
+                    <th>角色</th>
+                    <th>目前訂閱</th>
+                    <th>訂閱到期日</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    var currentSub = user.UserSubscriptions?.OrderByDescending(us => us.StartDate).FirstOrDefault();
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="selectedUsers" value="@user.UserId" class="user-checkbox" />
+                        </td>
+                        <td>@user.Email</td>
+                        <td>@user.Nickname</td>
+                        <td>@user.Role</td>
+                        <td>@(currentSub?.Plan?.PlanName ?? "無訂閱")</td>
+                        <td>@(currentSub?.EndDate.ToString("yyyy/MM/dd") ?? "---")</td>
+                        <td>
+                            <a asp-action="UserSubscriptionHistory" asp-route-userId="@user.UserId" 
+                               class="btn btn-info btn-sm">詳細</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 class="card-title">批次更新訂閱</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <select id="planSelection" class="form-control">
+                        <option value="">選擇訂閱計劃...</option>
+                        @foreach (var plan in (IEnumerable<MyPocket.Core.Models.SubscriptionPlan>)ViewBag.SubscriptionPlans)
+                        {
+                            <option value="@plan.PlanId">@plan.PlanName</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" id="updateSelected" class="btn btn-primary" disabled>
+                        更新選定用戶的訂閱
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Select All 功能
+            $("#selectAll").change(function () {
+                $(".user-checkbox").prop('checked', $(this).prop('checked'));
+                updateButtonState();
+            });
+
+            // 個別checkbox變更時更新按鈕狀態
+            $(".user-checkbox").change(function () {
+                updateButtonState();
+                // 檢查是否所有checkbox都被選中
+                var allChecked = $(".user-checkbox:not(:checked)").length === 0;
+                $("#selectAll").prop('checked', allChecked);
+            });
+
+            // 訂閱計劃選擇變更時更新按鈕狀態
+            $("#planSelection").change(function () {
+                updateButtonState();
+            });
+
+            // 更新按鈕啟用狀態
+            function updateButtonState() {
+                var hasSelection = $(".user-checkbox:checked").length > 0;
+                var hasPlan = $("#planSelection").val() !== "";
+                $("#updateSelected").prop('disabled', !hasSelection || !hasPlan);
+            }
+
+            // 處理批次更新
+            $("#updateSelected").click(function (e) {
+                e.preventDefault();
+
+                // 顯示確認對話框
+                if (!confirm("確定要更新選定用戶的訂閱計劃嗎？")) {
+                    return;
+                }
+                
+                // 收集選中的用戶ID
+                var selectedUsers = [];
+                $(".user-checkbox:checked").each(function () {
+                    selectedUsers.push($(this).val());
+                });
+
+                var planId = $("#planSelection").val();
+
+                // 禁用按鈕，避免重複提交
+                $("#updateSelected").prop('disabled', true);
+                
+                $.ajax({
+                    url: '@Url.Action("UpdateSelectedSubscriptions")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        userIds: selectedUsers,
+                        planId: planId
+                    }),
+                    success: function (result) {
+                        if (result.success) {
+                            alert(result.message);
+                            location.reload();
+                        } else {
+                            alert('錯誤：' + result.message);
+                            // 重新啟用按鈕
+                            updateButtonState();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('更新訂閱時發生錯誤：' + error);
+                        // 重新啟用按鈕
+                        updateButtonState();
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPocket.DataAccess.Data;
+using MyPocket.Services;
 using MyPocket.Shared.ViewModels.Accounts;
 using System.Security.Claims;
 
@@ -13,10 +14,12 @@ namespace MyPocket.Web.Controllers
     public class AccountController : Controller
     {
         private readonly MyPocketDBContext _context;
+        private readonly ISubscriptionService _subscriptionService; // 訂閱服務介面
 
-        public AccountController(MyPocketDBContext context)
+        public AccountController(MyPocketDBContext context, ISubscriptionService subscriptionService)
         {
             _context = context;
+            _subscriptionService = subscriptionService;
         }
 
         [HttpGet]
@@ -109,8 +112,14 @@ namespace MyPocket.Web.Controllers
                 UpdatedAt = DateTime.UtcNow,
                 IsDeleted = false
             };
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+
+            // 自動訂閱基本方案
+            await _subscriptionService.SubscribeToBasicPlanAsync(user.UserId);
+
+            TempData["SuccessMessage"] = "註冊成功！已自動為您訂閱基本會員方案。";
             return RedirectToAction("Login");
         }
     }

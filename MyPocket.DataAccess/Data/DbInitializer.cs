@@ -9,6 +9,57 @@ namespace MyPocket.DataAccess.Data
         {
             await context.Database.EnsureCreatedAsync();
 
+            // Initialize subscription plans if they don't exist
+            if (!await context.SubscriptionPlans.AnyAsync())
+            {
+                var subscriptionPlans = new List<SubscriptionPlan>
+                {
+                    new SubscriptionPlan
+                    {
+                        PlanId = Guid.NewGuid(),
+                        PlanName = "免費基本會員",
+                        Price = 0M,
+                        DurationDays = 36500, // 100年，實質上就是永久
+                        Description = "基本功能：\n- 基本收支記錄\n- 單一預算設定\n- 基礎收支報表"
+                    },
+                    new SubscriptionPlan
+                    {
+                        PlanId = Guid.NewGuid(),
+                        PlanName = "進階會員（月付）",
+                        Price = 89M,
+                        DurationDays = 30,
+                        Description = "所有進階功能，月付方案：\n- 多重預算管理\n- 詳細圖表分析\n- 目標儲蓄追蹤\n- 自訂分類\n- 資料匯出"
+                    },
+                    new SubscriptionPlan
+                    {
+                        PlanId = Guid.NewGuid(),
+                        PlanName = "進階會員（季付）",
+                        Price = 249M,
+                        DurationDays = 90,
+                        Description = "所有進階功能，季付方案：\n- 比月付方案省83元\n- 多重預算管理\n- 詳細圖表分析\n- 目標儲蓄追蹤\n- 自訂分類\n- 資料匯出"
+                    },
+                    new SubscriptionPlan
+                    {
+                        PlanId = Guid.NewGuid(),
+                        PlanName = "進階會員（半年）",
+                        Price = 449M,
+                        DurationDays = 180,
+                        Description = "所有進階功能，半年方案：\n- 比月付方案省85元/月\n- 多重預算管理\n- 詳細圖表分析\n- 目標儲蓄追蹤\n- 自訂分類\n- 資料匯出"
+                    },
+                    new SubscriptionPlan
+                    {
+                        PlanId = Guid.NewGuid(),
+                        PlanName = "進階會員（年付）",
+                        Price = 799M,
+                        DurationDays = 365,
+                        Description = "所有進階功能，年付方案：\n- 比月付方案省269元/月\n- 多重預算管理\n- 詳細圖表分析\n- 目標儲蓄追蹤\n- 自訂分類\n- 資料匯出\n- 額外贈送1個月"
+                    }
+                };
+
+                await context.SubscriptionPlans.AddRangeAsync(subscriptionPlans);
+                await context.SaveChangesAsync();
+            }
+
             bool hasUser = await context.Users.AnyAsync(u => u.Email == "freemember@example.com");
             if (!hasUser)
             {
@@ -53,6 +104,7 @@ namespace MyPocket.DataAccess.Data
                 throw new InvalidOperationException("Admin user not found. Database initialization failed.");
             }
 
+            // Initialize default categories
             var defaultCategories = new List<Category>
             {
                 new Category { CategoryId = Guid.NewGuid(), UserId = adminUser.UserId, CategoryName = "餐飲", CategoryType = "支出", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow, IsDeleted = false },
