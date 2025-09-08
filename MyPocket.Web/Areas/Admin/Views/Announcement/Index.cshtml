@@ -4,9 +4,15 @@
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 <h2>公告管理</h2>
+
+<div class="mb-2">
+    <input type="text" id="tableFilter" class="form-control" placeholder="搜尋...">
+</div>
+
 <p>
     <a asp-action="Create" class="btn btn-success">新增公告</a>
 </p>
+
 <table class="table table-bordered table-hover">
     <thead class="table-dark">
         <tr>
