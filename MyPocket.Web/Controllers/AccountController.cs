@@ -58,6 +58,9 @@ namespace MyPocket.Web.Controllers
                 if (user.Role == "Admin")
                     return RedirectToAction("Index", "Users", new { area = "Admin" });
 
+                else if (user.Role == "PaidMember")
+                    return RedirectToAction("Index", "PaidMember", new { area = "User" });
+
                 else if (user.Role == "FreeMember")
                     return RedirectToAction("Index", "Transactions", new { area = "User"});
 

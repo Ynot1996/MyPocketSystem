@@ -6,7 +6,7 @@ using System.Security.Claims;
 namespace MyPocket.Web.Areas.User.Controllers
 {
     [Area("User")]
-    [Authorize(Roles = "FreeMember")]
+    [Authorize(Roles = "FreeMember,PaidMember")]
     public class SubscriptionsController : Controller
     {
         private readonly ISubscriptionService _subscriptionService;
