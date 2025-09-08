@@ -1,0 +1,43 @@
+@model MyPocket.Core.Models.SubscriptionPlan
+
+@{
+    ViewData["Title"] = "刪除訂閱方案";
+}
+
+<h1>刪除訂閱方案</h1>
+
+<h3>確定要刪除這個訂閱方案嗎？</h3>
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">
+            方案名稱
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PlanName)
+        </dd>
+        <dt class="col-sm-2">
+            價格
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+        <dt class="col-sm-2">
+            天數
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DurationDays)
+        </dd>
+        <dt class="col-sm-2">
+            說明
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="PlanId" />
+        <input type="submit" value="刪除" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+    </form>
+</div>
