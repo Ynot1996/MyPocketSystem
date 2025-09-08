@@ -1,65 +1,143 @@
 ﻿@model IEnumerable<MyPocket.Core.Models.Category>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "分類管理";
+    Func<MyPocket.Core.Models.Category, bool> isAdminCategory = c => c.User != null && c.User.Email == "admin@example.com";
+    var incomeCategories = Model.Where(c => c.CategoryType == "收入").ToList();
+    var expenseCategories = Model.Where(c => c.CategoryType == "支出").ToList();
 }
 
-<h1>Index</h1>
+<h1>分類管理</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.CategoryName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CategoryType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsDeleted)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CategoryName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CategoryType)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsDeleted)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Email)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.CategoryId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.CategoryId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.CategoryId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="row mb-3">
+    <div class="col-md-4 mb-2">
+        <input type="text" id="tableFilter" class="form-control" placeholder="搜尋...">
+    </div>
+    <div class="col-md-3 mb-2">
+        <select id="typeFilter" class="form-select">
+            <option value="">全部類型</option>
+            <option value="收入">收入</option>
+            <option value="支出">支出</option>
+        </select>
+    </div>
+    <div class="col-md-3 mb-2 d-flex align-items-center">
+        <input type="checkbox" id="showUserCategory" class="form-check-input me-2">
+        <label for="showUserCategory" class="form-check-label">顯示使用者自訂類別</label>
+    </div>
+    <div class="col-md-2 mb-2 text-end">
+        <a asp-action="Create" class="btn btn-success">新增分類</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 category-block" data-block="收入">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">收入分類</div>
+            <div class="card-body p-0">
+                <table class="table table-striped align-middle mb-0 category-table" data-type="收入">
+                    <thead>
+                        <tr>
+                            <th>分類名稱</th>
+                            <th>來源</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in incomeCategories)
+                        {
+                            var isAdmin = isAdminCategory(item);
+                            <tr data-type="收入" data-admin="@(isAdmin ? "1" : "0")">
+                                <td>@item.CategoryName</td>
+                                <td>
+                                    @if (isAdmin)
+                                    {
+                                        <span class="badge bg-primary">管理者</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info text-dark">使用者</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-primary">編輯</a>
+                                    <a asp-action="Details" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-secondary">詳細</a>
+                                    <a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-danger">刪除</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 category-block" data-block="支出">
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">支出分類</div>
+            <div class="card-body p-0">
+                <table class="table table-striped align-middle mb-0 category-table" data-type="支出">
+                    <thead>
+                        <tr>
+                            <th>分類名稱</th>
+                            <th>來源</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in expenseCategories)
+                        {
+                            var isAdmin = isAdminCategory(item);
+                            <tr data-type="支出" data-admin="@(isAdmin ? "1" : "0")">
+                                <td>@item.CategoryName</td>
+                                <td>
+                                    @if (isAdmin)
+                                    {
+                                        <span class="badge bg-primary">管理者</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info text-dark">使用者</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-primary">編輯</a>
+                                    <a asp-action="Details" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-secondary">詳細</a>
+                                    <a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-danger">刪除</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterTable() {
+        var text = $('#tableFilter').val().toLowerCase();
+        var type = $('#typeFilter').val();
+        var showUser = $('#showUserCategory').is(':checked');
+
+        // 區塊顯示控制
+        if (type === "") {
+            $('.category-block').show();
+        } else {
+            $('.category-block').each(function () {
+                $(this).toggle($(this).data('block') === type);
+            });
+        }
+
+        // 列顯示控制
+        $('.category-table tbody tr').each(function () {
+            var row = $(this);
+            var isAdmin = row.data('admin') == 1;
+            var matchText = row.text().toLowerCase().indexOf(text) > -1;
+            var matchUser = showUser || isAdmin;
+            row.toggle(matchText && matchUser);
+        });
+    }
+    $(document).ready(function () {
+        $('#tableFilter, #typeFilter, #showUserCategory').on('input change', filterTable);
+        filterTable();
+    });
+</script>
