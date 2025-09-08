@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace MyPocket.Web.Areas.User.Controllers
 {
     [Area("User")]
-    [Authorize(Roles = "FreeMember")]
+    [Authorize(Roles = "FreeMember,PaidMember")]
     public class CategoriesController : Controller
     {
         private readonly ICategoryService _categoryService;
