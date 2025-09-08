@@ -48,6 +48,7 @@ builder.Services.AddScoped<ISavingGoalService, SavingGoalService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<MyPocket.Services.ISubscriptionService, SubscriptionService>();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();

@@ -1,0 +1,52 @@
+@model IEnumerable<MyPocket.Core.Models.SubscriptionPlan>
+
+@{
+    ViewData["Title"] = "訂閱方案管理";
+}
+
+<h1>訂閱方案管理</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">建立新方案</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PlanName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DurationDays)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.PlanName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DurationDays)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.PlanId" class="btn btn-info btn-sm">編輯</a> |
+                <a asp-action="Delete" asp-route-id="@item.PlanId" class="btn btn-danger btn-sm">刪除</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
