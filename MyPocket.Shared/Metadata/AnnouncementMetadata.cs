@@ -9,29 +9,29 @@ namespace MyPocket.Shared.Metadata
 
     public class AnnouncementMetadata
     {
-        [Required(ErrorMessage = "¤½§iID¬°¥²¶ñ")]
-        [Display(Name = "¤½§iID")]
+        [Required(ErrorMessage = "å…¬å‘ŠIDç‚ºå¿…å¡«")]
+        [Display(Name = "å…¬å‘ŠID")]
         public Guid AnnouncementId { get; set; }
 
-        [Required(ErrorMessage = "ºŞ²z­ûID¬°¥²¶ñ")]
-        [Display(Name = "ºŞ²z­ûID")]
+        [Required(ErrorMessage = "ç®¡ç†å“¡IDç‚ºå¿…å¡«")]
+        [Display(Name = "ç®¡ç†å“¡ID")]
         public Guid AdminId { get; set; }
 
-        [Required(ErrorMessage = "¼ĞÃD¬°¥²¶ñ")]
-        [Display(Name = "¼ĞÃD")]
-        [StringLength(200, ErrorMessage = "{0}ªø«×¤£¯à¶W¹L{1}­Ó¦r¤¸")]
+        [Required(ErrorMessage = "æ¨™é¡Œç‚ºå¿…å¡«")]
+        [Display(Name = "æ¨™é¡Œ")]
+        [StringLength(200, ErrorMessage = "{0}é•·åº¦ä¸èƒ½è¶…é{1}å€‹å­—å…ƒ")]
         public string Title { get; set; } = null!;
 
-        [Required(ErrorMessage = "¤º®e¬°¥²¶ñ")]
-        [Display(Name = "¤º®e")]
+        [Required(ErrorMessage = "å…§å®¹ç‚ºå¿…å¡«")]
+        [Display(Name = "å…§å®¹")]
         public string Content { get; set; } = null!;
 
-        [Required(ErrorMessage = "µo¥¬¤é´Á¬°¥²¶ñ")]
-        [Display(Name = "µo¥¬¤é´Á")]
+        [Required(ErrorMessage = "ç™¼å¸ƒæ—¥æœŸç‚ºå¿…å¡«")]
+        [Display(Name = "ç™¼å¸ƒæ—¥æœŸ")]
         [DataType(DataType.DateTime)]
         public DateTime PublishDate { get; set; }
 
-        [Display(Name = "ºŞ²z­û")]
+        [Display(Name = "ç®¡ç†å“¡")]
         public virtual User Admin { get; set; } = null!;
     }
 }

@@ -10,43 +10,43 @@ namespace MyPocket.Shared.Metadata
     public class TransactionMetadata
     {
         [Required]
-        [Display(Name = "¥æ©öID")]
+        [Display(Name = "äº¤æ˜“ID")]
         public Guid TransactionId { get; set; }
 
         [Required]
-        [Display(Name = "¥Î¤áID")]
+        [Display(Name = "ç”¨æˆ¶ID")]
         public Guid UserId { get; set; }
 
         [Required]
-        [Display(Name = "¤ÀÃşID")]
+        [Display(Name = "åˆ†é¡ID")]
         public Guid CategoryId { get; set; }
 
         [Required]
-        [Display(Name = "ª÷ÃB")]
+        [Display(Name = "é‡‘é¡")]
         public decimal Amount { get; set; }
 
         [Required]
-        [Display(Name = "¥æ©öÃş«¬")]
+        [Display(Name = "äº¤æ˜“é¡å‹")]
         public string TransactionType { get; set; } = null!;
 
         [Required]
-        [Display(Name = "¥æ©ö¤é´Á")]
+        [Display(Name = "äº¤æ˜“æ—¥æœŸ")]
         [DataType(DataType.DateTime)]
         public DateTime TransactionDate { get; set; }
 
-        [Display(Name = "´y­z")]
+        [Display(Name = "æè¿°")]
         public string? Description { get; set; }
 
-        [Display(Name = "«Ø¥ß®É¶¡")]
+        [Display(Name = "å»ºç«‹æ™‚é–“")]
         public DateTime CreatedAt { get; set; }
 
-        [Display(Name = "§ó·s®É¶¡")]
+        [Display(Name = "æ›´æ–°æ™‚é–“")]
         public DateTime UpdatedAt { get; set; }
 
-        [Display(Name = "¤ÀÃş")]
+        [Display(Name = "åˆ†é¡")]
         public virtual Category Category { get; set; } = null!;
 
-        [Display(Name = "¥Î¤á")]
+        [Display(Name = "ç”¨æˆ¶")]
         public virtual User User { get; set; } = null!;
     }
 }

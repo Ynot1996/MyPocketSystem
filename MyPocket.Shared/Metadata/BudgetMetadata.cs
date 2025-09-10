@@ -10,42 +10,42 @@ namespace MyPocket.Shared.Metadata
     public class BudgetMetadata
     {
         [Required]
-        [Display(Name = "¹wºâID")]
+        [Display(Name = "é ç®—ID")]
         public Guid BudgetId { get; set; }
 
         [Required]
-        [Display(Name = "¥Î¤áID")]
+        [Display(Name = "ç”¨æˆ¶ID")]
         public Guid UserId { get; set; }
 
         [Required]
-        [Display(Name = "¤ÀÃşID")]
+        [Display(Name = "åˆ†é¡ID")]
         public Guid CategoryId { get; set; }
 
         [Required]
-        [Display(Name = "ª÷ÃB")]
+        [Display(Name = "é‡‘é¡")]
         public decimal Amount { get; set; }
 
         [Required]
-        [Display(Name = "¦~«×")]
+        [Display(Name = "å¹´åº¦")]
         public string BudgetYear { get; set; } = null!;
 
         [Required]
-        [Display(Name = "¤ë¥÷")]
+        [Display(Name = "æœˆä»½")]
         public string BudgetMonth { get; set; } = null!;
 
-        [Display(Name = "«Ø¥ß®É¶¡")]
+        [Display(Name = "å»ºç«‹æ™‚é–“")]
         public DateTime CreatedAt { get; set; }
 
-        [Display(Name = "§ó·s®É¶¡")]
+        [Display(Name = "æ›´æ–°æ™‚é–“")]
         public DateTime UpdatedAt { get; set; }
 
-        [Display(Name = "¤w§R°£")]
+        [Display(Name = "å·²åˆªé™¤")]
         public bool IsDeleted { get; set; }
 
-        [Display(Name = "¤ÀÃş")]
+        [Display(Name = "åˆ†é¡")]
         public virtual Category Category { get; set; } = null!;
 
-        [Display(Name = "¥Î¤á")]
+        [Display(Name = "ç”¨æˆ¶")]
         public virtual User User { get; set; } = null!;
     }
 }

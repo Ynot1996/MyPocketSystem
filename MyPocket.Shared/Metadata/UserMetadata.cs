@@ -10,53 +10,53 @@ namespace MyPocket.Shared.Metadata
     public class UserMetadata
     {
         [Required]
-        [Display(Name = "¥Î¤áID")]
+        [Display(Name = "ç”¨æˆ¶ID")]
         public Guid UserId { get; set; }
 
         [Required]
-        [Display(Name = "¹q¤l¶l¥ó")]
+        [Display(Name = "é›»å­éƒµä»¶")]
         [EmailAddress]
         public string Email { get; set; } = null!;
 
         [Required]
-        [Display(Name = "±K½XÂø´ê")]
+        [Display(Name = "å¯†ç¢¼é›œæ¹Š")]
         public string PasswordHash { get; set; } = null!;
 
-        [Display(Name = "¼ÊºÙ")]
+        [Display(Name = "æš±ç¨±")]
         public string? Nickname { get; set; }
 
         [Required]
-        [Display(Name = "¨¤¦â")]
+        [Display(Name = "è§’è‰²")]
         public string Role { get; set; } = null!;
 
-        [Display(Name = "«Ø¥ß¤é´Á")]
+        [Display(Name = "å»ºç«‹æ—¥æœŸ")]
         public DateTime CreationDate { get; set; }
 
-        [Display(Name = "³Ì«áµn¤J¤é´Á")]
+        [Display(Name = "æœ€å¾Œç™»å…¥æ—¥æœŸ")]
         public DateTime LastLoginDate { get; set; }
 
-        [Display(Name = "§ó·s®É¶¡")]
+        [Display(Name = "æ›´æ–°æ™‚é–“")]
         public DateTime UpdatedAt { get; set; }
 
-        [Display(Name = "¤w§R°£")]
+        [Display(Name = "å·²åˆªé™¤")]
         public bool IsDeleted { get; set; }
 
-        [Display(Name = "¤½§i")]
+        [Display(Name = "å…¬å‘Š")]
         public virtual ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
 
-        [Display(Name = "¹wºâ")]
+        [Display(Name = "é ç®—")]
         public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
-        [Display(Name = "¤ÀÃş")]
+        [Display(Name = "åˆ†é¡")]
         public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
 
-        [Display(Name = "Àx»W¥Ø¼Ğ")]
+        [Display(Name = "å„²è“„ç›®æ¨™")]
         public virtual ICollection<SavingGoal> SavingGoals { get; set; } = new List<SavingGoal>();
 
-        [Display(Name = "¥æ©ö")]
+        [Display(Name = "äº¤æ˜“")]
         public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 
-        [Display(Name = "­q¾\")]
+        [Display(Name = "è¨‚é–±")]
         public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
     }
 }
