@@ -10,38 +10,38 @@ namespace MyPocket.Shared.Metadata
     public class UserSubscriptionMetadata
     {
         [Required]
-        [Display(Name = "­q¾\ID")]
+        [Display(Name = "è¨‚é–±ID")]
         public Guid SubscriptionId { get; set; }
 
         [Required]
-        [Display(Name = "¥Î¤áID")]
+        [Display(Name = "ç”¨æˆ¶ID")]
         public Guid UserId { get; set; }
 
         [Required]
-        [Display(Name = "¤è®×ID")]
+        [Display(Name = "æ–¹æ¡ˆID")]
         public Guid PlanId { get; set; }
 
         [Required]
-        [Display(Name = "¶}©l¤é´Á")]
+        [Display(Name = "é–‹å§‹æ—¥æœŸ")]
         [DataType(DataType.DateTime)]
         public DateTime StartDate { get; set; }
 
         [Required]
-        [Display(Name = "µ²§ô¤é´Á")]
+        [Display(Name = "çµæŸæ—¥æœŸ")]
         [DataType(DataType.DateTime)]
         public DateTime EndDate { get; set; }
 
         [Required]
-        [Display(Name = "ª¬ºA")]
+        [Display(Name = "ç‹€æ…‹")]
         public string Status { get; set; } = null!;
 
-        [Display(Name = "¥I´Ú")]
+        [Display(Name = "ä»˜æ¬¾")]
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
-        [Display(Name = "¤è®×")]
+        [Display(Name = "æ–¹æ¡ˆ")]
         public virtual SubscriptionPlan Plan { get; set; } = null!;
 
-        [Display(Name = "¥Î¤á")]
+        [Display(Name = "ç”¨æˆ¶")]
         public virtual User User { get; set; } = null!;
     }
 }

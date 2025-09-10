@@ -20,7 +20,7 @@ namespace MyPocket.Services
         public async Task<List<Transaction>> GetUserTransactionsAsync(Guid userId)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException("¥Î¤áID¤£¯à¬°ªÅ", nameof(userId));
+                throw new ArgumentException(@"ç”¨æˆ¶IDä¸èƒ½ç‚ºç©º", nameof(userId));
 
             return await _context.Transactions
                 .Include(t => t.Category)
@@ -32,17 +32,17 @@ namespace MyPocket.Services
         public async Task<List<Transaction>> GetUserTransactionsByMonthAsync(Guid userId, int year, int month)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException("¥Î¤áID¤£¯à¬°ªÅ", nameof(userId));
+                throw new ArgumentException(@"ç”¨æˆ¶IDä¸èƒ½ç‚ºç©º", nameof(userId));
             if (year < 1900 || year > 9999)
-                throw new ArgumentException("µL®Äªº¦~¥÷", nameof(year));
+                throw new ArgumentException(@"ç„¡æ•ˆçš„å¹´ä»½", nameof(year));
             if (month < 1 || month > 12)
-                throw new ArgumentException("µL®Äªº¤ë¥÷", nameof(month));
+                throw new ArgumentException(@"ç„¡æ•ˆçš„æœˆä»½", nameof(month));
 
             return await _context.Transactions
                 .Include(t => t.Category)
-                .Where(t => t.UserId == userId && 
-                           !t.IsDeleted && 
-                           t.TransactionDate.Year == year && 
+                .Where(t => t.UserId == userId &&
+                           !t.IsDeleted &&
+                           t.TransactionDate.Year == year &&
                            t.TransactionDate.Month == month)
                 .OrderByDescending(t => t.TransactionDate)
                 .ToListAsync();
@@ -51,35 +51,35 @@ namespace MyPocket.Services
         public async Task<Transaction?> GetTransactionAsync(Guid userId, Guid transactionId)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException("¥Î¤áID¤£¯à¬°ªÅ", nameof(userId));
+                throw new ArgumentException(@"ç”¨æˆ¶IDä¸èƒ½ç‚ºç©º", nameof(userId));
             if (transactionId == Guid.Empty)
-                throw new ArgumentException("¥æ©öID¤£¯à¬°ªÅ", nameof(transactionId));
+                throw new ArgumentException(@"äº¤æ˜“IDä¸èƒ½ç‚ºç©º", nameof(transactionId));
 
             return await _context.Transactions
                 .Include(t => t.Category)
-                .FirstOrDefaultAsync(t => t.TransactionId == transactionId && 
-                                        t.UserId == userId && 
+                .FirstOrDefaultAsync(t => t.TransactionId == transactionId &&
+                                        t.UserId == userId &&
                                         !t.IsDeleted);
         }
 
         public async Task<decimal> CalculateCurrentSavingAsync(Guid userId, DateTime start, DateTime end)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException("¥Î¤áID¤£¯à¬°ªÅ", nameof(userId));
+                throw new ArgumentException(@"ç”¨æˆ¶IDä¸èƒ½ç‚ºç©º", nameof(userId));
 
             var income = await _context.Transactions
-                .Where(t => t.UserId == userId && 
-                           !t.IsDeleted && 
-                           t.TransactionType == "¦¬¤J" && 
-                           t.TransactionDate >= start && 
+                .Where(t => t.UserId == userId &&
+                           !t.IsDeleted &&
+                           t.TransactionType == "æ”¶å…¥" &&
+                           t.TransactionDate >= start &&
                            t.TransactionDate <= end)
                 .SumAsync(t => t.Amount);
 
             var expense = await _context.Transactions
-                .Where(t => t.UserId == userId && 
-                           !t.IsDeleted && 
-                           t.TransactionType == "¤ä¥X" && 
-                           t.TransactionDate >= start && 
+                .Where(t => t.UserId == userId &&
+                           !t.IsDeleted &&
+                           t.TransactionType == "æ”¯å‡º" &&
+                           t.TransactionDate >= start &&
                            t.TransactionDate <= end)
                 .SumAsync(t => t.Amount);
 
@@ -89,11 +89,11 @@ namespace MyPocket.Services
         public async Task<(bool success, string message, Transaction? transaction)> CreateTransactionAsync(Guid userId, TransactionCreateModel model)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException("¥Î¤áID¤£¯à¬°ªÅ", nameof(userId));
+                throw new ArgumentException(@"ç”¨æˆ¶IDä¸èƒ½ç‚ºç©º", nameof(userId));
 
             try
             {
-                // ¬d§ä¤ÀÃş¨Ã½T»{¨äÄİ©ó¸Ó¥Î¤á©Î¬O¨t²ÎÀq»{¤ÀÃş
+                // æŸ¥æ‰¾åˆ†é¡ä¸¦ç¢ºèªå…¶å±¬æ–¼è©²ç”¨æˆ¶æˆ–æ˜¯ç³»çµ±é»˜èªåˆ†é¡
                 var categoryViewModel = await _categoryService.GetUserCategoriesAsync(userId);
                 var category = categoryViewModel.DefaultIncomeCategories
                     .Concat(categoryViewModel.DefaultExpenseCategories)
@@ -102,7 +102,7 @@ namespace MyPocket.Services
                     .FirstOrDefault(c => c.CategoryId == model.CategoryId);
 
                 if (category == null)
-                    return (false, "µL®Äªº¤ÀÃş", null);
+                    return (false, @"ç„¡æ•ˆçš„åˆ†é¡", null);
 
                 var transaction = new Transaction
                 {
@@ -121,45 +121,45 @@ namespace MyPocket.Services
                 _context.Transactions.Add(transaction);
                 await _context.SaveChangesAsync();
 
-                // ­«·s¥[¸ü¤ÀÃşÃöÁp
+                // é‡æ–°åŠ è¼‰åˆ†é¡é—œè¯
                 await _context.Entry(transaction)
                     .Reference(t => t.Category)
                     .LoadAsync();
 
-                return (true, "¥æ©ö¬ö¿ı¤w¦¨¥\·s¼W", transaction);
+                return (true, @"äº¤æ˜“ç´€éŒ„å·²æˆåŠŸæ–°å¢", transaction);
             }
             catch (Exception ex)
             {
-                return (false, $"·s¼W¥¢±Ñ: {ex.Message}", null);
+                return (false, @$"æ–°å¢å¤±æ•—: {ex.Message}", null);
             }
         }
 
         public async Task<(bool success, string message)> DeleteTransactionAsync(Guid userId, Guid transactionId)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException("¥Î¤áID¤£¯à¬°ªÅ", nameof(userId));
+                throw new ArgumentException(@"ç”¨æˆ¶IDä¸èƒ½ç‚ºç©º", nameof(userId));
             if (transactionId == Guid.Empty)
-                throw new ArgumentException("¥æ©öID¤£¯à¬°ªÅ", nameof(transactionId));
+                throw new ArgumentException(@"äº¤æ˜“IDä¸èƒ½ç‚ºç©º", nameof(transactionId));
 
             try
             {
                 var transaction = await _context.Transactions
-                    .FirstOrDefaultAsync(t => t.TransactionId == transactionId && 
-                                            t.UserId == userId && 
+                    .FirstOrDefaultAsync(t => t.TransactionId == transactionId &&
+                                            t.UserId == userId &&
                                             !t.IsDeleted);
 
                 if (transaction == null)
-                    return (false, "§ä¤£¨ì­n§R°£ªº¥æ©ö¬ö¿ı");
+                    return (false, @"æ‰¾ä¸åˆ°è¦åˆªé™¤çš„äº¤æ˜“ç´€éŒ„");
 
                 transaction.IsDeleted = true;
                 transaction.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                return (true, "¥æ©ö¬ö¿ı¤w¦¨¥\§R°£");
+                return (true, @"äº¤æ˜“ç´€éŒ„å·²æˆåŠŸåˆªé™¤");
             }
             catch (Exception ex)
             {
-                return (false, $"§R°£¥¢±Ñ: {ex.Message}");
+                return (false, @$"åˆªé™¤å¤±æ•—: {ex.Message}");
             }
         }
     }

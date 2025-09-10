@@ -10,38 +10,38 @@ namespace MyPocket.Shared.Metadata
     public class CategoryMetadata
     {
         [Required]
-        [Display(Name = "¤ÀÃşID")]
+        [Display(Name = "åˆ†é¡ID")]
         public Guid CategoryId { get; set; }
 
         [Required]
-        [Display(Name = "¥Î¤áID")]
+        [Display(Name = "ç”¨æˆ¶ID")]
         public Guid UserId { get; set; }
 
         [Required]
-        [Display(Name = "¤ÀÃş¦WºÙ")]
+        [Display(Name = "åˆ†é¡åç¨±")]
         [StringLength(50)]
         public string CategoryName { get; set; } = null!;
 
         [Required]
-        [Display(Name = "¤ÀÃşÃş«¬")]
+        [Display(Name = "åˆ†é¡é¡å‹")]
         public string CategoryType { get; set; } = null!;
 
-        [Display(Name = "«Ø¥ß®É¶¡")]
+        [Display(Name = "å»ºç«‹æ™‚é–“")]
         public DateTime CreatedAt { get; set; }
 
-        [Display(Name = "§ó·s®É¶¡")]
+        [Display(Name = "æ›´æ–°æ™‚é–“")]
         public DateTime UpdatedAt { get; set; }
 
-        [Display(Name = "¤w§R°£")]
+        [Display(Name = "å·²åˆªé™¤")]
         public bool IsDeleted { get; set; }
 
-        [Display(Name = "¹wºâ")]
+        [Display(Name = "é ç®—")]
         public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
-        [Display(Name = "¥æ©ö")]
+        [Display(Name = "äº¤æ˜“")]
         public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 
-        [Display(Name = "¥Î¤á")]
+        [Display(Name = "ç”¨æˆ¶")]
         public virtual User User { get; set; } = null!;
     }
 }

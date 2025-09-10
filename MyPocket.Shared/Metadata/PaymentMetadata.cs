@@ -10,27 +10,27 @@ namespace MyPocket.Shared.Metadata
     public class PaymentMetadata
     {
         [Required]
-        [Display(Name = "¥I´ÚID")]
+        [Display(Name = "ä»˜æ¬¾ID")]
         public Guid PaymentId { get; set; }
 
         [Required]
-        [Display(Name = "­q¾\ID")]
+        [Display(Name = "è¨‚é–±ID")]
         public Guid SubscriptionId { get; set; }
 
         [Required]
-        [Display(Name = "ª÷ÃB")]
+        [Display(Name = "é‡‘é¡")]
         public decimal Amount { get; set; }
 
         [Required]
-        [Display(Name = "¥I´Ú¤é´Á")]
+        [Display(Name = "ä»˜æ¬¾æ—¥æœŸ")]
         [DataType(DataType.DateTime)]
         public DateTime PaymentDate { get; set; }
 
         [Required]
-        [Display(Name = "ª¬ºA")]
+        [Display(Name = "ç‹€æ…‹")]
         public string Status { get; set; } = null!;
 
-        [Display(Name = "­q¾\")]
+        [Display(Name = "è¨‚é–±")]
         public virtual UserSubscription Subscription { get; set; } = null!;
     }
 }

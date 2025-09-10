@@ -10,33 +10,33 @@ namespace MyPocket.Shared.Metadata
     public class SavingGoalMetadata
     {
         [Required]
-        [Display(Name = "¥Ø¼ĞID")]
+        [Display(Name = "ç›®æ¨™ID")]
         public Guid GoalId { get; set; }
 
         [Required]
-        [Display(Name = "¥Î¤áID")]
+        [Display(Name = "ç”¨æˆ¶ID")]
         public Guid UserId { get; set; }
 
         [Required]
-        [Display(Name = "¥Ø¼Ğ¦WºÙ")]
+        [Display(Name = "ç›®æ¨™åç¨±")]
         [StringLength(100)]
         public string GoalName { get; set; } = null!;
 
         [Required]
-        [Display(Name = "¥Ø¼Ğ¤é´Á")]
+        [Display(Name = "ç›®æ¨™æ—¥æœŸ")]
         [DataType(DataType.DateTime)]
         public DateTime TargetDate { get; set; }
 
-        [Display(Name = "«Ø¥ß®É¶¡")]
+        [Display(Name = "å»ºç«‹æ™‚é–“")]
         public DateTime CreatedAt { get; set; }
 
-        [Display(Name = "§ó·s®É¶¡")]
+        [Display(Name = "æ›´æ–°æ™‚é–“")]
         public DateTime UpdatedAt { get; set; }
 
-        [Display(Name = "¤w§R°£")]
+        [Display(Name = "å·²åˆªé™¤")]
         public bool IsDeleted { get; set; }
 
-        [Display(Name = "¥Î¤á")]
+        [Display(Name = "ç”¨æˆ¶")]
         public virtual User User { get; set; } = null!;
     }
 }

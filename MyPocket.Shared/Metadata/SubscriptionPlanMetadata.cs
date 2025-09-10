@@ -10,20 +10,20 @@ namespace MyPocket.Shared.Metadata
     public class SubscriptionPlanMetadata
     {
         [Required]
-        [Display(Name = "よID")]
+        [Display(Name = "鏂规ID")]
         public Guid PlanId { get; set; }
 
         [Required]
-        [Display(Name = "よ嘿")]
+        [Display(Name = "鏂规鍚嶇ū")]
         [StringLength(100)]
         public string PlanName { get; set; } = null!;
 
         [Required]
-        [Display(Name = "基")]
+        [Display(Name = "鍍规牸")]
         public decimal Price { get; set; }
 
         [Required]
-        [Display(Name = "磞瓃")]
+        [Display(Name = "鎻忚堪")]
         public string Description { get; set; } = null!;
     }
 }
