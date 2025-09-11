@@ -1,22 +1,22 @@
 @model MyPocket.Shared.ViewModels.Budgets.BudgetViewModel
 @{
-    ViewData["Title"] = "½s¿è¹wºâ";
+    ViewData["Title"] = "ç·¨è¼¯é ç®—";
     Layout = "~/Views/Shared/_LayoutUser.cshtml";
 }
-<h2>½s¿è¹wºâ</h2>
+<h2>ç·¨è¼¯é ç®—</h2>
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="BudgetId" />
     <div class="mb-3">
-        <label asp-for="CategoryName" class="form-label">¤ÀÃş</label>
+        <label asp-for="CategoryName" class="form-label">åˆ†é¡</label>
         <input asp-for="CategoryName" class="form-control" readonly />
     </div>
     <div class="mb-3">
-        <label asp-for="Amount" class="form-label">¹wºâª÷ÃB</label>
+        <label asp-for="Amount" class="form-label">é ç®—é‡‘é¡</label>
         <input asp-for="Amount" class="form-control" type="number" min="1" required />
         <span asp-validation-for="Amount" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-success">Àx¦s</button>
-    <a asp-action="Index" class="btn btn-secondary">¨ú®ø</a>
+    <button type="submit" class="btn btn-success">å„²å­˜</button>
+    <a asp-action="Index" class="btn btn-secondary">å–æ¶ˆ</a>
 </form>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

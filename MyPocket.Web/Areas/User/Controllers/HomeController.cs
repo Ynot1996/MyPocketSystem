@@ -13,11 +13,12 @@ namespace MyPocket.Web.Areas.User.Controllers
     public class HomeController : Controller
     {
         private readonly MyPocketDBContext _context;
+        
         public HomeController(MyPocketDBContext context)
         {
             _context = context;
         }
-        // ...existing code...
+
         public async Task<IActionResult> Index()
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -1,9 +1,9 @@
 @model MyPocket.Shared.ViewModels.Announcements.AnnouncementCreateModel
 @{
-    ViewData["Title"] = "·s¼W¤½§i";
+    ViewData["Title"] = "æ–°å¢žå…¬å‘Š";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h2>·s¼W¤½§i</h2>
+<h2>æ–°å¢žå…¬å‘Š</h2>
 
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -16,17 +16,17 @@
 
 <form asp-action="Create" method="post">
     <div class="mb-3">
-        <label asp-for="Title" class="form-label">¼ÐÃD</label>
+        <label asp-for="Title" class="form-label">æ¨™é¡Œ</label>
         <input asp-for="Title" class="form-control" />
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="Content" class="form-label">¤º®e</label>
+        <label asp-for="Content" class="form-label">å…§å®¹</label>
         <textarea asp-for="Content" class="form-control" rows="5"></textarea>
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>  
-    <button type="submit" class="btn btn-success">Àx¦s</button>
-    <a asp-action="Index" class="btn btn-secondary">ªð¦^</a>
+    <button type="submit" class="btn btn-success">å„²å­˜</button>
+    <a asp-action="Index" class="btn btn-secondary">è¿”å›ž</a>
 </form>
 
 @section Scripts {

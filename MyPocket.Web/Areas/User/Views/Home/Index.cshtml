@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "·|­û­º­¶";
+    ViewData["Title"] = "æœƒå“¡é¦–é ";
     Layout = "~/Views/Shared/_LayoutUser.cshtml";
     var user = ViewBag.User;
     var recentTransactions = ViewBag.RecentTransactions as List<MyPocket.Shared.ViewModels.TransactionViewModel>;
@@ -8,19 +8,19 @@
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col-md-12">
-            <h2 class="fw-bold">Åwªï¡A@user?.Nickname¡I</h2>
-            <div class="text-muted">³Ìªñµn¤J¡G@user?.LastLoginDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+            <h2 class="fw-bold">æ­¡è¿ï¼Œ@user?.Nicknameï¼</h2>
+            <div class="text-muted">æœ€è¿‘ç™»å…¥ï¼š@user?.LastLoginDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
         </div>
     </div>
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header bg-primary text-white">§Ö³t¤J¤f</div>
+                <div class="card-header bg-primary text-white">å¿«é€Ÿå…¥å£</div>
                 <div class="card-body d-flex flex-wrap gap-3">
-                    <a class="btn btn-outline-success" asp-area="User" asp-controller="Transactions" asp-action="Index">°O±b</a>
-                    <a class="btn btn-outline-info" asp-area="User" asp-controller="Categories" asp-action="Index">¤ÀÃşºŞ²z</a>
-                    <a class="btn btn-outline-warning" asp-area="User" asp-controller="Budgets" asp-action="Index">¹wºâºŞ²z</a>
-                    <a class="btn btn-outline-secondary" asp-area="User" asp-controller="SavingGoals" asp-action="Index">Àx»W¥Ø¼Ğ</a>
+                    <a class="btn btn-outline-success" asp-area="User" asp-controller="Transactions" asp-action="Index">è¨˜å¸³</a>
+                    <a class="btn btn-outline-info" asp-area="User" asp-controller="Categories" asp-action="Index">åˆ†é¡ç®¡ç†</a>
+                    <a class="btn btn-outline-warning" asp-area="User" asp-controller="Budgets" asp-action="Index">é ç®—ç®¡ç†</a>
+                    <a class="btn btn-outline-secondary" asp-area="User" asp-controller="SavingGoals" asp-action="Index">å„²è“„ç›®æ¨™</a>
                 </div>
             </div>
         </div>
@@ -28,7 +28,7 @@
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header bg-secondary text-white">³Ì·s¤½§i</div>
+                <div class="card-header bg-secondary text-white">æœ€æ–°å…¬å‘Š</div>
                 <div class="card-body">
                     @if (announcements != null && announcements.Count > 0)
                     {
@@ -36,7 +36,7 @@
                         {
                             <div class="mb-3">
                                 <h5 class="fw-bold">@ann.Title</h5>
-                                <div class="text-muted small">µo¥¬®É¶¡¡G@ann.PublishDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+                                <div class="text-muted small">ç™¼å¸ƒæ™‚é–“ï¼š@ann.PublishDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
                                 <div>@ann.Content</div>
                                 <hr />
                             </div>
@@ -44,7 +44,7 @@
                     }
                     else
                     {
-                        <div class="text-muted">¥Ø«e¨S¦³¤½§i¡C</div>
+                        <div class="text-muted">ç›®å‰æ²’æœ‰å…¬å‘Šã€‚</div>
                     }
                 </div>
             </div>
@@ -53,7 +53,7 @@
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header bg-success text-white">ªñ´Á¥æ©ö</div>
+                <div class="card-header bg-success text-white">è¿‘æœŸäº¤æ˜“</div>
                 <div class="card-body">
                     @if (recentTransactions != null && recentTransactions.Count > 0)
                     {
@@ -64,14 +64,14 @@
                                 <span>@txVm.Transaction.TransactionDate.ToLocalTime().ToString("MM-dd HH:mm")</span>
                                 <span>@txVm.CategoryName</span>
                                 <span class="fw-bold">@txVm.Transaction.Amount.ToString("N0")</span>
-                                <span class="badge bg-@(txVm.Transaction.TransactionType == "¦¬¤J" ? "success" : "danger")">@txVm.Transaction.TransactionType</span>
+                                <span class="badge bg-@(txVm.Transaction.TransactionType == "æ”¶å…¥" ? "success" : "danger")">@txVm.Transaction.TransactionType</span>
                             </li>
                         }
                         </ul>
                     }
                     else
                     {
-                        <div class="text-muted">©|µL¥æ©ö¬ö¿ı</div>
+                        <div class="text-muted">å°šç„¡äº¤æ˜“ç´€éŒ„</div>
                     }
                 </div>
             </div>

@@ -1,27 +1,27 @@
 @model IEnumerable<MyPocket.Core.Models.Transaction>
 @{
-    var incomeList = Model.Where(x => x.TransactionType.Trim() == "¦¬¤J").ToList();
-    var expenseList = Model.Where(x => x.TransactionType.Trim() == "¤ä¥X").ToList();
+    var incomeList = Model.Where(x => x.TransactionType.Trim() == "æ”¶å…¥").ToList();
+    var expenseList = Model.Where(x => x.TransactionType.Trim() == "æ”¯å‡º").ToList();
 }
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <h5 class="card-title mb-3 fw-bold text-success">¦¬¤J¬ö¿ı</h5>
+        <h5 class="card-title mb-3 fw-bold text-success">æ”¶å…¥ç´€éŒ„</h5>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>¤é´Á</th>
-                        <th>Ãş§O</th>
-                        <th>ª÷ÃB</th>
-                        <th>³Æµù</th>
-                        <th>¾Ş§@</th>
+                        <th>æ—¥æœŸ</th>
+                        <th>é¡åˆ¥</th>
+                        <th>é‡‘é¡</th>
+                        <th>å‚™è¨»</th>
+                        <th>æ“ä½œ</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (!incomeList.Any())
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-muted">©|µL¦¬¤J¬ö¿ı</td>
+                            <td colspan="5" class="text-center text-muted">å°šç„¡æ”¶å…¥ç´€éŒ„</td>
                         </tr>
                     }
                     else
@@ -37,8 +37,8 @@
                                     <form asp-action="Delete" method="post" class="d-inline">
                                         <input type="hidden" name="id" value="@item.TransactionId" />
                                         <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('½T©w­n§R°£¦¹µ§¥æ©ö?');">
-                                            §R°£
+                                                onclick="return confirm('ç¢ºå®šè¦åˆªé™¤æ­¤ç­†äº¤æ˜“?');">
+                                            åˆªé™¤
                                         </button>
                                     </form>
                                 </td>
@@ -53,23 +53,23 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <h5 class="card-title mb-3 fw-bold text-danger">¤ä¥X¬ö¿ı</h5>
+        <h5 class="card-title mb-3 fw-bold text-danger">æ”¯å‡ºç´€éŒ„</h5>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>¤é´Á</th>
-                        <th>Ãş§O</th>
-                        <th>ª÷ÃB</th>
-                        <th>³Æµù</th>
-                        <th>¾Ş§@</th>
+                        <th>æ—¥æœŸ</th>
+                        <th>é¡åˆ¥</th>
+                        <th>é‡‘é¡</th>
+                        <th>å‚™è¨»</th>
+                        <th>æ“ä½œ</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (!expenseList.Any())
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-muted">©|µL¤ä¥X¬ö¿ı</td>
+                            <td colspan="5" class="text-center text-muted">å°šç„¡æ”¯å‡ºç´€éŒ„</td>
                         </tr>
                     }
                     else
@@ -85,8 +85,8 @@
                                     <form asp-action="Delete" method="post" class="d-inline">
                                         <input type="hidden" name="id" value="@item.TransactionId" />
                                         <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('½T©w­n§R°£¦¹µ§¥æ©ö?');">
-                                            §R°£
+                                                onclick="return confirm('ç¢ºå®šè¦åˆªé™¤æ­¤ç­†äº¤æ˜“?');">
+                                            åˆªé™¤
                                         </button>
                                     </form>
                                 </td>

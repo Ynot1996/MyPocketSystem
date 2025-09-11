@@ -1,21 +1,21 @@
 @model MyPocket.Core.Models.Announcement
 @{
-    ViewData["Title"] = "§R°£¤½§i";
+    ViewData["Title"] = "åˆªé™¤å…¬å‘Š";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h2>§R°£¤½§i</h2>
+<h2>åˆªé™¤å…¬å‘Š</h2>
 <div class="alert alert-danger">
-    <strong>½T©w­n§R°£³o«h¤½§i¶Ü¡H</strong>
+    <strong>ç¢ºå®šè¦åˆªé™¤é€™å‰‡å…¬å‘Šå—ï¼Ÿ</strong>
 </div>
 <div class="card mb-3">
     <div class="card-body">
         <h4 class="card-title">@Model.Title</h4>
-        <div class="text-muted mb-2">µo¥¬®É¶¡¡G@Model.PublishDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+        <div class="text-muted mb-2">ç™¼å¸ƒæ™‚é–“ï¼š@Model.PublishDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
         <div>@Model.Content</div>
     </div>
 </div>
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="AnnouncementId" />
-    <button type="submit" class="btn btn-danger">½T©w§R°£</button>
-    <a asp-action="Index" class="btn btn-secondary">¨ú®ø</a>
+    <button type="submit" class="btn btn-danger">ç¢ºå®šåˆªé™¤</button>
+    <a asp-action="Index" class="btn btn-secondary">å–æ¶ˆ</a>
 </form>

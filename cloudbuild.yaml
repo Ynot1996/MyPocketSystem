@@ -1,0 +1,12 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/mypocket-web', './MyPocket.Web']
+  id: Build
+  dir: '.'
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/mypocket-web']
+  id: Push
+- name: 'gcr.io/google.com/cloudsdk/cloud-sdk'
+  args: ['run', 'deploy', 'mypocket-cd', '--image', 'gcr.io/$PROJECT_ID/mypocket-web', '--region', 'asia-east1', '--platform', 'managed', '--allow-unauthenticated']
+  id: Deploy
+  dir: '.'

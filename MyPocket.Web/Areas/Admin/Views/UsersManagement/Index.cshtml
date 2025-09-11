@@ -1,20 +1,20 @@
 @model IEnumerable<MyPocket.Core.Models.User>
 @{
-    ViewData["Title"] = "¥Î¤á­q¾\ºŞ²z";
+    ViewData["Title"] = "ç”¨æˆ¶è¨‚é–±ç®¡ç†";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<h1>¥Î¤á­q¾\ºŞ²z</h1>
+<h1>ç”¨æˆ¶è¨‚é–±ç®¡ç†</h1>
 
 <div class="mb-2">
-    <input type="text" id="tableFilter" class="form-control" placeholder="·j´M...">
+    <input type="text" id="tableFilter" class="form-control" placeholder="æœå°‹...">
 </div>
 
 <div class="alert alert-info">
-    ¿ï¾Ü¥Î¤á¨Ã§ó·s¨ä­q¾\­p¹º¡C§A¥i¥H¡G
+    é¸æ“‡ç”¨æˆ¶ä¸¦æ›´æ–°å…¶è¨‚é–±è¨ˆåŠƒã€‚ä½ å¯ä»¥ï¼š
     <ul>
-        <li>ÂIÀ»³æ¤@¥Î¤áªº¡u¸Ô²Ó¡v¬d¬İ¨ä­q¾\¾ú¥v</li>
-        <li>¤Ä¿ï¦h­Ó¥Î¤á¨Ã¿ï¾Ü­q¾\­p¹º¶i¦æ§å¦¸§ó·s</li>
+        <li>é»æ“Šå–®ä¸€ç”¨æˆ¶çš„ã€Œè©³ç´°ã€æŸ¥çœ‹å…¶è¨‚é–±æ­·å²</li>
+        <li>å‹¾é¸å¤šå€‹ç”¨æˆ¶ä¸¦é¸æ“‡è¨‚é–±è¨ˆåŠƒé€²è¡Œæ‰¹æ¬¡æ›´æ–°</li>
     </ul>
 </div>
 
@@ -35,12 +35,12 @@
                     <th>
                         <input type="checkbox" id="selectAll" />
                     </th>
-                    <th>¹q¤l¶l¥ó</th>
-                    <th>¼ÊºÙ</th>
-                    <th>¨¤¦â</th>
-                    <th>¥Ø«e­q¾\</th>
-                    <th>­q¾\¨ì´Á¤é</th>
-                    <th>¾Ş§@</th>
+                    <th>é›»å­éƒµä»¶</th>
+                    <th>æš±ç¨±</th>
+                    <th>è§’è‰²</th>
+                    <th>ç›®å‰è¨‚é–±</th>
+                    <th>è¨‚é–±åˆ°æœŸæ—¥</th>
+                    <th>æ“ä½œ</th>
                 </tr>
             </thead>
             <tbody>
@@ -54,11 +54,11 @@
                         <td>@user.Email</td>
                         <td>@user.Nickname</td>
                         <td>@user.Role</td>
-                        <td>@(currentSub?.Plan?.PlanName ?? "µL­q¾\")</td>
+                        <td>@(currentSub?.Plan?.PlanName ?? "ç„¡è¨‚é–±")</td>
                         <td>@(currentSub?.EndDate.ToString("yyyy/MM/dd") ?? "---")</td>
                         <td>
                             <a asp-action="UserSubscriptionHistory" asp-route-userId="@user.UserId" 
-                               class="btn btn-info btn-sm">¸Ô²Ó</a>
+                               class="btn btn-info btn-sm">è©³ç´°</a>
                         </td>
                     </tr>
                 }
@@ -68,11 +68,11 @@
 
     <div class="card mt-3">
         <div class="card-body">
-            <h5 class="card-title">§å¦¸§ó·s­q¾\</h5>
+            <h5 class="card-title">æ‰¹æ¬¡æ›´æ–°è¨‚é–±</h5>
             <div class="row">
                 <div class="col-md-6">
                     <select id="planSelection" class="form-control">
-                        <option value="">¿ï¾Ü­q¾\­p¹º...</option>
+                        <option value="">é¸æ“‡è¨‚é–±è¨ˆåŠƒ...</option>
                         @foreach (var plan in (IEnumerable<MyPocket.Core.Models.SubscriptionPlan>)ViewBag.SubscriptionPlans)
                         {
                             <option value="@plan.PlanId">@plan.PlanName</option>
@@ -81,7 +81,7 @@
                 </div>
                 <div class="col-md-6">
                     <button type="button" id="updateSelected" class="btn btn-primary" disabled>
-                        §ó·s¿ï©w¥Î¤áªº­q¾\
+                        æ›´æ–°é¸å®šç”¨æˆ¶çš„è¨‚é–±
                     </button>
                 </div>
             </div>
@@ -92,42 +92,42 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Select All ¥\¯à
+            // Select All åŠŸèƒ½
             $("#selectAll").change(function () {
                 $(".user-checkbox").prop('checked', $(this).prop('checked'));
                 updateButtonState();
             });
 
-            // ­Ó§OcheckboxÅÜ§ó®É§ó·s«ö¶sª¬ºA
+            // å€‹åˆ¥checkboxè®Šæ›´æ™‚æ›´æ–°æŒ‰éˆ•ç‹€æ…‹
             $(".user-checkbox").change(function () {
                 updateButtonState();
-                // ÀË¬d¬O§_©Ò¦³checkbox³£³Q¿ï¤¤
+                // æª¢æŸ¥æ˜¯å¦æ‰€æœ‰checkboxéƒ½è¢«é¸ä¸­
                 var allChecked = $(".user-checkbox:not(:checked)").length === 0;
                 $("#selectAll").prop('checked', allChecked);
             });
 
-            // ­q¾\­p¹º¿ï¾ÜÅÜ§ó®É§ó·s«ö¶sª¬ºA
+            // è¨‚é–±è¨ˆåŠƒé¸æ“‡è®Šæ›´æ™‚æ›´æ–°æŒ‰éˆ•ç‹€æ…‹
             $("#planSelection").change(function () {
                 updateButtonState();
             });
 
-            // §ó·s«ö¶s±Ò¥Îª¬ºA
+            // æ›´æ–°æŒ‰éˆ•å•Ÿç”¨ç‹€æ…‹
             function updateButtonState() {
                 var hasSelection = $(".user-checkbox:checked").length > 0;
                 var hasPlan = $("#planSelection").val() !== "";
                 $("#updateSelected").prop('disabled', !hasSelection || !hasPlan);
             }
 
-            // ³B²z§å¦¸§ó·s
+            // è™•ç†æ‰¹æ¬¡æ›´æ–°
             $("#updateSelected").click(function (e) {
                 e.preventDefault();
 
-                // Åã¥Ü½T»{¹ï¸Ü®Ø
-                if (!confirm("½T©w­n§ó·s¿ï©w¥Î¤áªº­q¾\­p¹º¶Ü¡H")) {
+                // é¡¯ç¤ºç¢ºèªå°è©±æ¡†
+                if (!confirm("ç¢ºå®šè¦æ›´æ–°é¸å®šç”¨æˆ¶çš„è¨‚é–±è¨ˆåŠƒå—ï¼Ÿ")) {
                     return;
                 }
                 
-                // ¦¬¶°¿ï¤¤ªº¥Î¤áID
+                // æ”¶é›†é¸ä¸­çš„ç”¨æˆ¶ID
                 var selectedUsers = [];
                 $(".user-checkbox:checked").each(function () {
                     selectedUsers.push($(this).val());
@@ -135,7 +135,7 @@
 
                 var planId = $("#planSelection").val();
 
-                // ¸T¥Î«ö¶s¡AÁ×§K­«½Æ´£¥æ
+                // ç¦ç”¨æŒ‰éˆ•ï¼Œé¿å…é‡è¤‡æäº¤
                 $("#updateSelected").prop('disabled', true);
                 
                 $.ajax({
@@ -151,14 +151,14 @@
                             alert(result.message);
                             location.reload();
                         } else {
-                            alert('¿ù»~¡G' + result.message);
-                            // ­«·s±Ò¥Î«ö¶s
+                            alert('éŒ¯èª¤ï¼š' + result.message);
+                            // é‡æ–°å•Ÿç”¨æŒ‰éˆ•
                             updateButtonState();
                         }
                     },
                     error: function (xhr, status, error) {
-                        alert('§ó·s­q¾\®Éµo¥Í¿ù»~¡G' + error);
-                        // ­«·s±Ò¥Î«ö¶s
+                        alert('æ›´æ–°è¨‚é–±æ™‚ç™¼ç”ŸéŒ¯èª¤ï¼š' + error);
+                        // é‡æ–°å•Ÿç”¨æŒ‰éˆ•
                         updateButtonState();
                     }
                 });

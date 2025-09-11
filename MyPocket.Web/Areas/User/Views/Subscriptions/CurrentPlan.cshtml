@@ -1,10 +1,10 @@
 @model MyPocket.Core.Models.UserSubscription
 @{
-    ViewData["Title"] = "���e�q�\���";
+    ViewData["Title"] = "當前訂閱方案";
 }
 
 <div class="container py-5">
-    <h2 class="mb-4">���e�q�\���</h2>
+    <h2 class="mb-4">當前訂閱方案</h2>
 
     <div class="row">
         <div class="col-md-8">
@@ -13,17 +13,17 @@
                     <h5 class="card-title text-primary">@Model.Plan.PlanName</h5>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>�q�\�}�l����G</strong></p>
+                            <p class="mb-1"><strong>訂閱開始日期：</strong></p>
                             <p>@Model.StartDate.ToLocalTime().ToString("yyyy/MM/dd")</p>
                         </div>
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>�q�\�������G</strong></p>
+                            <p class="mb-1"><strong>訂閱到期日期：</strong></p>
                             <p>@Model.EndDate.ToLocalTime().ToString("yyyy/MM/dd")</p>
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <h6>��פ��e�G</h6>
+                        <h6>方案內容：</h6>
                         @foreach (var line in (Model.Plan.Description ?? "").Split('\n'))
                         {
                             <p class="mb-1">@line</p>
@@ -32,13 +32,13 @@
 
                     <div class="d-flex justify-content-between align-items-center">
                         <a asp-action="Plans" class="btn btn-outline-primary">
-                            �d�ݩҦ����
+                            查看所有方案
                         </a>
                         <form asp-action="Cancel" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-danger"
-                                    onclick="return confirm('�T�w�n�����q�\�ܡH�o�|�ߧY�פ�z���|���v�q�C');">
-                                �����q�\
+                                    onclick="return confirm('確定要取消訂閱嗎？這會立即終止您的會員權益。');">
+                                取消訂閱
                             </button>
                         </form>
                     </div>
@@ -49,15 +49,15 @@
             {
                 <div class="card mt-4">
                     <div class="card-body">
-                        <h5 class="card-title">�I�ڰO��</h5>
+                        <h5 class="card-title">付款記錄</h5>
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>�I�ڤ��</th>
-                                        <th>���B</th>
-                                        <th>�I�ڤ覡</th>
-                                        <th>���A</th>
+                                        <th>付款日期</th>
+                                        <th>金額</th>
+                                        <th>付款方式</th>
+                                        <th>狀態</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -85,27 +85,27 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">�q�\����</h5>
-                    <p>�z���q�\�N�b @((Model.EndDate - DateTime.UtcNow).Days) �ѫ����C</p>
+                    <h5 class="card-title">訂閱提醒</h5>
+                    <p>您的訂閱將在 @((Model.EndDate - DateTime.UtcNow).Days) 天後到期。</p>
                     
                     @if ((Model.EndDate - DateTime.UtcNow).Days < 7)
                     {
                         <div class="alert alert-warning">
                             <i class="bi bi-exclamation-triangle"></i>
-                            �z���q�\�Y�N����A��ĳ�z�ή���q�H�קK�A�Ȥ��_�C
+                            您的訂閱即將到期，建議您及時續訂以避免服務中斷。
                         </div>
                     }
 
-                    <a asp-action="Plans" class="btn btn-primary w-100">��q�A��</a>
+                    <a asp-action="Plans" class="btn btn-primary w-100">續訂服務</a>
                 </div>
             </div>
 
             <div class="card mt-3">
                 <div class="card-body">
-                    <h5 class="card-title">�ݭn���U�H</h5>
-                    <p class="card-text">�p�G�z��������D�λݭn��U�A���H���pô�ڭ̪��ȪA�ζ��C</p>
+                    <h5 class="card-title">需要幫助？</h5>
+                    <p class="card-text">如果您有任何問題或需要協助，請隨時聯繫我們的客服團隊。</p>
                     <a href="mailto:support@mypocket.com" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-envelope"></i> �pô�ȪA
+                        <i class="bi bi-envelope"></i> 聯繫客服
                     </a>
                 </div>
             </div>

@@ -52,11 +52,11 @@ namespace MyPocket.Web.Areas.Admin.Controllers
             try
             {
                 var success = await _subscriptionService.SubscribeAsync(userId, planId);
-                TempData["SuccessMessage"] = success ? "­q¾\­p¹º§ó·s¦¨¥\¡C" : "§ó·s­q¾\®Éµo¥Í¿ù»~¡C";
+                TempData["SuccessMessage"] = success ? "è¨‚é–±è¨ˆåŠƒæ›´æ–°æˆåŠŸã€‚" : "æ›´æ–°è¨‚é–±æ™‚ç™¼ç”ŸéŒ¯èª¤ã€‚";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"§ó·s­q¾\®Éµo¥Í¿ù»~¡G{ex.Message}";
+                TempData["ErrorMessage"] = $"æ›´æ–°è¨‚é–±æ™‚ç™¼ç”ŸéŒ¯èª¤ï¼š{ex.Message}";
             }
 
             return RedirectToAction(nameof(UserSubscriptionHistory), new { userId });
@@ -67,7 +67,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
         {
             if (request?.UserIds == null || request.UserIds.Count == 0 || request.PlanId == Guid.Empty)
             {
-                return Json(new { success = false, message = "µL®Äªº½Ğ¨D°Ñ¼Æ¡C" });
+                return Json(new { success = false, message = "ç„¡æ•ˆçš„è«‹æ±‚åƒæ•¸ã€‚" });
             }
 
             try
@@ -76,7 +76,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                 {
                     await _subscriptionService.SubscribeAsync(userId, request.PlanId);
                 }
-                return Json(new { success = true, message = $"¤w¦¨¥\§ó·s {request.UserIds.Count} ¦ì¨Ï¥ÎªÌªº­q¾\­p¹º¡C" });
+                return Json(new { success = true, message = $"å·²æˆåŠŸæ›´æ–° {request.UserIds.Count} ä½ä½¿ç”¨è€…çš„è¨‚é–±è¨ˆåŠƒã€‚" });
             }
             catch (Exception ex)
             {
@@ -94,11 +94,11 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                     .ToListAsync();
 
                 var basicPlan = await _context.SubscriptionPlans
-                    .FirstOrDefaultAsync(p => p.PlanName.Contains("°ò¥»") || p.PlanName.Contains("§K¶O"));
+                    .FirstOrDefaultAsync(p => p.PlanName.Contains("åŸºæœ¬") || p.PlanName.Contains("å…è²»"));
 
                 if (basicPlan == null)
                 {
-                    TempData["ErrorMessage"] = "§ä¤£¨ì°ò¥»¤è®×¡C";
+                    TempData["ErrorMessage"] = "æ‰¾ä¸åˆ°åŸºæœ¬æ–¹æ¡ˆã€‚";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -110,11 +110,11 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "¤w¦¨¥\±N©Ò¦³¨Ï¥ÎªÌ§ó·s¬°§K¶O·|­û¡A¨Ã­q¾\°ò¥»¤è®×¡C";
+                TempData["SuccessMessage"] = "å·²æˆåŠŸå°‡æ‰€æœ‰ä½¿ç”¨è€…æ›´æ–°ç‚ºå…è²»æœƒå“¡ï¼Œä¸¦è¨‚é–±åŸºæœ¬æ–¹æ¡ˆã€‚";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"§ó·s¨Ï¥ÎªÌª¬ºA®Éµo¥Í¿ù»~¡G{ex.Message}";
+                TempData["ErrorMessage"] = $"æ›´æ–°ä½¿ç”¨è€…ç‹€æ…‹æ™‚ç™¼ç”ŸéŒ¯èª¤ï¼š{ex.Message}";
             }
 
             return RedirectToAction(nameof(Index));

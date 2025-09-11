@@ -1,8 +1,8 @@
 @model MyPocket.Core.Models.SavingGoal
 @{
-    ViewData["Title"] = "·s¼WÀx»W¥Ø¼Ð";
+    ViewData["Title"] = "æ–°å¢žå„²è“„ç›®æ¨™";
 }
-<h2>·s¼WÀx»W¥Ø¼Ð</h2>
+<h2>æ–°å¢žå„²è“„ç›®æ¨™</h2>
 <form asp-action="Create" method="post">
     <div class="mb-3">
         <label asp-for="GoalName" class="form-label"></label>
@@ -24,8 +24,8 @@
         <input asp-for="TargetDate" class="form-control" type="date" />
         <span asp-validation-for="TargetDate" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Àx¦s</button>
-    <a asp-action="Index" class="btn btn-secondary">ªð¦^</a>
+    <button type="submit" class="btn btn-primary">å„²å­˜</button>
+    <a asp-action="Index" class="btn btn-secondary">è¿”å›ž</a>
 </form>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

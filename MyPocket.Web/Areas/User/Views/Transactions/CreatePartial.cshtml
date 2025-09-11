@@ -4,13 +4,13 @@
 }
 <div class="card shadow-sm">
     <div class="card-body">
-        <h5 class="card-title mb-3 fw-bold text-primary">·s¼W¥æ©ö</h5>
+        <h5 class="card-title mb-3 fw-bold text-primary">æ–°å¢äº¤æ˜“</h5>
         <form asp-action="Create" method="post" autocomplete="off">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
             <div class="mb-3">
-                <label for="CategoryId" class="form-label">Ãş§O <span class="text-danger">*</span></label>
+                <label for="CategoryId" class="form-label">é¡åˆ¥ <span class="text-danger">*</span></label>
                 <select name="CategoryId" id="CategoryId" class="form-select" required>
-                    <option value="">-- ¿ï¾ÜÃş§O --</option>
+                    <option value="">-- é¸æ“‡é¡åˆ¥ --</option>
                     @foreach (var categoryGroup in ((IEnumerable<SelectListItem>)ViewBag.Categories).GroupBy(c => c.Group.Name))
                     {
                         <optgroup label="@categoryGroup.Key">
@@ -27,18 +27,18 @@
                 }
             </div>
             <div class="mb-3">
-                <label for="Amount" class="form-label">ª÷ÃB <span class="text-danger">*</span></label>
+                <label for="Amount" class="form-label">é‡‘é¡ <span class="text-danger">*</span></label>
                 <input type="number" name="Amount" class="form-control" step="0.01" min="0" required />
             </div>
             <div class="mb-3">
-                <label for="TransactionDate" class="form-label">¥æ©ö¤é´Á <span class="text-danger">*</span></label>
+                <label for="TransactionDate" class="form-label">äº¤æ˜“æ—¥æœŸ <span class="text-danger">*</span></label>
                 <input type="datetime-local" name="TransactionDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
             </div>
             <div class="mb-3">
-                <label for="Description" class="form-label">³Æµù</label>
+                <label for="Description" class="form-label">å‚™è¨»</label>
                 <textarea name="Description" class="form-control" rows="2" maxlength="100"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary w-100">·s¼W</button>
+            <button type="submit" class="btn btn-primary w-100">æ–°å¢</button>
         </form>
     </div>
 </div>

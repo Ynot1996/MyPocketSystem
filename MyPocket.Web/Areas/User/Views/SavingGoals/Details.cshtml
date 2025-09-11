@@ -1,23 +1,23 @@
 @model MyPocket.Core.Models.SavingGoal
 @{
-    ViewData["Title"] = "Àx»W¥Ø¼Ğ©ú²Ó";
+    ViewData["Title"] = "å„²è“„ç›®æ¨™æ˜ç´°";
 }
-<h2>Àx»W¥Ø¼Ğ©ú²Ó</h2>
+<h2>å„²è“„ç›®æ¨™æ˜ç´°</h2>
 <div class="mb-3">
-    <label class="form-label">¦WºÙ</label>
+    <label class="form-label">åç¨±</label>
     <div class="form-control-plaintext">@Model.GoalName</div>
 </div>
 <div class="mb-3">
-    <label class="form-label">¥Ø¼Ğª÷ÃB</label>
+    <label class="form-label">ç›®æ¨™é‡‘é¡</label>
     <div class="form-control-plaintext">@Model.TargetAmount.ToString("N0")</div>
 </div>
 <div class="mb-3">
-    <label class="form-label">¥Ø«eª÷ÃB</label>
+    <label class="form-label">ç›®å‰é‡‘é¡</label>
     <div class="form-control-plaintext">@Model.CurrentAmount.ToString("N0")</div>
 </div>
 <div class="mb-3">
-    <label class="form-label">¥Ø¼Ğ¤é´Á</label>
+    <label class="form-label">ç›®æ¨™æ—¥æœŸ</label>
     <div class="form-control-plaintext">@Model.TargetDate.ToString("yyyy-MM-dd")</div>
 </div>
-<a asp-action="Edit" asp-route-id="@Model.GoalId" class="btn btn-warning">½s¿è</a>
-<a asp-action="Index" class="btn btn-secondary">ªğ¦^</a>
+<a asp-action="Edit" asp-route-id="@Model.GoalId" class="btn btn-warning">ç·¨è¼¯</a>
+<a asp-action="Index" class="btn btn-secondary">è¿”å›</a>

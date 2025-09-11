@@ -1,22 +1,22 @@
 @model MyPocket.Shared.ViewModels.Categories.UserCategoryViewModel
 @{
-    ViewData["Title"] = "§Úªº¦¬¤äÃş§O";
+    ViewData["Title"] = "æˆ‘çš„æ”¶æ”¯é¡åˆ¥";
 }
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col-12">
             <div class="alert alert-info">
-                ±z¥i¥H¦b¦¹­¶­±ºŞ²z¦Û¤vªº¦¬¤J»P¤ä¥XÃş§O¡C¹w³]Ãş§O¶È¨Ñ°Ñ¦Ò¡AµLªk­×§ï©Î§R°£¡C¦Û­qÃş§O¥i·s¼W»P§R°£¡A¶È¦Û¤v¥i¨£¡C
+                æ‚¨å¯ä»¥åœ¨æ­¤é é¢ç®¡ç†è‡ªå·±çš„æ”¶å…¥èˆ‡æ”¯å‡ºé¡åˆ¥ã€‚é è¨­é¡åˆ¥åƒ…ä¾›åƒè€ƒï¼Œç„¡æ³•ä¿®æ”¹æˆ–åˆªé™¤ã€‚è‡ªè¨‚é¡åˆ¥å¯æ–°å¢èˆ‡åˆªé™¤ï¼Œåƒ…è‡ªå·±å¯è¦‹ã€‚
             </div>
         </div>
     </div>
     <ul class="nav nav-pills mb-3" id="categoryTab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="income-tab" data-bs-toggle="pill" data-bs-target="#income" type="button" role="tab" aria-controls="income" aria-selected="true">¦¬¤JÃş§O</button>
+            <button class="nav-link active" id="income-tab" data-bs-toggle="pill" data-bs-target="#income" type="button" role="tab" aria-controls="income" aria-selected="true">æ”¶å…¥é¡åˆ¥</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="expense-tab" data-bs-toggle="pill" data-bs-target="#expense" type="button" role="tab" aria-controls="expense" aria-selected="false">¤ä¥XÃş§O</button>
+            <button class="nav-link" id="expense-tab" data-bs-toggle="pill" data-bs-target="#expense" type="button" role="tab" aria-controls="expense" aria-selected="false">æ”¯å‡ºé¡åˆ¥</button>
         </li>
     </ul>
     <div class="tab-content" id="categoryTabContent">
@@ -24,7 +24,7 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <div class="card h-100">
-                        <div class="card-header bg-light">¹w³]¦¬¤JÃş§O</div>
+                        <div class="card-header bg-light">é è¨­æ”¶å…¥é¡åˆ¥</div>
                         <ul class="list-group list-group-flush">
                             @if (Model.DefaultIncomeCategories.Any())
                             {
@@ -32,20 +32,20 @@
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <span>@c.CategoryName</span>
-                                        <span class="badge bg-secondary">¹w³]</span>
+                                        <span class="badge bg-secondary">é è¨­</span>
                                     </li>
                                 }
                             }
                             else
                             {
-                                <li class="list-group-item text-muted">µL¹w³]¦¬¤JÃş§O</li>
+                                <li class="list-group-item text-muted">ç„¡é è¨­æ”¶å…¥é¡åˆ¥</li>
                             }
                         </ul>
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <div class="card h-100">
-                        <div class="card-header bg-light">¦Û­q¦¬¤JÃş§O</div>
+                        <div class="card-header bg-light">è‡ªè¨‚æ”¶å…¥é¡åˆ¥</div>
                         <ul class="list-group list-group-flush">
                             @if (Model.UserIncomeCategories.Any())
                             {
@@ -54,21 +54,21 @@
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <span>@c.CategoryName</span>
                                         <form asp-action="Delete" asp-route-id="@c.CategoryId" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">§R°£</button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">åˆªé™¤</button>
                                         </form>
                                     </li>
                                 }
                             }
                             else
                             {
-                                <li class="list-group-item text-muted">©|¥¼·s¼W¦Û­q¦¬¤JÃş§O</li>
+                                <li class="list-group-item text-muted">å°šæœªæ–°å¢è‡ªè¨‚æ”¶å…¥é¡åˆ¥</li>
                             }
                         </ul>
                         <div class="card-footer bg-white">
                             <form asp-action="Create" method="post" class="input-group">
-                                <input type="hidden" name="newCategoryType" value="¦¬¤J" />
-                                <input type="text" name="newCategoryName" class="form-control" placeholder="·s¼W¦¬¤JÃş§O..." required />
-                                <button class="btn btn-primary" type="submit">·s¼W</button>
+                                <input type="hidden" name="newCategoryType" value="æ”¶å…¥" />
+                                <input type="text" name="newCategoryName" class="form-control" placeholder="æ–°å¢æ”¶å…¥é¡åˆ¥..." required />
+                                <button class="btn btn-primary" type="submit">æ–°å¢</button>
                             </form>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <div class="card h-100">
-                        <div class="card-header bg-light">¹w³]¤ä¥XÃş§O</div>
+                        <div class="card-header bg-light">é è¨­æ”¯å‡ºé¡åˆ¥</div>
                         <ul class="list-group list-group-flush">
                             @if (Model.DefaultExpenseCategories.Any())
                             {
@@ -87,20 +87,20 @@
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <span>@c.CategoryName</span>
-                                        <span class="badge bg-secondary">¹w³]</span>
+                                        <span class="badge bg-secondary">é è¨­</span>
                                     </li>
                                 }
                             }
                             else
                             {
-                                <li class="list-group-item text-muted">µL¹w³]¤ä¥XÃş§O</li>
+                                <li class="list-group-item text-muted">ç„¡é è¨­æ”¯å‡ºé¡åˆ¥</li>
                             }
                         </ul>
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <div class="card h-100">
-                        <div class="card-header bg-light">¦Û­q¤ä¥XÃş§O</div>
+                        <div class="card-header bg-light">è‡ªè¨‚æ”¯å‡ºé¡åˆ¥</div>
                         <ul class="list-group list-group-flush">
                             @if (Model.UserExpenseCategories.Any())
                             {
@@ -109,21 +109,21 @@
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <span>@c.CategoryName</span>
                                         <form asp-action="Delete" asp-route-id="@c.CategoryId" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">§R°£</button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">åˆªé™¤</button>
                                         </form>
                                     </li>
                                 }
                             }
                             else
                             {
-                                <li class="list-group-item text-muted">©|¥¼·s¼W¦Û­q¤ä¥XÃş§O</li>
+                                <li class="list-group-item text-muted">å°šæœªæ–°å¢è‡ªè¨‚æ”¯å‡ºé¡åˆ¥</li>
                             }
                         </ul>
                         <div class="card-footer bg-white">
                             <form asp-action="Create" method="post" class="input-group">
-                                <input type="hidden" name="newCategoryType" value="¤ä¥X" />
-                                <input type="text" name="newCategoryName" class="form-control" placeholder="·s¼W¤ä¥XÃş§O..." required />
-                                <button class="btn btn-primary" type="submit">·s¼W</button>
+                                <input type="hidden" name="newCategoryType" value="æ”¯å‡º" />
+                                <input type="text" name="newCategoryName" class="form-control" placeholder="æ–°å¢æ”¯å‡ºé¡åˆ¥..." required />
+                                <button class="btn btn-primary" type="submit">æ–°å¢</button>
                             </form>
                         </div>
                     </div>

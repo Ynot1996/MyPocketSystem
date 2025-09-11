@@ -1,11 +1,11 @@
 @model IEnumerable<MyPocket.Core.Models.SubscriptionPlan>
 @{
-    ViewData["Title"] = "≠qæ\§ËÆ◊";
+    ViewData["Title"] = "Ë®ÇÈñ±ÊñπÊ°à";
     var currentSubscription = ViewBag.CurrentSubscription as MyPocket.Core.Models.UserSubscription;
 }
 
 <div class="container py-5">
-    <h1 class="text-center mb-5">øÔæ‹æA¶X±z™∫§ËÆ◊</h1>
+    <h1 class="text-center mb-5">ÈÅ∏ÊìáÈÅ©ÂêàÊÇ®ÁöÑÊñπÊ°à</h1>
 
     <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
         @foreach (var plan in Model)
@@ -19,18 +19,18 @@
                         <h1 class="card-title pricing-card-title">
                             @if (plan.Price == 0)
                             {
-                                <span>ßK∂O</span>
+                                <span>ÂÖçË≤ª</span>
                             }
                             else
                             {
                                 <span>NT$@plan.Price</span>
                                 @if (plan.DurationDays == 30)
                                 {
-                                    <small class="text-body-secondary fw-light">/§Î</small>
+                                    <small class="text-body-secondary fw-light">/Êúà</small>
                                 }
                                 else if (plan.DurationDays == 365)
                                 {
-                                    <small class="text-body-secondary fw-light">/¶~</small>
+                                    <small class="text-body-secondary fw-light">/Âπ¥</small>
                                 }
                             }
                         </h1>
@@ -46,10 +46,10 @@
                             @if (currentSubscription != null && currentSubscription.PlanId == plan.PlanId)
                             {
                                 <div class="alert alert-success">
-                                    <small>•ÿ´e§ËÆ◊°]®Ï¥¡§È°G@currentSubscription.EndDate.ToLocalTime().ToString("yyyy/MM/dd")°^</small>
+                                    <small>ÁõÆÂâçÊñπÊ°àÔºàÂà∞ÊúüÊó•Ôºö@currentSubscription.EndDate.ToLocalTime().ToString("yyyy/MM/dd")Ôºâ</small>
                                 </div>
-                                <form asp-action="Cancel" method="post" onsubmit="return confirm('ΩT©w≠n®˙Æ¯≠qæ\∂‹°H');">
-                                    <button type="submit" class="w-100 btn btn-outline-danger">®˙Æ¯≠qæ\</button>
+                                <form asp-action="Cancel" method="post" onsubmit="return confirm('Á¢∫ÂÆöË¶ÅÂèñÊ∂àË®ÇÈñ±ÂóéÔºü');">
+                                    <button type="submit" class="w-100 btn btn-outline-danger">ÂèñÊ∂àË®ÇÈñ±</button>
                                 </form>
                             }
                             else
@@ -57,7 +57,7 @@
                                 <form asp-action="Subscribe" method="post">
                                     <input type="hidden" name="planId" value="@plan.PlanId" />
                                     <button type="submit" class="w-100 btn @(plan.Price > 0 ? "btn-primary" : "btn-outline-primary")">
-                                        •ﬂßY≠qæ\
+                                        Á´ãÂç≥Ë®ÇÈñ±
                                     </button>
                                 </form>
                             }
@@ -65,7 +65,7 @@
                         else
                         {
                             <a asp-controller="Account" asp-action="Login" class="w-100 btn @(plan.Price > 0 ? "btn-primary" : "btn-outline-primary")">
-                                µn§J´·≠qæ\
+                                ÁôªÂÖ•ÂæåË®ÇÈñ±
                             </a>
                         }
                     </div>
