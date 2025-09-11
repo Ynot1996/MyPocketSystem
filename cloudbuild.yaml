@@ -1,29 +1,48 @@
 steps:
-# Step 1: Build Docker image (指定 Dockerfile 路徑)
 - name: gcr.io/cloud-builders/docker
   args:
-    [
-      'build',
-      '-t', 'gcr.io/$PROJECT_ID/mypocket-web',
-      '-f', 'MyPocket.Web/Dockerfile',
-      '.'
-    ]
+    - build
+    - '--no-cache'
+    - '-t'
+    - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+    - '.'
+    - '-f'
+    - 'MyPocket.Web/Dockerfile'  # 已修正 Dockerfile 路徑
   id: Build
-
-# Step 2: Push image
 - name: gcr.io/cloud-builders/docker
-  args: ['push', 'gcr.io/$PROJECT_ID/mypocket-web']
-  id: Push
-
-# Step 3: Deploy to Cloud Run
-- name: gcr.io/google.com/cloudsdk/cloud-sdk
   args:
-    [
-      'run', 'deploy', 'mypocket-cd',
-      '--image', 'gcr.io/$PROJECT_ID/mypocket-web',
-      '--region', 'asia-east1',
-      '--platform', 'managed',
-      '--allow-unauthenticated'
-    ]
+    - push
+    - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+  id: Push
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  args:
+    - run
+    - services
+    - update
+    - $_SERVICE_NAME
+    - '--platform=managed'
+    - '--image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+    - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID'
+    - '--region=$_DEPLOY_REGION'
+    - '--quiet'
   id: Deploy
+  entrypoint: gcloud
+images:
+- '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY # 修正日誌設定的關鍵
+substitutions:
+  _AR_HOSTNAME: asia-east1-docker.pkg.dev
+  _AR_REPOSITORY: cloud-run-source-deploy
+  _AR_PROJECT_ID: augmented-world-471606-n4
+  _PLATFORM: managed
+  _SERVICE_NAME: mypocket-cd
+  REPO_NAME: mypocketsystem
+  _TRIGGER_ID: d87dd839-ce77-493f-a003-d346fbff68ba
+  _DEPLOY_REGION: asia-east1
+tags:
+- gcp-cloud-build-deploy-cloud-run
+- gcp-cloud-build-deploy-cloud-run-managed
+- mypocket-cd
 
