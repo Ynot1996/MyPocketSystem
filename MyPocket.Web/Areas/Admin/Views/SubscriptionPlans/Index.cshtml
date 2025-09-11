@@ -1,13 +1,13 @@
 @model IEnumerable<MyPocket.Core.Models.SubscriptionPlan>
 
 @{
-    ViewData["Title"] = "璹綷よ恨瞶";
+    ViewData["Title"] = "瑷傞柋鏂规绠＄悊";
 }
 
-<h1>璹綷よ恨瞶</h1>
+<h1>瑷傞柋鏂规绠＄悊</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">ミ穝よ</a>
+    <a asp-action="Create" class="btn btn-primary">鏂板鏂规</a>
 </p>
 <table class="table">
     <thead>
@@ -24,7 +24,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.Description)
             </th>
-            <th>巨</th>
+            <th>鎿嶄綔</th>
         </tr>
     </thead>
     <tbody>
@@ -43,8 +43,8 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.PlanId" class="btn btn-info btn-sm">絪胯</a> |
-                <a asp-action="Delete" asp-route-id="@item.PlanId" class="btn btn-danger btn-sm">埃</a>
+                <a asp-action="Edit" asp-route-id="@item.PlanId" class="btn btn-info btn-sm">绶ㄨ集</a> |
+                <a asp-action="Delete" asp-route-id="@item.PlanId" class="btn btn-danger btn-sm">鍒櫎</a>
             </td>
         </tr>
 }

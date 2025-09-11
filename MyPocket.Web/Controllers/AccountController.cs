@@ -14,8 +14,7 @@ namespace MyPocket.Web.Controllers
     public class AccountController : Controller
     {
         private readonly MyPocketDBContext _context;
-        private readonly ISubscriptionService _subscriptionService; // ­q¾\ªA°È¤¶­±
-
+        private readonly ISubscriptionService _subscriptionService;
         public AccountController(MyPocketDBContext context, ISubscriptionService subscriptionService)
         {
             _context = context;
@@ -66,7 +65,7 @@ namespace MyPocket.Web.Controllers
 
                 return RedirectToAction("Index", "Home");
             }
-            ModelState.AddModelError(string.Empty, "±b¸¹©Î±K½X¿ù»~");
+            ModelState.AddModelError(string.Empty, "å¸³è™Ÿæˆ–å¯†ç¢¼éŒ¯èª¤");
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -99,7 +98,7 @@ namespace MyPocket.Web.Controllers
 
             if (await _context.Users.AnyAsync(u => u.Email == model.Email && !u.IsDeleted))
             {
-                ModelState.AddModelError("Email", "¦¹Email¤w³Qµù¥U");
+                ModelState.AddModelError("Email", "æ­¤Emailå·²è¢«è¨»å†Š");
                 return View(model);
             }
 
@@ -119,10 +118,10 @@ namespace MyPocket.Web.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // ¦Û°Ê­q¾\°ò¥»¤è®×
+            // è‡ªå‹•è¨‚é–±åŸºæœ¬æ–¹æ¡ˆ
             await _subscriptionService.SubscribeToBasicPlanAsync(user.UserId);
 
-            TempData["SuccessMessage"] = "µù¥U¦¨¥\¡I¤w¦Û°Ê¬°±z­q¾\°ò¥»·|­û¤è®×¡C";
+            TempData["SuccessMessage"] = "è¨»å†ŠæˆåŠŸï¼å·²è‡ªå‹•ç‚ºæ‚¨è¨‚é–±åŸºæœ¬æœƒå“¡æ–¹æ¡ˆã€‚";
             return RedirectToAction("Login");
         }
     }

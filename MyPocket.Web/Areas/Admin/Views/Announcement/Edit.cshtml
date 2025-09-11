@@ -1,23 +1,23 @@
 @model MyPocket.Core.Models.Announcement
 @{
-    ViewData["Title"] = "½s¿è¤½§i";
+    ViewData["Title"] = "ç·¨è¼¯å…¬å‘Š";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h2>½s¿è¤½§i</h2>
+<h2>ç·¨è¼¯å…¬å‘Š</h2>
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="AnnouncementId" />
     <div class="mb-3">
-        <label asp-for="Title" class="form-label">¼ÐÃD</label>
+        <label asp-for="Title" class="form-label">æ¨™é¡Œ</label>
         <input asp-for="Title" class="form-control" />
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="Content" class="form-label">¤º®e</label>
+        <label asp-for="Content" class="form-label">å…§å®¹</label>
         <textarea asp-for="Content" class="form-control" rows="5"></textarea>
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-warning">Àx¦s</button>
-    <a asp-action="Index" class="btn btn-secondary">ªð¦^</a>
+    <button type="submit" class="btn btn-warning">å„²å­˜</button>
+    <a asp-action="Index" class="btn btn-secondary">è¿”å›ž</a>
 </form>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

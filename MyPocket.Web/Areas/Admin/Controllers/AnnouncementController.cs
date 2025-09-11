@@ -58,16 +58,16 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                     var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                     if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid adminId))
                     {
-                        ModelState.AddModelError("", "µLªkÃÑ§OºŞ²z­û¨­¥÷");
+                        ModelState.AddModelError("", "ç„¡æ³•è­˜åˆ¥ç®¡ç†å“¡èº«ä»½");
                         return View(model);
                     }
 
-                    // ÀË¬d¥Î¤á¬O§_¦s¦b¥B¬OºŞ²z­û
+                    // æª¢æŸ¥ç”¨æˆ¶æ˜¯å¦å­˜åœ¨ä¸”æ˜¯ç®¡ç†å“¡
                     var admin = await _context.Users
                         .FirstOrDefaultAsync(u => u.UserId == adminId && u.Role == "Admin");
                     if (admin == null)
                     {
-                        ModelState.AddModelError("", "ºŞ²z­û±b¤á¤£¦s¦b©ÎÅv­­¤£¨¬");
+                        ModelState.AddModelError("", "ç®¡ç†å“¡å¸³æˆ¶ä¸å­˜åœ¨æˆ–æ¬Šé™ä¸è¶³");
                         return View(model);
                     }
 
@@ -83,12 +83,12 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                     _context.Announcements.Add(announcement);
                     await _context.SaveChangesAsync();
 
-                    TempData["SuccessMessage"] = "¤½§i¤w¦¨¥\µo¥¬";
+                    TempData["SuccessMessage"] = "å…¬å‘Šå·²æˆåŠŸç™¼å¸ƒ";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", $"µo¥Í¿ù»~: {ex.Message}");
+                    ModelState.AddModelError("", $"ç™¼ç”ŸéŒ¯èª¤: {ex.Message}");
                 }
             }
 

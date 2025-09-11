@@ -1,14 +1,14 @@
 @model MyPocket.Core.Models.Announcement
 @{
-    ViewData["Title"] = "¤½§i¸Ô²Ó";
+    ViewData["Title"] = "å…¬å‘Šè©³ç´°";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h2>¤½§i¸Ô²Ó</h2>
+<h2>å…¬å‘Šè©³ç´°</h2>
 <div class="card">
     <div class="card-body">
         <h4 class="card-title">@Model.Title</h4>
-        <div class="text-muted mb-2">µo¥¬®É¶¡¡G@Model.PublishDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+        <div class="text-muted mb-2">ç™¼å¸ƒæ™‚é–“ï¼š@Model.PublishDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
         <div>@Model.Content</div>
     </div>
 </div>
-<a asp-action="Index" class="btn btn-secondary mt-3">ªð¦^</a>
+<a asp-action="Index" class="btn btn-secondary mt-3">è¿”å›ž</a>

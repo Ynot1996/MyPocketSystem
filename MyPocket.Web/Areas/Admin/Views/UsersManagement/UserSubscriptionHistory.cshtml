@@ -1,6 +1,6 @@
 @model MyPocket.Core.Models.User
 @{
-    ViewData["Title"] = $"¥Î¤á­q¾\¾ú¥v - {Model.Email}";
+    ViewData["Title"] = $"ç”¨æˆ¶è¨‚é–±æ­·å² - {Model.Email}";
 }
 
 <div class="container-fluid">
@@ -10,20 +10,20 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    ¥Î¤á¸ê°T
+                    ç”¨æˆ¶è³‡è¨Š
                 </div>
                 <div class="card-body">
                     <dl class="row">
-                        <dt class="col-sm-4">¹q¤l¶l¥ó</dt>
+                        <dt class="col-sm-4">é›»å­éƒµä»¶</dt>
                         <dd class="col-sm-8">@Model.Email</dd>
 
-                        <dt class="col-sm-4">¼ÊºÙ</dt>
+                        <dt class="col-sm-4">æš±ç¨±</dt>
                         <dd class="col-sm-8">@Model.Nickname</dd>
 
-                        <dt class="col-sm-4">¨¤¦â</dt>
+                        <dt class="col-sm-4">è§’è‰²</dt>
                         <dd class="col-sm-8">@Model.Role</dd>
 
-                        <dt class="col-sm-4">µù¥U¤é´Á</dt>
+                        <dt class="col-sm-4">è¨»å†Šæ—¥æœŸ</dt>
                         <dd class="col-sm-8">@Model.CreationDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</dd>
                     </dl>
                 </div>
@@ -32,7 +32,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    §ó·s­q¾\
+                    æ›´æ–°è¨‚é–±
                 </div>
                 <div class="card-body">
                     @if (TempData["SuccessMessage"] != null)
@@ -47,7 +47,7 @@
                     <form asp-action="UpdateSubscription" method="post">
                         <input type="hidden" name="userId" value="@Model.UserId" />
                         <div class="form-group">
-                            <label>¿ï¾Ü·sªº­q¾\­p¹º</label>
+                            <label>é¸æ“‡æ–°çš„è¨‚é–±è¨ˆåŠƒ</label>
                             <select name="planId" class="form-control">
                                 @foreach (var plan in (IEnumerable<MyPocket.Core.Models.SubscriptionPlan>)ViewBag.SubscriptionPlans)
                                 {
@@ -55,7 +55,7 @@
                                 }
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary mt-3">§ó·s­q¾\</button>
+                        <button type="submit" class="btn btn-primary mt-3">æ›´æ–°è¨‚é–±</button>
                     </form>
                 </div>
             </div>
@@ -64,17 +64,17 @@
 
     <div class="card">
         <div class="card-header">
-            ­q¾\¾ú¥v°O¿ı
+            è¨‚é–±æ­·å²è¨˜éŒ„
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>­q¾\­p¹º</th>
-                            <th>¶}©l¤é´Á</th>
-                            <th>µ²§ô¤é´Á</th>
-                            <th>ª¬ºA</th>
+                            <th>è¨‚é–±è¨ˆåŠƒ</th>
+                            <th>é–‹å§‹æ—¥æœŸ</th>
+                            <th>çµæŸæ—¥æœŸ</th>
+                            <th>ç‹€æ…‹</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,6 +94,6 @@
     </div>
 
     <div class="mt-3">
-        <a asp-action="Index" class="btn btn-secondary">ªğ¦^¦Cªí</a>
+        <a asp-action="Index" class="btn btn-secondary">è¿”å›åˆ—è¡¨</a>
     </div>
 </div>

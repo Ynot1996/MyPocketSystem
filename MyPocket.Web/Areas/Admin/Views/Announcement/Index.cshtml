@@ -1,25 +1,25 @@
 @model IEnumerable<MyPocket.Core.Models.Announcement>
 @{
-    ViewData["Title"] = "¤½§iºŞ²z";
+    ViewData["Title"] = "å…¬å‘Šç®¡ç†";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h2>¤½§iºŞ²z</h2>
+<h2>å…¬å‘Šç®¡ç†</h2>
 
 <div class="mb-2">
-    <input type="text" id="tableFilter" class="form-control" placeholder="·j´M...">
+    <input type="text" id="tableFilter" class="form-control" placeholder="æœå°‹...">
 </div>
 
 <p>
-    <a asp-action="Create" class="btn btn-success">·s¼W¤½§i</a>
+    <a asp-action="Create" class="btn btn-success">æ–°å¢å…¬å‘Š</a>
 </p>
 
 <table class="table table-bordered table-hover">
     <thead class="table-dark">
         <tr>
-            <th>¼ĞÃD</th>
-            <th>¤º®e</th>
-            <th>µo¥¬®É¶¡</th>
-            <th>ºŞ²z</th>
+            <th>æ¨™é¡Œ</th>
+            <th>å…§å®¹</th>
+            <th>ç™¼å¸ƒæ™‚é–“</th>
+            <th>ç®¡ç†</th>
         </tr>
     </thead>
     <tbody>
@@ -30,9 +30,9 @@
             <td>@item.Content</td>
             <td>@item.PublishDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.AnnouncementId" class="btn btn-info btn-sm">¸Ô²Ó</a>
-                <a asp-action="Edit" asp-route-id="@item.AnnouncementId" class="btn btn-warning btn-sm">½s¿è</a>
-                <a asp-action="Delete" asp-route-id="@item.AnnouncementId" class="btn btn-danger btn-sm">§R°£</a>
+                <a asp-action="Details" asp-route-id="@item.AnnouncementId" class="btn btn-info btn-sm">è©³ç´°</a>
+                <a asp-action="Edit" asp-route-id="@item.AnnouncementId" class="btn btn-warning btn-sm">ç·¨è¼¯</a>
+                <a asp-action="Delete" asp-route-id="@item.AnnouncementId" class="btn btn-danger btn-sm">åˆªé™¤</a>
             </td>
         </tr>
     }

@@ -1,34 +1,34 @@
 @model MyPocket.Core.Models.SubscriptionPlan
 
 @{
-    ViewData["Title"] = "§R°£­q¾\¤è®×";
+    ViewData["Title"] = "åˆªé™¤è¨‚é–±æ–¹æ¡ˆ";
 }
 
-<h1>§R°£­q¾\¤è®×</h1>
+<h1>åˆªé™¤è¨‚é–±æ–¹æ¡ˆ</h1>
 
-<h3>½T©w­n§R°£³o­Ó­q¾\¤è®×¶Ü¡H</h3>
+<h3>ç¢ºå®šè¦åˆªé™¤é€™å€‹è¨‚é–±æ–¹æ¡ˆå—Žï¼Ÿ</h3>
 <div>
     <dl class="row">
         <dt class="col-sm-2">
-            ¤è®×¦WºÙ
+            æ–¹æ¡ˆåç¨±
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PlanName)
         </dd>
         <dt class="col-sm-2">
-            »ù®æ
+            åƒ¹æ ¼
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Price)
         </dd>
         <dt class="col-sm-2">
-            ¤Ñ¼Æ
+            å¤©æ•¸
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DurationDays)
         </dd>
         <dt class="col-sm-2">
-            »¡©ú
+            èªªæ˜Ž
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Description)
@@ -37,7 +37,7 @@
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="PlanId" />
-        <input type="submit" value="§R°£" class="btn btn-danger" />
-        <a asp-action="Index" class="btn btn-secondary">ªð¦^¦Cªí</a>
+        <input type="submit" value="åˆªé™¤" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">è¿”å›žåˆ—è¡¨</a>
     </form>
 </div>

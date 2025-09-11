@@ -1,19 +1,19 @@
 @model IEnumerable<MyPocket.Core.Models.SavingGoal>
 @{
-    ViewData["Title"] = "Àx»W¥Ø¼Ğ";
+    ViewData["Title"] = "å„²è“„ç›®æ¨™";
 }
-<h2>Àx»W¥Ø¼Ğ</h2>
+<h2>å„²è“„ç›®æ¨™</h2>
 <p>
-    <a class="btn btn-primary" asp-action="Create">·s¼W¥Ø¼Ğ</a>
+    <a class="btn btn-primary" asp-action="Create">æ–°å¢ç›®æ¨™</a>
 </p>
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
-            <th>¦WºÙ</th>
-            <th>¥Ø¼Ğª÷ÃB</th>
-            <th>¥Ø«eª÷ÃB</th>
-            <th>¥Ø¼Ğ¤é´Á</th>
-            <th>¾Ş§@</th>
+            <th>åç¨±</th>
+            <th>ç›®æ¨™é‡‘é¡</th>
+            <th>ç›®å‰é‡‘é¡</th>
+            <th>ç›®æ¨™æ—¥æœŸ</th>
+            <th>æ“ä½œ</th>
         </tr>
     </thead>
     <tbody>
@@ -25,9 +25,9 @@
             <td>@item.CurrentAmount.ToString("N0")</td>
             <td>@item.TargetDate.ToString("yyyy-MM-dd")</td>
             <td>
-                <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@item.GoalId">ÀËµø</a>
-                <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@item.GoalId">½s¿è</a>
-                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.GoalId">§R°£</a>
+                <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@item.GoalId">æª¢è¦–</a>
+                <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@item.GoalId">ç·¨è¼¯</a>
+                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.GoalId">åˆªé™¤</a>
             </td>
         </tr>
     }

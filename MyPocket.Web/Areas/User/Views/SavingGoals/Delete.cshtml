@@ -1,27 +1,27 @@
 @model MyPocket.Core.Models.SavingGoal
 @{
-    ViewData["Title"] = "§R°£Àx»W¥Ø¼Ğ";
+    ViewData["Title"] = "åˆªé™¤å„²è“„ç›®æ¨™";
 }
-<h2>§R°£Àx»W¥Ø¼Ğ</h2>
-<h4>½T©w­n§R°£¦¹Àx»W¥Ø¼Ğ¶Ü¡H</h4>
+<h2>åˆªé™¤å„²è“„ç›®æ¨™</h2>
+<h4>ç¢ºå®šè¦åˆªé™¤æ­¤å„²è“„ç›®æ¨™å—ï¼Ÿ</h4>
 <div class="mb-3">
-    <label class="form-label">¦WºÙ</label>
+    <label class="form-label">åç¨±</label>
     <div class="form-control-plaintext">@Model.GoalName</div>
 </div>
 <div class="mb-3">
-    <label class="form-label">¥Ø¼Ğª÷ÃB</label>
+    <label class="form-label">ç›®æ¨™é‡‘é¡</label>
     <div class="form-control-plaintext">@Model.TargetAmount.ToString("N0")</div>
 </div>
 <div class="mb-3">
-    <label class="form-label">¥Ø«eª÷ÃB</label>
+    <label class="form-label">ç›®å‰é‡‘é¡</label>
     <div class="form-control-plaintext">@Model.CurrentAmount.ToString("N0")</div>
 </div>
 <div class="mb-3">
-    <label class="form-label">¥Ø¼Ğ¤é´Á</label>
+    <label class="form-label">ç›®æ¨™æ—¥æœŸ</label>
     <div class="form-control-plaintext">@Model.TargetDate.ToString("yyyy-MM-dd")</div>
 </div>
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="GoalId" />
-    <button type="submit" class="btn btn-danger">½T©w§R°£</button>
-    <a asp-action="Index" class="btn btn-secondary">¨ú®ø</a>
+    <button type="submit" class="btn btn-danger">ç¢ºå®šåˆªé™¤</button>
+    <a asp-action="Index" class="btn btn-secondary">å–æ¶ˆ</a>
 </form>

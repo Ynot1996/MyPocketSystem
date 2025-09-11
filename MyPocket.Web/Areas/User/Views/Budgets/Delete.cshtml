@@ -1,18 +1,18 @@
 @model MyPocket.Shared.ViewModels.Budgets.BudgetViewModel
 @{
-    ViewData["Title"] = "§R°£¹wºâ";
+    ViewData["Title"] = "åˆªé™¤é ç®—";
     Layout = "~/Views/Shared/_LayoutUser.cshtml";
 }
-<h2>§R°£¹wºâ</h2>
-<div class="alert alert-warning">½T©w­n§R°£¦¹¹wºâ¶Ü¡H¦¹°Ê§@µLªkÁÙ­ì¡C</div>
+<h2>åˆªé™¤é ç®—</h2>
+<div class="alert alert-warning">ç¢ºå®šè¦åˆªé™¤æ­¤é ç®—å—ï¼Ÿæ­¤å‹•ä½œç„¡æ³•é‚„åŸã€‚</div>
 <dl class="row">
-    <dt class="col-sm-3">¤ÀÃş</dt>
+    <dt class="col-sm-3">åˆ†é¡</dt>
     <dd class="col-sm-9">@Model.CategoryName</dd>
-    <dt class="col-sm-3">¹wºâª÷ÃB</dt>
+    <dt class="col-sm-3">é ç®—é‡‘é¡</dt>
     <dd class="col-sm-9">@Model.Amount.ToString("N0")</dd>
 </dl>
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="BudgetId" />
-    <button type="submit" class="btn btn-danger">§R°£</button>
-    <a asp-action="Index" class="btn btn-secondary">¨ú®ø</a>
+    <button type="submit" class="btn btn-danger">åˆªé™¤</button>
+    <a asp-action="Index" class="btn btn-secondary">å–æ¶ˆ</a>
 </form>

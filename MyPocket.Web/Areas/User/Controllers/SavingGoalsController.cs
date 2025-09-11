@@ -22,7 +22,6 @@ namespace MyPocket.Web.Areas.User.Controllers
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
                 return RedirectToAction("Login", "Account", new { area = "" });
 
-            // 取得所有目標（含月/年預設目標）
             var now = DateTime.UtcNow;
             await _savingGoalService.GetOrCreateMonthlyGoalAsync(userId, now.Year, now.Month);
             await _savingGoalService.GetOrCreateYearlyGoalAsync(userId, now.Year);

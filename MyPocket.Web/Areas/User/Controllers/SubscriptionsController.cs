@@ -47,7 +47,7 @@ namespace MyPocket.Web.Areas.User.Controllers
             var subscription = await _subscriptionService.GetActiveSubscriptionAsync(userId);
             if (subscription == null)
             {
-                TempData["ErrorMessage"] = "±z¥Ø«e¨S¦³¬¡ÅDªº­q¾\¤è®×¡C";
+                TempData["ErrorMessage"] = "æ‚¨ç›®å‰æ²’æœ‰æ´»èºçš„è¨‚é–±æ–¹æ¡ˆã€‚";
                 return RedirectToAction("Plans");
             }
 
@@ -67,18 +67,18 @@ namespace MyPocket.Web.Areas.User.Controllers
             var plan = await _subscriptionService.GetPlanByIdAsync(planId);
             if (plan == null)
             {
-                TempData["ErrorMessage"] = "§ä¤£¨ì«ü©wªº­q¾\¤è®×¡C";
+                TempData["ErrorMessage"] = "æ‰¾ä¸åˆ°æŒ‡å®šçš„è¨‚é–±æ–¹æ¡ˆã€‚";
                 return RedirectToAction("Plans");
             }
 
             var result = await _subscriptionService.SubscribeAsync(userId, planId);
             if (result)
             {
-                TempData["SuccessMessage"] = $"¦¨¥\­q¾\ {plan.PlanName}¡I";
+                TempData["SuccessMessage"] = $"æˆåŠŸè¨‚é–± {plan.PlanName}ï¼";
                 return RedirectToAction("Plans");
             }
 
-            TempData["ErrorMessage"] = "­q¾\¥¢±Ñ¡A½Ğµy«á¦A¸Õ¡C";
+            TempData["ErrorMessage"] = "è¨‚é–±å¤±æ•—ï¼Œè«‹ç¨å¾Œå†è©¦ã€‚";
             return RedirectToAction("Plans");
         }
 
@@ -95,18 +95,18 @@ namespace MyPocket.Web.Areas.User.Controllers
             var isActive = await _subscriptionService.IsSubscriptionActiveAsync(userId);
             if (!isActive)
             {
-                TempData["ErrorMessage"] = "±z¥Ø«e¨S¦³¬¡ÅDªº­q¾\¡C";
+                TempData["ErrorMessage"] = "æ‚¨ç›®å‰æ²’æœ‰æ´»èºçš„è¨‚é–±ã€‚";
                 return RedirectToAction("Plans");
             }
 
             var result = await _subscriptionService.CancelSubscriptionAsync(userId);
             if (result)
             {
-                TempData["SuccessMessage"] = "¤w¦¨¥\¨ú®ø­q¾\¡C";
+                TempData["SuccessMessage"] = "å·²æˆåŠŸå–æ¶ˆè¨‚é–±ã€‚";
             }
             else
             {
-                TempData["ErrorMessage"] = "¨ú®ø­q¾\¥¢±Ñ¡A½Ğµy«á¦A¸Õ¡C";
+                TempData["ErrorMessage"] = "å–æ¶ˆè¨‚é–±å¤±æ•—ï¼Œè«‹ç¨å¾Œå†è©¦ã€‚";
             }
 
             return RedirectToAction("Plans");

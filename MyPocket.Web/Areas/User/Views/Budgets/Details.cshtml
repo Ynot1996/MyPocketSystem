@@ -1,23 +1,23 @@
 @model MyPocket.Shared.ViewModels.Budgets.BudgetViewModel
 @{
-    ViewData["Title"] = "¹wºâ©ú²Ó";
+    ViewData["Title"] = "é ç®—æ˜ç´°";
     Layout = "~/Views/Shared/_LayoutUser.cshtml";
 }
-<h2>¹wºâ©ú²Ó</h2>
+<h2>é ç®—æ˜ç´°</h2>
 <dl class="row">
-    <dt class="col-sm-3">¤ÀÃş</dt>
+    <dt class="col-sm-3">åˆ†é¡</dt>
     <dd class="col-sm-9">@Model.CategoryName</dd>
-    <dt class="col-sm-3">¹wºâª÷ÃB</dt>
+    <dt class="col-sm-3">é ç®—é‡‘é¡</dt>
     <dd class="col-sm-9">@Model.Amount.ToString("N0")</dd>
-    <dt class="col-sm-3">¤wªá¶O</dt>
+    <dt class="col-sm-3">å·²èŠ±è²»</dt>
     <dd class="col-sm-9">@Model.Spent.ToString("N0")</dd>
-    <dt class="col-sm-3">³Ñ¾lª÷ÃB</dt>
+    <dt class="col-sm-3">å‰©é¤˜é‡‘é¡</dt>
     <dd class="col-sm-9">@Model.Remaining.ToString("N0")</dd>
-    <dt class="col-sm-3">¦~«×</dt>
+    <dt class="col-sm-3">å¹´åº¦</dt>
     <dd class="col-sm-9">@Model.BudgetYear</dd>
-    <dt class="col-sm-3">¤ë¥÷</dt>
+    <dt class="col-sm-3">æœˆä»½</dt>
     <dd class="col-sm-9">@Model.BudgetMonth</dd>
 </dl>
-<a asp-action="Edit" asp-route-id="@Model.BudgetId" class="btn btn-primary">½s¿è</a>
-<a asp-action="Delete" asp-route-id="@Model.BudgetId" class="btn btn-danger">§R°£</a>
-<a asp-action="Index" class="btn btn-secondary">ªğ¦^¦Cªí</a>
+<a asp-action="Edit" asp-route-id="@Model.BudgetId" class="btn btn-primary">ç·¨è¼¯</a>
+<a asp-action="Delete" asp-route-id="@Model.BudgetId" class="btn btn-danger">åˆªé™¤</a>
+<a asp-action="Index" class="btn btn-secondary">è¿”å›åˆ—è¡¨</a>

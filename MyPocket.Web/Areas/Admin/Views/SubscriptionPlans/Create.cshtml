@@ -1,10 +1,10 @@
 @model MyPocket.Core.Models.SubscriptionPlan
 
 @{
-    ViewData["Title"] = "ミ璹綷よ";
+    ViewData["Title"] = "寤虹珛瑷傞柋鏂规";
 }
 
-<h1>ミ璹綷よ</h1>
+<h1>寤虹珛瑷傞柋鏂规</h1>
 
 <hr />
 <div class="row">
@@ -12,28 +12,28 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="PlanName" class="control-label">よ嘿</label>
+                <label asp-for="PlanName" class="control-label">鏂规鍚嶇ū</label>
                 <input asp-for="PlanName" class="form-control" />
                 <span asp-validation-for="PlanName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Price" class="control-label">基</label>
+                <label asp-for="Price" class="control-label">鍍规牸</label>
                 <input asp-for="Price" class="form-control" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="DurationDays" class="control-label">ぱ计</label>
+                <label asp-for="DurationDays" class="control-label">澶╂暩</label>
                 <input asp-for="DurationDays" class="form-control" />
                 <span asp-validation-for="DurationDays" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Description" class="control-label">弧</label>
+                <label asp-for="Description" class="control-label">瑾槑</label>
                 <textarea asp-for="Description" class="form-control"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="form-group mt-3">
-                <input type="submit" value="ミ" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary"></a>
+                <input type="submit" value="寤虹珛" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">杩斿洖鍒楄〃</a>
             </div>
         </form>
     </div>

@@ -26,22 +26,22 @@ namespace MyPocket.Web.Areas.User.Controllers
         }
 
         /// <summary>
-        /// Àò¨ú·í«e¥Î¤áID
+        /// ç²å–ç•¶å‰ç”¨æˆ¶ID
         /// </summary>
-        /// <returns>¥Î¤áID</returns>
-        /// <exception cref="UnauthorizedAccessException">·íµLªkÀò¨ú¥Î¤áID®É©ß¥X</exception>
+        /// <returns>ç”¨æˆ¶ID</returns>
+        /// <exception cref="UnauthorizedAccessException">ç•¶ç„¡æ³•ç²å–ç”¨æˆ¶IDæ™‚æ‹‹å‡º</exception>
         private Guid GetUserId()
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
             {
-                throw new UnauthorizedAccessException("µLªkÃÑ§O¥Î¤á¨­¥÷");
+                throw new UnauthorizedAccessException("ç„¡æ³•è­˜åˆ¥ç”¨æˆ¶èº«ä»½");
             }
             return userId;
         }
 
         /// <summary>
-        /// ¥æ©ö°O¿ı­º­¶
+        /// äº¤æ˜“è¨˜éŒ„é¦–é 
         /// </summary>
         public async Task<IActionResult> Index()
         {
@@ -49,17 +49,17 @@ namespace MyPocket.Web.Areas.User.Controllers
             {
                 var userId = GetUserId();
 
-                // Àò¨ú¥æ©ö°O¿ı
+                // ç²å–äº¤æ˜“è¨˜éŒ„
                 var transactions = await _transactionService.GetUserTransactionsAsync(userId);
                 
-                // Àò¨úÀx»W¥Ø¼Ğ
+                // ç²å–å„²è“„ç›®æ¨™
                 var savingGoals = await _savingGoalService.GetUserGoalsAsync(userId);
                 ViewBag.SavingGoals = savingGoals;
 
-                // Àò¨ú¤ÀÃş¦Cªí
+                // ç²å–åˆ†é¡åˆ—è¡¨
                 var categoryViewModel = await _categoryService.GetUserCategoriesAsync(userId);
                 
-                // ¦X¨Ö¦¬¤J©M¤ä¥X¤ÀÃş
+                // åˆä½µæ”¶å…¥å’Œæ”¯å‡ºåˆ†é¡
                 var allCategories = categoryViewModel.DefaultIncomeCategories
                     .Concat(categoryViewModel.DefaultExpenseCategories)
                     .Concat(categoryViewModel.UserIncomeCategories)
@@ -88,13 +88,13 @@ namespace MyPocket.Web.Areas.User.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"¸ü¤J¸ê®Æ®Éµo¥Í¿ù»~: {ex.Message}";
+                TempData["ErrorMessage"] = $"è¼‰å…¥è³‡æ–™æ™‚ç™¼ç”ŸéŒ¯èª¤: {ex.Message}";
                 return View(Enumerable.Empty<Core.Models.Transaction>());
             }
         }
 
         /// <summary>
-        /// ·s¼W¥æ©ö°O¿ı
+        /// æ–°å¢äº¤æ˜“è¨˜éŒ„
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -105,7 +105,7 @@ namespace MyPocket.Web.Areas.User.Controllers
                 var errors = string.Join(" ", ModelState.Values
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage));
-                TempData["ErrorMessage"] = $"½ĞÀË¬d¿é¤J¸ê®Æ¬O§_¥¿½T: {errors}";
+                TempData["ErrorMessage"] = $"è«‹æª¢æŸ¥è¼¸å…¥è³‡æ–™æ˜¯å¦æ­£ç¢º: {errors}";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -129,14 +129,14 @@ namespace MyPocket.Web.Areas.User.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"·s¼W¥¢±Ñ: {ex.Message}";
+                TempData["ErrorMessage"] = $"æ–°å¢å¤±æ•—: {ex.Message}";
             }
 
             return RedirectToAction(nameof(Index));
         }
 
         /// <summary>
-        /// §R°£¥æ©ö°O¿ı
+        /// åˆªé™¤äº¤æ˜“è¨˜éŒ„
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -162,7 +162,7 @@ namespace MyPocket.Web.Areas.User.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"§R°£¥¢±Ñ: {ex.Message}";
+                TempData["ErrorMessage"] = $"åˆªé™¤å¤±æ•—: {ex.Message}";
             }
 
             return RedirectToAction(nameof(Index));
