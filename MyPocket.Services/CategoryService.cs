@@ -17,7 +17,19 @@ namespace MyPocket.Services
 
         public async Task<UserCategoryViewModel> GetUserCategoriesAsync(Guid userId)
         {
+            // 記錄傳入的 userId
+            System.Diagnostics.Debug.WriteLine($"CategoryService called with userId: {userId}");
+            System.Diagnostics.Debug.WriteLine($"Hardcoded AdminUserId: {AdminUserId}");
+
             var categories = await _context.Categories.Where(c => !c.IsDeleted).ToListAsync();
+
+            // 記錄篩選後的類別數量
+            System.Diagnostics.Debug.WriteLine($"Total categories from DB: {categories.Count}");
+            System.Diagnostics.Debug.WriteLine($"DefaultIncomeCategories count: {categories.Count(c => c.UserId == AdminUserId && c.CategoryType == "收入")}");
+            System.Diagnostics.Debug.WriteLine($"DefaultExpenseCategories count: {categories.Count(c => c.UserId == AdminUserId && c.CategoryType == "支出")}");
+            System.Diagnostics.Debug.WriteLine($"UserIncomeCategories count: {categories.Count(c => c.UserId == userId && c.CategoryType == "收入")}");
+            System.Diagnostics.Debug.WriteLine($"UserExpenseCategories count: {categories.Count(c => c.UserId == userId && c.CategoryType == "支出")}");
+
             return new UserCategoryViewModel
             {
                 DefaultIncomeCategories = categories.Where(c => c.UserId == AdminUserId && c.CategoryType == "收入").ToList(),

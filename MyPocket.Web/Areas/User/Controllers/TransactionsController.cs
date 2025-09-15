@@ -49,6 +49,10 @@ namespace MyPocket.Web.Areas.User.Controllers
             {
                 var userId = GetUserId();
 
+                // 在這裡加入日誌記錄
+                // 這會讓你看到雲端環境中，系統獲取到的 userId 是什麼
+                System.Diagnostics.Debug.WriteLine($"User ID in Index action: {userId}");
+
                 // 獲取交易記錄
                 var transactions = await _transactionService.GetUserTransactionsAsync(userId);
                 
