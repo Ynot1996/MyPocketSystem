@@ -32,10 +32,18 @@ namespace MyPocket.Services
 
             return new UserCategoryViewModel
             {
-                DefaultIncomeCategories = categories.Where(c => c.UserId == AdminUserId && c.CategoryType == "收入").ToList(),
-                DefaultExpenseCategories = categories.Where(c => c.UserId == AdminUserId && c.CategoryType == "支出").ToList(),
-                UserIncomeCategories = categories.Where(c => c.UserId == userId && c.CategoryType == "收入").ToList(),
-                UserExpenseCategories = categories.Where(c => c.UserId == userId && c.CategoryType == "支出").ToList()
+                DefaultIncomeCategories = categories
+    .Where(c => c.UserId == AdminUserId && c.CategoryType.Equals("收入", StringComparison.OrdinalIgnoreCase))
+    .ToList(),
+                DefaultExpenseCategories = categories
+    .Where(c => c.UserId == AdminUserId && c.CategoryType.Equals("支出", StringComparison.OrdinalIgnoreCase))
+    .ToList(),
+                UserIncomeCategories = categories
+    .Where(c => c.UserId == userId && c.CategoryType.Equals("收入", StringComparison.OrdinalIgnoreCase))
+    .ToList(),
+                UserExpenseCategories = categories
+    .Where(c => c.UserId == userId && c.CategoryType.Equals("支出", StringComparison.OrdinalIgnoreCase))
+    .ToList(),
             };
         }
 
