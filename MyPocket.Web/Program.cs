@@ -6,8 +6,29 @@ using MyPocket.DataAccess.Data;
 using MyPocket.Shared.Resources;
 using MyPocket.Services;
 using MyPocket.Services.Interfaces;
+using Google.Cloud.SecretManager.V1;
 
 var builder = WebApplication.CreateBuilder(args);
+var secretName = $"projects/302126295113/secrets/MyPocketDB-ConnectionString";
+
+try
+{
+    // 創建 Secret Manager 客戶端
+    var secretManagerClient = SecretManagerServiceClient.Create();
+    // 存取 Secret 的內容
+    var secret = secretManagerClient.AccessSecretVersion(secretName);
+    var connectionString = secret.Payload.Data.ToStringUtf8();
+
+    // 將從 Secret Manager 讀取的連線字串添加到配置中
+    builder.Configuration["ConnectionStrings:MyPocketDBConnection"] = connectionString;
+}
+catch (Exception ex)
+{
+    // 如果讀取 Secret 失敗，這裡會捕捉到錯誤
+    // 建議在本地端，你可以在 appsettings.json 中保留連線字串以進行開發
+    Console.WriteLine($"Error accessing secret from Secret Manager: {ex.Message}");
+    // 在生產環境中，這個錯誤很可能意味著權限問題或 Secret 不存在
+}
 
 builder.Services.AddControllersWithViews()
     .AddViewLocalization()
