@@ -1,4 +1,4 @@
-@* ºŞ²z­û¥Î Layout *@
+@* ç®¡ç†å“¡ç”¨ Layout *@
 @{
     Layout = null;
     string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
@@ -23,12 +23,12 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item dropdown">
-                            @* ·s¼W¤@­Ó¤U©Ô¿ï³æ¥D¶µ¥Ø¡A¨Ã¥[¤W dropdown Ãş§O *@
+                            @* æ–°å¢ä¸€å€‹ä¸‹æ‹‰é¸å–®ä¸»é …ç›®ï¼Œä¸¦åŠ ä¸Š dropdown é¡åˆ¥ *@
                             <a class="nav-link dropdown-toggle text-dark @(currentController == "Users" || currentController == "UsersManagement" ? "active fw-bold" : "")" href="#" id="usersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-people-fill"></i> Users
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="usersDropdown">
-                                @* ¤U©Ô¿ï³æ®e¾¹ *@
+                                @* ä¸‹æ‹‰é¸å–®å®¹å™¨ *@
                                 <li>
                                     <a class="dropdown-item @(currentController == "Users" && currentAction == "Index" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="Users" asp-action="Index">
                                         Users Management
@@ -61,7 +61,7 @@
                         <li class="nav-item">
                             <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-link nav-link text-primary">
-                                    µn¥X (@(User?.Identity?.Name ?? ""))
+                                    ç™»å‡º (@(User?.Identity?.Name ?? ""))
                                 </button>
                             </form>
                         </li>

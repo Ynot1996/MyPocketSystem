@@ -1,10 +1,10 @@
 @model MyPocket.Shared.ViewModels.Accounts.RegisterViewModel
 
 @{
-    ViewData["Title"] = "µù¥U";
+    ViewData["Title"] = "è¨»å†Š";
 }
 
-<h1>µù¥U</h1>
+<h1>è¨»å†Š</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -31,13 +31,13 @@
                 <span asp-validation-for="Nickname" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="µù¥U" class="btn btn-primary" />
+                <input type="submit" value="è¨»å†Š" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 <div>
-    <a asp-action="Login">¤w¦³±b¸¹¡Hµn¤J</a>
+    <a asp-action="Login">å·²æœ‰å¸³è™Ÿï¼Ÿç™»å…¥</a>
 </div>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

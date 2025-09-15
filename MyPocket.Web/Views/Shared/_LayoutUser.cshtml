@@ -1,4 +1,4 @@
-@* §@ØÎ∑|≠˚•Œ Layout *@
+@* ‰∏ÄËà¨ÊúÉÂì°Áî® Layout *@
 @{
     Layout = null;
 }
@@ -25,29 +25,29 @@
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="User" asp-controller="Transactions" asp-action="Index">
-                                <i class="bi bi-journal-text"></i> ∞O±b
+                                <i class="bi bi-journal-text"></i> Ë®òÂ∏≥
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="User" asp-controller="Categories" asp-action="Index">
-                                <i class="bi bi-tags"></i> √˛ßO∫ﬁ≤z
+                                <i class="bi bi-tags"></i> È°ûÂà•ÁÆ°ÁêÜ
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="User" asp-controller="Budgets" asp-action="Index">
-                                <i class="bi bi-wallet2"></i> πw∫‚∫ﬁ≤z
+                                <i class="bi bi-wallet2"></i> È†êÁÆóÁÆ°ÁêÜ
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="User" asp-controller="SavingGoals" asp-action="Index">
-                                <i class="bi bi-piggy-bank"></i> ¿xªW•ÿº–
+                                <i class="bi bi-piggy-bank"></i> ÂÑ≤ËìÑÁõÆÊ®ô
                             </a>
                         </li>
                         @if (User.IsInRole("PaidMember"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="User" asp-controller="PaidMember" asp-action="Index">
-                                    <i class="bi bi-gem"></i> •I∂O∑|≠˚±M∞œ
+                                    <i class="bi bi-gem"></i> ‰ªòË≤ªÊúÉÂì°Â∞àÂçÄ
                                 </a>
                             </li>
                         }
@@ -55,34 +55,34 @@
                     <ul class="navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="User" asp-controller="Subscriptions" asp-action="Plans">
-                                <i class="bi bi-star"></i> ∑|≠˚§ËÆ◊
+                                <i class="bi bi-star"></i> ÊúÉÂì°ÊñπÊ°à
                                 @if (User.IsInRole("FreeMember"))
                                 {
-                                    <span class="badge bg-warning text-dark">§…Ø≈</span>
+                                    <span class="badge bg-warning text-dark">ÂçáÁ¥ö</span>
                                 }
                             </a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle me-1"></i>
-                                <span>@(User.FindFirst("Nickname")?.Value ?? User.Identity?.Name ?? "∑|≠˚")</span>
+                                <span>@(User.FindFirst("Nickname")?.Value ?? User.Identity?.Name ?? "ÊúÉÂì°")</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li>
                                     <a class="dropdown-item" asp-area="User" asp-controller="User" asp-action="Index">
-                                        <i class="bi bi-gear"></i> ±b∏π≥]©w
+                                        <i class="bi bi-gear"></i> Â∏≥ËôüË®≠ÂÆö
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" asp-area="User" asp-controller="Subscriptions" asp-action="CurrentPlan">
-                                        <i class="bi bi-star"></i> ∑|≠˚∏Í∞T
+                                        <i class="bi bi-star"></i> ÊúÉÂì°Ë≥áË®ä
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider" /></li>
                                 <li>
                                     <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                         <button type="submit" class="dropdown-item">
-                                            <i class="bi bi-box-arrow-right"></i> µn•X
+                                            <i class="bi bi-box-arrow-right"></i> ÁôªÂá∫
                                         </button>
                                     </form>
                                 </li>
