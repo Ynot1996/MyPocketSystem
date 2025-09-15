@@ -17,7 +17,16 @@ builder.Services.AddControllersWithViews()
     });
 
 builder.Services.AddDbContext<MyPocketDBContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MyPocketDBConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("MyPocketDBConnection");
+    options.UseSqlServer(connectionString, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null);
+    });
+});
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -29,6 +38,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 // Add localization service
 builder.Services.AddSingleton<ILocalizationService, JsonLocalizationService>();
+
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+    logging.AddDebug();
+    logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Information);
+});
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MyPocket.Core.Models;
 using MyPocket.DataAccess.Data;
 using MyPocket.Services.Interfaces;
@@ -9,40 +10,84 @@ namespace MyPocket.Services
     public class CategoryService : ICategoryService
     {
         private readonly MyPocketDBContext _context;
+        private readonly ILogger<CategoryService> _logger;
         private static readonly Guid AdminUserId = Guid.Parse("ef908f96-9557-477d-97f1-4b1d766150bc");
-        public CategoryService(MyPocketDBContext context)
+
+        public CategoryService(MyPocketDBContext context, ILogger<CategoryService> logger)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<UserCategoryViewModel> GetUserCategoriesAsync(Guid userId)
         {
-            // 記錄傳入的 userId
-            System.Diagnostics.Debug.WriteLine($"CategoryService called with userId: {userId}");
-            System.Diagnostics.Debug.WriteLine($"Hardcoded AdminUserId: {AdminUserId}");
-
-            var categories = await _context.Categories.Where(c => !c.IsDeleted).ToListAsync();
-
-            // 記錄篩選後的類別數量
-            System.Diagnostics.Debug.WriteLine($"Total categories from DB: {categories.Count}");
-            System.Diagnostics.Debug.WriteLine($"DefaultIncomeCategories count: {categories.Count(c => c.UserId == AdminUserId && c.CategoryType == "收入")}");
-            System.Diagnostics.Debug.WriteLine($"DefaultExpenseCategories count: {categories.Count(c => c.UserId == AdminUserId && c.CategoryType == "支出")}");
-            System.Diagnostics.Debug.WriteLine($"UserIncomeCategories count: {categories.Count(c => c.UserId == userId && c.CategoryType == "收入")}");
-            System.Diagnostics.Debug.WriteLine($"UserExpenseCategories count: {categories.Count(c => c.UserId == userId && c.CategoryType == "支出")}");
-
-            return new UserCategoryViewModel
+            try
             {
-                DefaultIncomeCategories = categories.Where(c => c.UserId == AdminUserId && c.CategoryType == "收入").ToList(),
-                DefaultExpenseCategories = categories.Where(c => c.UserId == AdminUserId && c.CategoryType == "支出").ToList(),
-                UserIncomeCategories = categories.Where(c => c.UserId == userId && c.CategoryType == "收入").ToList(),
-                UserExpenseCategories = categories.Where(c => c.UserId == userId && c.CategoryType == "支出").ToList()
-            };
+                _logger.LogInformation("開始獲取用戶 {UserId} 的分類資料", userId);
+
+                // 使用單一查詢獲取所有需要的分類
+                var categories = await _context.Categories
+                    .AsNoTracking()
+                    .Where(c => !c.IsDeleted && (c.UserId == AdminUserId || c.UserId == userId))
+                    .ToListAsync();
+
+                _logger.LogInformation("從資料庫獲取到 {Count} 個分類", categories.Count);
+
+                var viewModel = new UserCategoryViewModel
+                {
+                    DefaultIncomeCategories = categories
+                        .Where(c => c.UserId == AdminUserId && c.CategoryType == "收入")
+                        .ToList(),
+                    DefaultExpenseCategories = categories
+                        .Where(c => c.UserId == AdminUserId && c.CategoryType == "支出")
+                        .ToList(),
+                    UserIncomeCategories = categories
+                        .Where(c => c.UserId == userId && c.CategoryType == "收入")
+                        .ToList(),
+                    UserExpenseCategories = categories
+                        .Where(c => c.UserId == userId && c.CategoryType == "支出")
+                        .ToList()
+                };
+
+                // 記錄獲取到的分類數量
+                _logger.LogInformation("分類統計 - 預設收入: {Count1}, 預設支出: {Count2}, 用戶收入: {Count3}, 用戶支出: {Count4}",
+                    viewModel.DefaultIncomeCategories.Count,
+                    viewModel.DefaultExpenseCategories.Count,
+                    viewModel.UserIncomeCategories.Count,
+                    viewModel.UserExpenseCategories.Count);
+
+                return viewModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "獲取用戶 {UserId} 的分類資料時發生錯誤", userId);
+                // 發生錯誤時返回空的 ViewModel，避免前端出錯
+                return new UserCategoryViewModel
+                {
+                    DefaultIncomeCategories = new List<Category>(),
+                    DefaultExpenseCategories = new List<Category>(),
+                    UserIncomeCategories = new List<Category>(),
+                    UserExpenseCategories = new List<Category>()
+                };
+            }
         }
 
-        public async Task CreateCategoryAsync(Guid userId, string name, string type)
+        public async Task CreateCategoryAsync(Guid userId, string name, string type)    
         {
-            if (!string.IsNullOrWhiteSpace(name) && (type == "收入" || type == "支出"))
+            try
             {
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    _logger.LogWarning("嘗試創建空白名稱的分類");
+                    return;
+                }
+
+                if (type != "收入" && type != "支出")
+                {
+                    _logger.LogWarning("嘗試創建無效類型的分類: {Type}", type);
+                    return;
+                }
+
                 var category = new Category
                 {
                     CategoryId = Guid.NewGuid(),
@@ -53,19 +98,40 @@ namespace MyPocket.Services
                     UpdatedAt = DateTime.UtcNow,
                     IsDeleted = false
                 };
+
                 _context.Categories.Add(category);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("成功為用戶 {UserId} 創建分類 {CategoryName}", userId, name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "為用戶 {UserId} 創建分類 {CategoryName} 時發生錯誤", userId, name);
+                throw;
             }
         }
 
         public async Task DeleteCategoryAsync(Guid userId, Guid categoryId)
         {
-            var category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == categoryId && c.UserId == userId);
-            if (category != null)
+            try
             {
+                var category = await _context.Categories
+                    .FirstOrDefaultAsync(c => c.CategoryId == categoryId && c.UserId == userId);
+
+                if (category == null)
+                {
+                    _logger.LogWarning("找不到要刪除的分類 {CategoryId}", categoryId);
+                    return;
+                }
+
                 category.IsDeleted = true;
                 category.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("成功刪除分類 {CategoryId}", categoryId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "刪除分類 {CategoryId} 時發生錯誤", categoryId);
+                throw;
             }
         }
     }
