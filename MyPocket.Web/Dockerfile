@@ -18,4 +18,5 @@ RUN dotnet publish "MyPocket.Web.csproj" -c Release -o /app/publish /p:UseAppHos
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ENTRYPOINT ["dotnet", "MyPocket.Web.dll"]

@@ -25,13 +25,10 @@ namespace MyPocket.Services
             {
                 _logger.LogInformation("開始獲取用戶 {UserId} 的分類資料", userId);
 
-                // 使用單一查詢獲取所有需要的分類
                 var categories = await _context.Categories
                     .AsNoTracking()
                     .Where(c => !c.IsDeleted && (c.UserId == AdminUserId || c.UserId == userId))
                     .ToListAsync();
-
-                _logger.LogInformation("從資料庫獲取到 {Count} 個分類", categories.Count);
 
                 var viewModel = new UserCategoryViewModel
                 {
@@ -49,13 +46,6 @@ namespace MyPocket.Services
                         .ToList()
                 };
 
-                // 記錄獲取到的分類數量
-                _logger.LogInformation("分類統計 - 預設收入: {Count1}, 預設支出: {Count2}, 用戶收入: {Count3}, 用戶支出: {Count4}",
-                    viewModel.DefaultIncomeCategories.Count,
-                    viewModel.DefaultExpenseCategories.Count,
-                    viewModel.UserIncomeCategories.Count,
-                    viewModel.UserExpenseCategories.Count);
-
                 return viewModel;
             }
             catch (Exception ex)
@@ -72,19 +62,19 @@ namespace MyPocket.Services
             }
         }
 
-        public async Task CreateCategoryAsync(Guid userId, string name, string type)    
+        public async Task CreateCategoryAsync(Guid userId, string name, string type)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(name))
                 {
-                    _logger.LogWarning("嘗試創建空白名稱的分類");
+                    _logger.LogWarning("Category name cannot be empty");
                     return;
                 }
 
                 if (type != "收入" && type != "支出")
                 {
-                    _logger.LogWarning("嘗試創建無效類型的分類: {Type}", type);
+                    _logger.LogWarning("Invalid category type: {Type}", type);
                     return;
                 }
 
@@ -101,11 +91,10 @@ namespace MyPocket.Services
 
                 _context.Categories.Add(category);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("成功為用戶 {UserId} 創建分類 {CategoryName}", userId, name);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "為用戶 {UserId} 創建分類 {CategoryName} 時發生錯誤", userId, name);
+                _logger.LogError(ex, "Error creating category for user {UserId}", userId);
                 throw;
             }
         }
