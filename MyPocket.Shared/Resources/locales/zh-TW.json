@@ -18,5 +18,7 @@
   "Privacy": "隱私權政策",
   "Login": "登入",
   "Register": "註冊",
-  "Logout": "登出"
+  "Logout": "登出",
+  "CompareAttribute_ValidationError": "「{0}」與「{1}」不相符。",
+  "RequiredAttribute_ValidationError": "「{0}」為必填欄位。"
 }
