@@ -6,6 +6,7 @@ using MyPocket.DataAccess.Data;
 using MyPocket.Shared.Resources;
 using MyPocket.Services;
 using MyPocket.Services.Interfaces;
+using Google.Cloud.SecretManager.V1;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,21 @@ builder.Services.AddControllersWithViews()
 
 builder.Services.AddDbContext<MyPocketDBContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("MyPocketDBConnection");
+    string connectionString;
+    if (builder.Environment.IsProduction())
+    {
+        // 從 Secret Manager 獲取連線字串
+        var secretClient = SecretManagerServiceClient.Create();
+        var secretName = "projects/augmented-world-471606-n4/secrets/MyPocketDBConnection/versions/latest";
+        var secret = secretClient.AccessSecretVersion(secretName);
+        connectionString = secret.Payload.Data.ToStringUtf8();
+    }
+    else
+    {
+        // 開發環境使用 appsettings.Development.json
+        connectionString = builder.Configuration.GetConnectionString("MyPocketDBConnection");
+    }
+
     options.UseSqlServer(connectionString, sqlOptions =>
     {
         sqlOptions.EnableRetryOnFailure(
