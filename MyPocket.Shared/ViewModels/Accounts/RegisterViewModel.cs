@@ -15,7 +15,6 @@ namespace MyPocket.Shared.ViewModels.Accounts
 
         [Required]
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "密碼與確認密碼不一致")]
         public string ConfirmPassword { get; set; } = null!;
 
         public string? Nickname { get; set; }

@@ -1,6 +1,7 @@
 @model IEnumerable<MyPocket.Core.Models.Transaction>
 @{
     var categoryError = ViewData.ModelState["CategoryId"]?.Errors.FirstOrDefault()?.ErrorMessage;
+    var categories = ViewBag.Categories as IEnumerable<SelectListItem>;
 }
 <div class="card shadow-sm">
     <div class="card-body">
@@ -11,14 +12,21 @@
                 <label for="CategoryId" class="form-label">類別 <span class="text-danger">*</span></label>
                 <select name="CategoryId" id="CategoryId" class="form-select" required>
                     <option value="">-- 選擇類別 --</option>
-                    @foreach (var categoryGroup in ((IEnumerable<SelectListItem>)ViewBag.Categories).GroupBy(c => c.Group.Name))
+                    @if (categories != null && categories.Any())
                     {
-                        <optgroup label="@categoryGroup.Key">
-                            @foreach (var category in categoryGroup)
-                            {
-                                <option value="@category.Value">@category.Text</option>
-                            }
-                        </optgroup>
+                        foreach (var categoryGroup in categories.GroupBy(c => c.Group.Name))
+                        {
+                            <optgroup label="@categoryGroup.Key">
+                                @foreach (var category in categoryGroup)
+                                {
+                                    <option value="@category.Value">@category.Text</option>
+                                }
+                            </optgroup>
+                        }
+                    }
+                    else
+                    {
+                        <option value="">搜尋不到類別</option>
                     }
                 </select>
                 @if (!string.IsNullOrEmpty(categoryError))
