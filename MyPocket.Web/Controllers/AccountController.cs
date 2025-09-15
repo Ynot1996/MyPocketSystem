@@ -93,6 +93,12 @@ namespace MyPocket.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            // 密碼與確認密碼一致性驗證
+            if (model.Password != model.ConfirmPassword)
+            {
+                ModelState.AddModelError(nameof(model.ConfirmPassword), "密碼與確認密碼不一致");
+            }
+
             if (!ModelState.IsValid)
                 return View(model);
 

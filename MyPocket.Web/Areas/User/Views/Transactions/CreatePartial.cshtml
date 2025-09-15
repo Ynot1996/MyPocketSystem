@@ -14,7 +14,7 @@
                     <option value="">-- 選擇類別 --</option>
                     @if (categories != null && categories.Any())
                     {
-                        foreach (var categoryGroup in categories.GroupBy(c => c.Group.Name))
+                        foreach (var categoryGroup in categories.Where(c => c.Group != null).GroupBy(c => c.Group.Name))
                         {
                             <optgroup label="@categoryGroup.Key">
                                 @foreach (var category in categoryGroup)
@@ -22,6 +22,12 @@
                                     <option value="@category.Value">@category.Text</option>
                                 }
                             </optgroup>
+                        }
+                        // 處理沒有 Group 的分類
+                        var noGroupCategories = categories.Where(c => c.Group == null);
+                        foreach (var category in noGroupCategories)
+                        {
+                            <option value="@category.Value">@category.Text</option>
                         }
                     }
                     else
