@@ -1,0 +1,34 @@
+@model MyPocket.Shared.ViewModels.Announcements.AnnouncementCreateModel
+@{
+    ViewData["Title"] = "新增公告";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<h2>新增公告</h2>
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label">標題</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Content" class="form-label">內容</label>
+        <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>  
+    <button type="submit" class="btn btn-success">儲存</button>
+    <a asp-action="Index" class="btn btn-secondary">返回</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

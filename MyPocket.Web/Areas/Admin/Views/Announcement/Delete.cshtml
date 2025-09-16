@@ -1,0 +1,21 @@
+@model MyPocket.Core.Models.Announcement
+@{
+    ViewData["Title"] = "刪除公告";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<h2>刪除公告</h2>
+<div class="alert alert-danger">
+    <strong>確定要刪除這則公告嗎？</strong>
+</div>
+<div class="card mb-3">
+    <div class="card-body">
+        <h4 class="card-title">@Model.Title</h4>
+        <div class="text-muted mb-2">發布時間：@Model.PublishDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+        <div>@Model.Content</div>
+    </div>
+</div>
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="AnnouncementId" />
+    <button type="submit" class="btn btn-danger">確定刪除</button>
+    <a asp-action="Index" class="btn btn-secondary">取消</a>
+</form>

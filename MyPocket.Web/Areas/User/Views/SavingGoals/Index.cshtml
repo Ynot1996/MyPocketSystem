@@ -1,0 +1,35 @@
+@model IEnumerable<MyPocket.Core.Models.SavingGoal>
+@{
+    ViewData["Title"] = "儲蓄目標";
+}
+<h2>儲蓄目標</h2>
+<p>
+    <a class="btn btn-primary" asp-action="Create">新增目標</a>
+</p>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>名稱</th>
+            <th>目標金額</th>
+            <th>目前金額</th>
+            <th>目標日期</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.GoalName</td>
+            <td>@item.TargetAmount.ToString("N0")</td>
+            <td>@item.CurrentAmount.ToString("N0")</td>
+            <td>@item.TargetDate.ToString("yyyy-MM-dd")</td>
+            <td>
+                <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@item.GoalId">檢視</a>
+                <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@item.GoalId">編輯</a>
+                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.GoalId">刪除</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

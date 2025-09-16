@@ -1,0 +1,86 @@
+@* 管理員用 Layout *@
+@{
+    Layout = null;
+    string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    string currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MyPocket.Web</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/MyPocket.Web.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-white text-dark">
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand text-primary" asp-area="Admin" asp-controller="Users" asp-action="Index">MyPocket Admin</a>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item dropdown">
+                            @* 新增一個下拉選單主項目，並加上 dropdown 類別 *@
+                            <a class="nav-link dropdown-toggle text-dark @(currentController == "Users" || currentController == "UsersManagement" ? "active fw-bold" : "")" href="#" id="usersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-people-fill"></i> Users
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="usersDropdown">
+                                @* 下拉選單容器 *@
+                                <li>
+                                    <a class="dropdown-item @(currentController == "Users" && currentAction == "Index" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="Users" asp-action="Index">
+                                        Users Management
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item @(currentController == "UsersManagement" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="UsersManagement" asp-action="Index">
+                                        Users Subscription
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark @(currentController == "Categories" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="Categories" asp-action="Index">
+                                <i class="bi bi-tags-fill"></i> Categories Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark @(currentController == "Announcement" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="Announcement" asp-action="Index">
+                                <i class="bi bi-megaphone-fill"></i> Announcement
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark @(currentController == "SubscriptionPlans" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="SubscriptionPlans" asp-action="Index">
+                                <i class="bi bi-credit-card-fill"></i> Subscription Plans
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-link nav-link text-primary">
+                                    登出 (@(User?.Identity?.Name ?? ""))
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    @Html.Partial("_FooterPartial")
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

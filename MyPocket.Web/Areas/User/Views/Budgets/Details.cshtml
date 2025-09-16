@@ -1,0 +1,23 @@
+@model MyPocket.Shared.ViewModels.Budgets.BudgetViewModel
+@{
+    ViewData["Title"] = "預算明細";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+<h2>預算明細</h2>
+<dl class="row">
+    <dt class="col-sm-3">分類</dt>
+    <dd class="col-sm-9">@Model.CategoryName</dd>
+    <dt class="col-sm-3">預算金額</dt>
+    <dd class="col-sm-9">@Model.Amount.ToString("N0")</dd>
+    <dt class="col-sm-3">已花費</dt>
+    <dd class="col-sm-9">@Model.Spent.ToString("N0")</dd>
+    <dt class="col-sm-3">剩餘金額</dt>
+    <dd class="col-sm-9">@Model.Remaining.ToString("N0")</dd>
+    <dt class="col-sm-3">年度</dt>
+    <dd class="col-sm-9">@Model.BudgetYear</dd>
+    <dt class="col-sm-3">月份</dt>
+    <dd class="col-sm-9">@Model.BudgetMonth</dd>
+</dl>
+<a asp-action="Edit" asp-route-id="@Model.BudgetId" class="btn btn-primary">編輯</a>
+<a asp-action="Delete" asp-route-id="@Model.BudgetId" class="btn btn-danger">刪除</a>
+<a asp-action="Index" class="btn btn-secondary">返回列表</a>

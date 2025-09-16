@@ -1,0 +1,95 @@
+@model IEnumerable<MyPocket.Core.Models.SubscriptionPlan>
+@{
+    ViewData["Title"] = "訂閱方案";
+    var currentSubscription = ViewBag.CurrentSubscription as MyPocket.Core.Models.UserSubscription;
+}
+
+<div class="container py-5">
+    <h1 class="text-center mb-5">選擇適合您的方案</h1>
+
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+        @foreach (var plan in Model)
+        {
+            <div class="col">
+                <div class="card mb-4 rounded-3 shadow-sm @(plan.Price > 0 ? "border-primary" : "")">
+                    <div class="card-header py-3 @(plan.Price > 0 ? "text-bg-primary border-primary" : "")">
+                        <h4 class="my-0 fw-normal">@plan.PlanName</h4>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="card-title pricing-card-title">
+                            @if (plan.Price == 0)
+                            {
+                                <span>免費</span>
+                            }
+                            else
+                            {
+                                <span>NT$@plan.Price</span>
+                                @if (plan.DurationDays == 30)
+                                {
+                                    <small class="text-body-secondary fw-light">/月</small>
+                                }
+                                else if (plan.DurationDays == 365)
+                                {
+                                    <small class="text-body-secondary fw-light">/年</small>
+                                }
+                            }
+                        </h1>
+                        <ul class="list-unstyled mt-3 mb-4">
+                            @foreach (var feature in plan.Description.Split('\n'))
+                            {
+                                <li class="mb-2">@feature</li>
+                            }
+                        </ul>
+
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            @if (currentSubscription != null && currentSubscription.PlanId == plan.PlanId)
+                            {
+                                <div class="alert alert-success">
+                                    <small>目前方案（到期日：@currentSubscription.EndDate.ToLocalTime().ToString("yyyy/MM/dd")）</small>
+                                </div>
+                                <form asp-action="Cancel" method="post" onsubmit="return confirm('確定要取消訂閱嗎？');">
+                                    <button type="submit" class="w-100 btn btn-outline-danger">取消訂閱</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="Subscribe" method="post">
+                                    <input type="hidden" name="planId" value="@plan.PlanId" />
+                                    <button type="submit" class="w-100 btn @(plan.Price > 0 ? "btn-primary" : "btn-outline-primary")">
+                                        立即訂閱
+                                    </button>
+                                </form>
+                            }
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="w-100 btn @(plan.Price > 0 ? "btn-primary" : "btn-outline-primary")">
+                                登入後訂閱
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            $(document).ready(function() {
+                toastr.success('@TempData["SuccessMessage"]');
+            });
+        </script>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <script>
+            $(document).ready(function() {
+                toastr.error('@TempData["ErrorMessage"]');
+            });
+        </script>
+    }
+}

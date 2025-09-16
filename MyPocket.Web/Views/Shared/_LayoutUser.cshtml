@@ -1,0 +1,110 @@
+@* 一般會員用 Layout *@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MyPocket.Web</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/MyPocket.Web.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="User" asp-controller="Home" asp-action="index">MyPocket</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between" id="navbarContent">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="User" asp-controller="Transactions" asp-action="Index">
+                                <i class="bi bi-journal-text"></i> 記帳
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="User" asp-controller="Categories" asp-action="Index">
+                                <i class="bi bi-tags"></i> 類別管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="User" asp-controller="Budgets" asp-action="Index">
+                                <i class="bi bi-wallet2"></i> 預算管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="User" asp-controller="SavingGoals" asp-action="Index">
+                                <i class="bi bi-piggy-bank"></i> 儲蓄目標
+                            </a>
+                        </li>
+                        @if (User.IsInRole("PaidMember"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="User" asp-controller="PaidMember" asp-action="Index">
+                                    <i class="bi bi-gem"></i> 付費會員專區
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="User" asp-controller="Subscriptions" asp-action="Plans">
+                                <i class="bi bi-star"></i> 會員方案
+                                @if (User.IsInRole("FreeMember"))
+                                {
+                                    <span class="badge bg-warning text-dark">升級</span>
+                                }
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle me-1"></i>
+                                <span>@(User.FindFirst("Nickname")?.Value ?? User.Identity?.Name ?? "會員")</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li>
+                                    <a class="dropdown-item" asp-area="User" asp-controller="User" asp-action="Index">
+                                        <i class="bi bi-gear"></i> 帳號設定
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-area="User" asp-controller="Subscriptions" asp-action="CurrentPlan">
+                                        <i class="bi bi-star"></i> 會員資訊
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="bi bi-box-arrow-right"></i> 登出
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    @Html.Partial("_FooterPartial")
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

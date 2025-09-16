@@ -1,0 +1,14 @@
+@model MyPocket.Core.Models.Announcement
+@{
+    ViewData["Title"] = "公告詳細";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<h2>公告詳細</h2>
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">@Model.Title</h4>
+        <div class="text-muted mb-2">發布時間：@Model.PublishDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+        <div>@Model.Content</div>
+    </div>
+</div>
+<a asp-action="Index" class="btn btn-secondary mt-3">返回</a>

@@ -1,0 +1,99 @@
+@model MyPocket.Core.Models.User
+@{
+    ViewData["Title"] = $"用戶訂閱歷史 - {Model.Email}";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    用戶資訊
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">電子郵件</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">暱稱</dt>
+                        <dd class="col-sm-8">@Model.Nickname</dd>
+
+                        <dt class="col-sm-4">角色</dt>
+                        <dd class="col-sm-8">@Model.Role</dd>
+
+                        <dt class="col-sm-4">註冊日期</dt>
+                        <dd class="col-sm-8">@Model.CreationDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    更新訂閱
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                    }
+
+                    <form asp-action="UpdateSubscription" method="post">
+                        <input type="hidden" name="userId" value="@Model.UserId" />
+                        <div class="form-group">
+                            <label>選擇新的訂閱計劃</label>
+                            <select name="planId" class="form-control">
+                                @foreach (var plan in (IEnumerable<MyPocket.Core.Models.SubscriptionPlan>)ViewBag.SubscriptionPlans)
+                                {
+                                    <option value="@plan.PlanId">@plan.PlanName - @plan.Price.ToString("C0")</option>
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">更新訂閱</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            訂閱歷史記錄
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>訂閱計劃</th>
+                            <th>開始日期</th>
+                            <th>結束日期</th>
+                            <th>狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var subscription in Model.UserSubscriptions.OrderByDescending(s => s.StartDate))
+                        {
+                            <tr>
+                                <td>@subscription.Plan.PlanName</td>
+                                <td>@subscription.StartDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                                <td>@subscription.EndDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                                <td>@subscription.Status</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+    </div>
+</div>

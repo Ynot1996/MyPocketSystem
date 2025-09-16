@@ -1,0 +1,146 @@
+@model IEnumerable<MyPocket.Core.Models.Transaction>
+@{
+    ViewData["Title"] = "記帳";
+    var incomeList = Model.Where(x => x.TransactionType.Trim() == "收入").ToList();
+    var expenseList = Model.Where(x => x.TransactionType.Trim() == "支出").ToList();
+    var totalIncome = incomeList.Sum(x => x.Amount);
+    var totalExpense = expenseList.Sum(x => x.Amount);
+    var balance = totalIncome - totalExpense;
+    var expenseByCategory = expenseList
+        .GroupBy(x => x.Category.CategoryName)
+        .Select(g => new { Category = g.Key, Amount = g.Sum(x => x.Amount) })
+        .ToList();
+    var now = DateTime.UtcNow;
+    var budgets = ViewBag.Budgets as List<MyPocket.Shared.ViewModels.Budgets.BudgetViewModel>;
+    var totalBudget = budgets?.Sum(b => b.Amount) ?? 0;
+    var totalBudgetSpent = budgets?.Sum(b => b.Spent) ?? 0;
+    var totalBudgetRemaining = totalBudget - totalBudgetSpent;
+    var percent = totalBudget == 0 ? 0 : Math.Min(100, (int)((totalBudgetSpent / totalBudget) * 100));
+    var savingGoals = ViewBag.SavingGoals as List<MyPocket.Core.Models.SavingGoal>;
+    var selectedGoal = savingGoals?.FirstOrDefault();
+    var savingPercent = (selectedGoal != null && selectedGoal.TargetAmount > 0) ? Math.Min(100, (int)((selectedGoal.CurrentAmount / selectedGoal.TargetAmount) * 100)) : 0;
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8 mb-3 mb-md-0">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body d-flex justify-content-around align-items-center">
+                    <div class="text-center">
+                        <div class="fw-bold text-success" style="font-size:1.2rem">總收入</div>
+                        <div class="fs-4 fw-bold text-success">@totalIncome.ToString("N0")</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="fw-bold text-danger" style="font-size:1.2rem">總支出</div>
+                        <div class="fs-4 fw-bold text-danger">@totalExpense.ToString("N0")</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="fw-bold text-primary" style="font-size:1.2rem">結餘</div>
+                        <div class="fs-4 fw-bold text-primary">@balance.ToString("N0")</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <canvas id="expensePieChart" width="180" height="180"></canvas>
+                        </div>
+                        <div class="col-md-5 align-self-center">
+                            <div class="fw-bold mb-2">各分類支出明細</div>
+                            <ul class="list-group list-group-flush">
+                                @foreach (var item in expenseByCategory)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>@item.Category</span>
+                                        <span class="fw-bold">@item.Amount.ToString("N0")</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body text-center">
+                    <div class="fw-bold">本月總預算</div>
+                    <div class="fs-4 fw-bold">@totalBudget.ToString("N0")</div>
+                    <div class="mb-2">已花費：<span class="text-danger">@totalBudgetSpent.ToString("N0")</span>，剩餘：<span class="text-success">@totalBudgetRemaining.ToString("N0")</span></div>
+                    <div class="progress mb-2" style="height: 1.2rem;">
+                        <div class="progress-bar @(totalBudgetSpent > totalBudget ? "bg-danger" : "bg-primary")" role="progressbar" style="width: @percent%" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
+                            @percent%
+                        </div>
+                    </div>
+                    <a href="@Url.Action("Index", "Budgets", new { area = "User" })" class="btn btn-outline-primary btn-sm">預算管理</a>
+                </div>
+            </div>
+            <div class="card shadow-sm mb-3">
+                <div class="card-body text-center">
+                    <div class="fw-bold mb-2">儲蓄目標進度</div>
+                    @if (selectedGoal != null)
+                    {
+                        <div class="mb-1">@selectedGoal.GoalName</div>
+                        <div class="mb-1">目標金額：<span class="fw-bold">@selectedGoal.TargetAmount.ToString("N0")</span></div>
+                        <div class="mb-1">目前金額：<span class="fw-bold">@selectedGoal.CurrentAmount.ToString("N0")</span></div>
+                        <div class="progress mb-2" style="height: 1.2rem;">
+                            <div class="progress-bar @(savingPercent >= 100 ? "bg-success" : "bg-info")" role="progressbar" style="width: @savingPercent%" aria-valuenow="@savingPercent" aria-valuemin="0" aria-valuemax="100">
+                                @savingPercent%
+                            </div>
+                        </div>
+                        @if (savingPercent >= 100)
+                        {
+                            <div class="alert alert-success mt-2">恭喜達成儲蓄目標！</div>
+                        }
+                        <a href="@Url.Action("Index", "SavingGoals", new { area = "User" })" class="btn btn-outline-success btn-sm">管理目標</a>
+                    }
+                    else
+                    {
+                        <div class="text-muted">尚未設定儲蓄目標</div>
+                        <a href="@Url.Action("Index", "SavingGoals", new { area = "User" })" class="btn btn-outline-success btn-sm">新增目標</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            @await Html.PartialAsync("CreatePartial", Model)
+        </div>
+        <div class="col-md-8">
+            @await Html.PartialAsync("ListPartial", Model)
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('expensePieChart').getContext('2d');
+        const data = {
+            labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(expenseByCategory.Select(x => x.Category).ToList())),
+            datasets: [{
+                data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(expenseByCategory.Select(x => x.Amount).ToList())),
+                backgroundColor: [
+                    '#f87171', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa', '#f472b6', '#facc15', '#38bdf8', '#4ade80', '#fca5a5'
+                ],
+                borderWidth: 1
+            }]
+        };
+        new Chart(ctx, {
+            type: 'pie',
+            data: data,
+            options: {
+                responsive: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    title: { display: true, text: '各分類支出' }
+                }
+            }
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
