@@ -79,6 +79,36 @@
         .list-group-item:not(:last-child) {
             border-bottom: 1px solid rgba(0,0,0,.05);
         }
+
+    .expense-category-list {
+        height: 390px;
+        overflow-y: auto;
+        margin-right: -1rem;
+        padding-right: 1rem;
+        scroll-behavior: smooth;
+    }
+
+    .expense-category-list::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .expense-category-list::-webkit-scrollbar-track {
+        background: #f8f9fa;
+        border-radius: 2px;
+    }
+
+    .expense-category-list::-webkit-scrollbar-thumb {
+        background: #dee2e6;
+        border-radius: 2px;
+    }
+
+    .expense-category-list::-webkit-scrollbar-thumb:hover {
+        background: #adb5bd;
+    }
+
+    .expense-category-list .list-group-item {
+        padding: 0.6rem 0;
+    }
 </style>
 
 <div class="container py-4">
@@ -119,15 +149,17 @@
                             <div class="fw-bold mb-3">
                                 <i class="bi bi-pie-chart-fill me-2"></i>Expense by Category
                             </div>
-                            <ul class="list-group list-group-flush">
-                                @foreach (var item in expenseByCategory)
-                                {
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span><i class="bi bi-tag me-2 text-muted"></i>@item.Category</span>
-                                        <span class="fw-bold">NT$@item.Amount.ToString("#,##0")</span>
-                                    </li>
-                                }
-                            </ul>
+                            <div class="expense-category-list">
+                                <ul class="list-group list-group-flush">
+                                    @foreach (var item in expenseByCategory)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span><i class="bi bi-tag me-2 text-muted"></i>@item.Category</span>
+                                            <span class="fw-bold">NT$@item.Amount.ToString("#,##0")</span>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
