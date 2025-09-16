@@ -1,6 +1,6 @@
 @model IEnumerable<MyPocket.Core.Models.Transaction>
 @{
-    ViewData["Title"] = "記帳";
+    ViewData["Title"] = "Transactions";
     var incomeList = Model.Where(x => x.TransactionType.Trim() == "收入").ToList();
     var expenseList = Model.Where(x => x.TransactionType.Trim() == "支出").ToList();
     var totalIncome = incomeList.Sum(x => x.Amount);
@@ -21,39 +21,110 @@
     var savingPercent = (selectedGoal != null && selectedGoal.TargetAmount > 0) ? Math.Min(100, (int)((selectedGoal.CurrentAmount / selectedGoal.TargetAmount) * 100)) : 0;
 }
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 25px rgba(0,0,0,.1) !important;
+        transition: all .3s ease;
+    }
+
+    .stat-card {
+        border-radius: 15px;
+        border: none;
+        transition: all .3s ease;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        height: 60px;
+        width: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .progress {
+        border-radius: 10px;
+        background-color: rgba(0,0,0,.05);
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+    }
+
+    .custom-btn {
+        border-radius: 20px;
+        padding: 8px 20px;
+        transition: all .3s ease;
+    }
+
+        .custom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,.1);
+        }
+
+    .card {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    }
+
+    .list-group-item {
+        border: none;
+        padding: 0.75rem 0;
+    }
+
+        .list-group-item:not(:last-child) {
+            border-bottom: 1px solid rgba(0,0,0,.05);
+        }
+</style>
+
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col-md-8 mb-3 mb-md-0">
-            <div class="card shadow-sm mb-3">
-                <div class="card-body d-flex justify-content-around align-items-center">
+            <div class="card stat-card shadow-sm mb-3 hover-shadow">
+                <div class="card-body d-flex justify-content-around align-items-center p-4">
                     <div class="text-center">
-                        <div class="fw-bold text-success" style="font-size:1.2rem">總收入</div>
-                        <div class="fs-4 fw-bold text-success">@totalIncome.ToString("N0")</div>
+                        <div class="stat-icon bg-success bg-opacity-10">
+                            <i class="bi bi-arrow-down-circle text-success"></i>
+                        </div>
+                        <div class="fw-bold text-success" style="font-size:1.2rem">Total Income</div>
+                        <div class="fs-4 fw-bold text-success">NT$@totalIncome.ToString("#,##0")</div>
                     </div>
                     <div class="text-center">
-                        <div class="fw-bold text-danger" style="font-size:1.2rem">總支出</div>
-                        <div class="fs-4 fw-bold text-danger">@totalExpense.ToString("N0")</div>
+                        <div class="stat-icon bg-danger bg-opacity-10">
+                            <i class="bi bi-arrow-up-circle text-danger"></i>
+                        </div>
+                        <div class="fw-bold text-danger" style="font-size:1.2rem">Total Expense</div>
+                        <div class="fs-4 fw-bold text-danger">NT$@totalExpense.ToString("#,##0")</div>
                     </div>
                     <div class="text-center">
-                        <div class="fw-bold text-primary" style="font-size:1.2rem">結餘</div>
-                        <div class="fs-4 fw-bold text-primary">@balance.ToString("N0")</div>
+                        <div class="stat-icon bg-primary bg-opacity-10">
+                            <i class="bi bi-cash-stack text-primary"></i>
+                        </div>
+                        <div class="fw-bold text-primary" style="font-size:1.2rem">Balance</div>
+                        <div class="fs-4 fw-bold text-primary">NT$@balance.ToString("#,##0")</div>
                     </div>
                 </div>
             </div>
-            <div class="card shadow-sm mb-3">
-                <div class="card-body">
+            <div class="card stat-card shadow-sm mb-3 hover-shadow">
+                <div class="card-body p-4">
                     <div class="row">
                         <div class="col-md-7">
                             <canvas id="expensePieChart" width="180" height="180"></canvas>
                         </div>
                         <div class="col-md-5 align-self-center">
-                            <div class="fw-bold mb-2">各分類支出明細</div>
+                            <div class="fw-bold mb-3">
+                                <i class="bi bi-pie-chart-fill me-2"></i>Expense by Category
+                            </div>
                             <ul class="list-group list-group-flush">
                                 @foreach (var item in expenseByCategory)
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span>@item.Category</span>
-                                        <span class="fw-bold">@item.Amount.ToString("N0")</span>
+                                        <span><i class="bi bi-tag me-2 text-muted"></i>@item.Category</span>
+                                        <span class="fw-bold">NT$@item.Amount.ToString("#,##0")</span>
                                     </li>
                                 }
                             </ul>
@@ -63,42 +134,78 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card shadow-sm mb-3">
-                <div class="card-body text-center">
-                    <div class="fw-bold">本月總預算</div>
-                    <div class="fs-4 fw-bold">@totalBudget.ToString("N0")</div>
-                    <div class="mb-2">已花費：<span class="text-danger">@totalBudgetSpent.ToString("N0")</span>，剩餘：<span class="text-success">@totalBudgetRemaining.ToString("N0")</span></div>
-                    <div class="progress mb-2" style="height: 1.2rem;">
-                        <div class="progress-bar @(totalBudgetSpent > totalBudget ? "bg-danger" : "bg-primary")" role="progressbar" style="width: @percent%" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
+            <div class="card stat-card shadow-sm mb-3 hover-shadow">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon bg-primary bg-opacity-10">
+                        <i class="bi bi-wallet2 text-primary"></i>
+                    </div>
+                    <div class="fw-bold mb-2">Monthly Budget</div>
+                    <div class="fs-4 fw-bold">NT$@totalBudget.ToString("#,##0")</div>
+                    <div class="mb-3">
+                        <div class="text-danger mb-1">
+                            <i class="bi bi-dash-circle me-1"></i>Spent: NT$@totalBudgetSpent.ToString("#,##0")
+                        </div>
+                        <div class="text-success">
+                            <i class="bi bi-plus-circle me-1"></i>Remaining: NT$@totalBudgetRemaining.ToString("#,##0")
+                        </div>
+                    </div>
+                    <div class="progress mb-3" style="height: 1.2rem;">
+                        <div class="progress-bar @(totalBudgetSpent > totalBudget ? "bg-danger" : "bg-primary")"
+                             role="progressbar" style="width: @percent%" aria-valuenow="@percent"
+                             aria-valuemin="0" aria-valuemax="100">
                             @percent%
                         </div>
                     </div>
-                    <a href="@Url.Action("Index", "Budgets", new { area = "User" })" class="btn btn-outline-primary btn-sm">預算管理</a>
+                    <a href="@Url.Action("Index", "Budgets", new { area = "User" })"
+                       class="btn btn-outline-primary btn-sm custom-btn">
+                        <i class="bi bi-gear me-1"></i>Manage Budget
+                    </a>
                 </div>
             </div>
-            <div class="card shadow-sm mb-3">
-                <div class="card-body text-center">
-                    <div class="fw-bold mb-2">儲蓄目標進度</div>
+            <div class="card stat-card shadow-sm mb-3 hover-shadow">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon bg-success bg-opacity-10">
+                        <i class="bi bi-piggy-bank text-success"></i>
+                    </div>
+                    <div class="fw-bold mb-3">Saving Goals Progress</div>
                     @if (selectedGoal != null)
                     {
-                        <div class="mb-1">@selectedGoal.GoalName</div>
-                        <div class="mb-1">目標金額：<span class="fw-bold">@selectedGoal.TargetAmount.ToString("N0")</span></div>
-                        <div class="mb-1">目前金額：<span class="fw-bold">@selectedGoal.CurrentAmount.ToString("N0")</span></div>
-                        <div class="progress mb-2" style="height: 1.2rem;">
-                            <div class="progress-bar @(savingPercent >= 100 ? "bg-success" : "bg-info")" role="progressbar" style="width: @savingPercent%" aria-valuenow="@savingPercent" aria-valuemin="0" aria-valuemax="100">
+                        <div class="mb-2">
+                            <i class="bi bi-bullseye me-1"></i>@selectedGoal.GoalName
+                        </div>
+                        <div class="mb-2">
+                            Target Amount: <span class="fw-bold">NT$@selectedGoal.TargetAmount.ToString("#,##0")</span>
+                        </div>
+                        <div class="mb-2">
+                            Current Amount: <span class="fw-bold">NT$@selectedGoal.CurrentAmount.ToString("#,##0")</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 1.2rem;">
+                            <div class="progress-bar @(savingPercent >= 100 ? "bg-success" : "bg-info")"
+                                 role="progressbar" style="width: @savingPercent%"
+                                 aria-valuenow="@savingPercent" aria-valuemin="0" aria-valuemax="100">
                                 @savingPercent%
                             </div>
                         </div>
                         @if (savingPercent >= 100)
                         {
-                            <div class="alert alert-success mt-2">恭喜達成儲蓄目標！</div>
+                            <div class="alert alert-success mt-3">
+                                <i class="bi bi-trophy me-2"></i>Congratulations! Goal Achieved!
+                            </div>
                         }
-                        <a href="@Url.Action("Index", "SavingGoals", new { area = "User" })" class="btn btn-outline-success btn-sm">管理目標</a>
+                        <a href="@Url.Action("Index", "SavingGoals", new { area = "User" })"
+                           class="btn btn-outline-success btn-sm custom-btn">
+                            <i class="bi bi-gear me-1"></i>Manage Goals
+                        </a>
                     }
                     else
                     {
-                        <div class="text-muted">尚未設定儲蓄目標</div>
-                        <a href="@Url.Action("Index", "SavingGoals", new { area = "User" })" class="btn btn-outline-success btn-sm">新增目標</a>
+                        <div class="text-muted mb-3">
+                            <i class="bi bi-info-circle me-1"></i>No saving goals set
+                        </div>
+                        <a href="@Url.Action("Index", "SavingGoals", new { area = "User" })"
+                           class="btn btn-outline-success btn-sm custom-btn">
+                            <i class="bi bi-plus me-1"></i>Add Goal
+                        </a>
                     }
                 </div>
             </div>
@@ -135,7 +242,7 @@
                 responsive: false,
                 plugins: {
                     legend: { position: 'bottom' },
-                    title: { display: true, text: '各分類支出' }
+                    title: { display: true, text: 'Expenses by Category' }
                 }
             }
         });

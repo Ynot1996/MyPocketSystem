@@ -1,45 +1,49 @@
 @model MyPocket.Shared.ViewModels.Accounts.RegisterViewModel
 
 @{
-    ViewData["Title"] = "註冊";
-    Layout = "~/Views/Shared/_LayoutGuest.cshtml";
+    ViewData["Title"] = "Sign Up";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>註冊</h1>
-<hr />
-<div class="row">
-    <div class="col-md-6 col-lg-5">
-        <form asp-action="Register" method="post" autocomplete="off">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" autocomplete="username" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+<div class="container py-5" style="min-height: 80vh; background: linear-gradient(135deg, #fff 0%, #f6f7fb 100%);">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="bg-white rounded-4 shadow-sm p-5 border border-1">
+                <h2 class="fw-bold mb-4 text-center" style="color:#222; letter-spacing:-1px;">Create your account</h2>
+                <form asp-action="Register" method="post" autocomplete="off">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email address</label>
+                        <input asp-for="Email" class="form-control form-control-lg" autocomplete="username" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <input asp-for="Password" class="form-control form-control-lg" type="password" autocomplete="new-password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                        <input asp-for="ConfirmPassword" class="form-control form-control-lg" type="password" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Nickname" class="form-label">Nickname</label>
+                        <input asp-for="Nickname" class="form-control form-control-lg" />
+                        <span asp-validation-for="Nickname" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-dark btn-lg w-100 mt-3" style="border-radius:8px;">Sign Up</button>
+                </form>
+                <div class="text-center mt-4">
+                    <span class="text-muted">Already have an account?</span>
+                    <a asp-action="Login" class="ms-1 link-primary">Log In</a>
+                </div>
             </div>
-            <div class="form-group mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" type="password" autocomplete="new-password" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="Nickname" class="form-label"></label>
-                <input asp-for="Nickname" class="form-control" />
-                <span asp-validation-for="Nickname" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="註冊" class="btn btn-primary w-100" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
-<div class="mt-3">
-    <a asp-action="Login">已有帳號？登入</a>
-</div>
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

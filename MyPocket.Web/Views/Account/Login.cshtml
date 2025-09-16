@@ -1,17 +1,35 @@
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Log In";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h2>Login</h2>
-<form asp-action="Login" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <div class="form-group">
-        <label for="email">帳號</label>
-        <input type="text" name="email" class="form-control" required />
+<div class="container py-5" style="min-height: 80vh; background: linear-gradient(135deg, #fff 0%, #f6f7fb 100%);">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="bg-white rounded-4 shadow-sm p-5 border border-1">
+                <h2 class="fw-bold mb-4 text-center" style="color:#222; letter-spacing:-1px;">Log in to your account</h2>
+                <form asp-action="Login" method="post" autocomplete="off">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="text" name="email" class="form-control form-control-lg" required autocomplete="username" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control form-control-lg" required autocomplete="current-password" />
+                    </div>
+                    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                    <button type="submit" class="btn btn-dark btn-lg w-100 mt-3" style="border-radius:8px;">Log In</button>
+                </form>
+                <div class="text-center mt-4">
+                    <span class="text-muted">Don't have an account?</span>
+                    <a asp-action="Register" class="ms-1 link-primary">Sign Up</a>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="password">密碼</label>
-        <input type="password" name="password" class="form-control" required />
-    </div>
-    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
-    <button type="submit" class="btn btn-primary">登入</button>
-</form>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
