@@ -2,39 +2,41 @@
 @inject ILocalizationService Localizer
 @{
     var culture = System.Threading.Thread.CurrentThread.CurrentUICulture.Name;
-    ViewData["Title"] = Localizer.GetString("Home", culture);
+    ViewData["Title"] = "Home";
 }
 
-<div class="container py-5" style="min-height: 80vh; background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);">
-    <div class="row align-items-center justify-content-center">
-        <div class="col-md-7 text-center">
-            <h1 class="display-3 fw-bold mb-3" style="color: #2d3748;">@Localizer.GetString("SimpleBudgetManagement", culture)</h1>
-            <p class="lead mb-4" style="color: #4a5568;">@Localizer.GetString("EasyManageDescription", culture)<br>@Localizer.GetString("CloudDescription", culture)</p>
-            <a href="#" class="btn btn-primary btn-lg px-5 shadow-sm" style="background: #3b82f6; border: none;">@Localizer.GetString("StartUsingNow", culture)</a>
+<!-- Notion-style Hero Section -->
+<div class="container-fluid px-0" style="background: linear-gradient(135deg, #fff 0%, #f6f7fb 100%); min-height: 80vh;">
+    <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+        <div class="col-lg-7 text-center py-5">
+            <h1 class="display-2 fw-bold mb-3" style="color:#222; letter-spacing:-2px;">Your Personal Finance Space</h1>
+            <p class="lead mb-4" style="color:#555; font-size:1.5rem;">As simple and flexible as Notion.<br>Manage your income, expenses, budgets, and goals all in one place.</p>
+            <a href="/Account/Register" class="btn btn-dark btn-lg px-5 shadow-sm me-2" style="border-radius: 8px;">Get Started</a>
+            <a href="/Account/Login" class="btn btn-outline-dark btn-lg px-5" style="border-radius: 8px;">Already have an account? Log In</a>
         </div>
     </div>
-    <div class="row mt-5 justify-content-center">
+    <div class="row justify-content-center mt-5 pb-5">
         <div class="col-md-10">
             <div class="row g-4">
                 <div class="col-md-4 text-center">
-                    <div class="p-4 bg-white rounded shadow-sm h-100">
-                        <i class="bi bi-bar-chart-fill display-5 text-primary mb-3"></i>
-                        <h5 class="fw-bold mb-2">@Localizer.GetString("RealTimeReports", culture)</h5>
-                        <p class="text-muted">@Localizer.GetString("ReportsDescription", culture)</p>
+                    <div class="p-4 bg-white rounded-4 shadow-sm h-100 border border-1">
+                        <i class="bi bi-graph-up display-5 text-primary mb-3"></i>
+                        <h5 class="fw-bold mb-2">Real-time Reports</h5>
+                        <p class="text-muted">Visualize your income, expenses, budgets, and goals with clear charts.</p>
                     </div>
                 </div>
                 <div class="col-md-4 text-center">
-                    <div class="p-4 bg-white rounded shadow-sm h-100">
-                        <i class="bi bi-wallet2 display-5 text-success mb-3"></i>
-                        <h5 class="fw-bold mb-2">@Localizer.GetString("MultiAccountManagement", culture)</h5>
-                        <p class="text-muted">@Localizer.GetString("AccountsDescription", culture)</p>
+                    <div class="p-4 bg-white rounded-4 shadow-sm h-100 border border-1">
+                        <i class="bi bi-wallet display-5 text-success mb-3"></i>
+                        <h5 class="fw-bold mb-2">Multi-Account Management</h5>
+                        <p class="text-muted">Track multiple accounts and categories flexibly for every transaction.</p>
                     </div>
                 </div>
                 <div class="col-md-4 text-center">
-                    <div class="p-4 bg-white rounded shadow-sm h-100">
-                        <i class="bi bi-cloud-check-fill display-5 text-info mb-3"></i>
-                        <h5 class="fw-bold mb-2">@Localizer.GetString("CloudSecurity", culture)</h5>
-                        <p class="text-muted">@Localizer.GetString("SecurityDescription", culture)</p>
+                    <div class="p-4 bg-white rounded-4 shadow-sm h-100 border border-1">
+                        <i class="bi bi-cloud display-5 text-info mb-3"></i>
+                        <h5 class="fw-bold mb-2">Cloud Sync & Security</h5>
+                        <p class="text-muted">Automatic backup, cross-device access, and secure data protection.</p>
                     </div>
                 </div>
             </div>

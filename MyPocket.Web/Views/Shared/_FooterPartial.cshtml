@@ -1,9 +1,9 @@
 ﻿<footer class="footer mt-5">
     <style>
         .footer {
-            background: #232323;
+            background: #18181b;
             color: #fff;
-            padding: 2rem 0 1rem 0;
+            padding: 2.5rem 0 1.5rem 0;
             font-size: 1rem;
             letter-spacing: 0.5px;
         }
@@ -37,33 +37,35 @@
             .footer small {
                 color: #bbb;
             }
+
+            .footer .footer-brand {
+                font-size: 1.5rem;
+                font-weight: bold;
+                letter-spacing: 1px;
+                margin-bottom: 0.5rem;
+            }
     </style>
     <div class="container">
         <div class="row">
-            <div class="col-md-4">
-                <h5>MyPocket</h5>
-                <p>
-                    您的個人理財管理系統，協助您輕鬆追蹤收支與預算。
-                </p>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="footer-brand">MyPocket</div>
+                <p class="mb-2">A Notion-inspired personal finance space.</p>
+                <small>© 2025 MyPocket. All Rights Reserved.</small>
             </div>
-            <div class="col-md-4">
-                <h5>聯絡我們</h5>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <h5>Contact Us</h5>
                 <ul>
-                    <li>電子郵件: info@mypocket.com</li>
-                    <li>地址: 您的公司地址</li>
+                    <li>Email: info@mypocket.com</li>
+                    <li>Address: 7 Xinyi Rd. Sec. 5, Xinyi Dist., Taipei</li>
                 </ul>
             </div>
             <div class="col-md-4">
-                <h5>連結</h5>
+                <h5>Links</h5>
                 <ul>
-                    <li><a href="@Url.Action("Privacy", "Home")">隱私權政策</a></li>
-                    <li><a href="#">服務條款</a></li>
+                    <li><a href="@Url.Action("Privacy", "Home")">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="mailto:info@mypocket.com">Contact Support</a></li>
                 </ul>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12 text-center mt-3">
-                <small>&copy; 2025 - MyPocket. All Rights Reserved.</small>
             </div>
         </div>
     </div>
