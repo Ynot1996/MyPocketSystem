@@ -14,15 +14,18 @@ namespace MyPocket.Web.Areas.User.Controllers
         private readonly ITransactionService _transactionService;
         private readonly ISavingGoalService _savingGoalService;
         private readonly ICategoryService _categoryService;
+        private readonly IBudgetService _budgetService;
 
         public TransactionsController(
             ITransactionService transactionService,
             ISavingGoalService savingGoalService,
-            ICategoryService categoryService)
+            ICategoryService categoryService,
+            IBudgetService budgetService)
         {
             _transactionService = transactionService;
             _savingGoalService = savingGoalService;
             _categoryService = categoryService;
+            _budgetService = budgetService;
         }
 
         /// <summary>
@@ -48,21 +51,26 @@ namespace MyPocket.Web.Areas.User.Controllers
             try
             {
                 var userId = GetUserId();
+                var currentYear = DateTime.Now.Year;
+                var currentMonth = DateTime.Now.Month;
 
                 // 在這裡加入日誌記錄
-                // 這會讓你看到雲端環境中，系統獲取到的 userId 是什麼
                 System.Diagnostics.Debug.WriteLine($"User ID in Index action: {userId}");
 
                 // 獲取交易記錄
                 var transactions = await _transactionService.GetUserTransactionsAsync(userId);
-                
+
                 // 獲取儲蓄目標
                 var savingGoals = await _savingGoalService.GetUserGoalsAsync(userId);
                 ViewBag.SavingGoals = savingGoals;
 
+                // 獲取預算資訊
+                var budgets = await _budgetService.GetUserBudgetsAsync(userId, currentYear, currentMonth);
+                ViewBag.Budgets = budgets;
+
                 // 獲取分類列表
                 var categoryViewModel = await _categoryService.GetUserCategoriesAsync(userId);
-                
+
                 // 合併收入和支出分類
                 var allCategories = categoryViewModel.DefaultIncomeCategories
                     .Concat(categoryViewModel.DefaultExpenseCategories)
