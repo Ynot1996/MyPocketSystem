@@ -7,10 +7,8 @@ using MyPocket.Services;
 using MyPocket.Shared.ViewModels.Accounts;
 using System.Security.Claims;
 
-
 namespace MyPocket.Web.Controllers
 {
-
     public class AccountController : Controller
     {
         private readonly MyPocketDBContext _context;
@@ -61,11 +59,11 @@ namespace MyPocket.Web.Controllers
                     return RedirectToAction("Index", "PaidMember", new { area = "User" });
 
                 else if (user.Role == "FreeMember")
-                    return RedirectToAction("Index", "Transactions", new { area = "User"});
+                    return RedirectToAction("Index", "Transactions", new { area = "User" });
 
                 return RedirectToAction("Index", "Home");
             }
-            ModelState.AddModelError(string.Empty, "帳號或密碼錯誤");
+            ModelState.AddModelError(string.Empty, "Invalid email or password.");
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -93,10 +91,10 @@ namespace MyPocket.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            // 密碼與確認密碼一致性驗證
+            // Password and confirm password match validation
             if (model.Password != model.ConfirmPassword)
             {
-                ModelState.AddModelError(nameof(model.ConfirmPassword), "密碼與確認密碼不一致");
+                ModelState.AddModelError(nameof(model.ConfirmPassword), "Password and Confirm Password do not match.");
             }
 
             if (!ModelState.IsValid)
@@ -104,7 +102,7 @@ namespace MyPocket.Web.Controllers
 
             if (await _context.Users.AnyAsync(u => u.Email == model.Email && !u.IsDeleted))
             {
-                ModelState.AddModelError("Email", "此Email已被註冊");
+                ModelState.AddModelError("Email", "This email is already registered.");
                 return View(model);
             }
 
@@ -124,10 +122,10 @@ namespace MyPocket.Web.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // 自動訂閱基本方案
+            // Auto subscribe to basic plan
             await _subscriptionService.SubscribeToBasicPlanAsync(user.UserId);
 
-            TempData["SuccessMessage"] = "註冊成功！已自動為您訂閱基本會員方案。";
+            TempData["SuccessMessage"] = "Registration successful! You have been subscribed to the basic plan.";
             return RedirectToAction("Login");
         }
     }
