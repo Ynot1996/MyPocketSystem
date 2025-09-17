@@ -311,14 +311,17 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script>
+        // 註冊 datalabels 插件
+        Chart.register(ChartDataLabels);
+
         let expensePieChart;
         const chartColors = [
-            '#f87171', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa', 
+            '#f87171', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa',
             '#f472b6', '#facc15', '#38bdf8', '#4ade80', '#fca5a5'
         ];
 
-        // Store all expense data
         const expenseData = {
             all: {
                 categories: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(expenseByCategory.Select(x => x.Category).ToList())),
@@ -340,10 +343,13 @@
 
         function updateChart(period) {
             const data = expenseData[period];
-            
+
             if (expensePieChart) {
                 expensePieChart.destroy();
             }
+
+            // 計算總金額用於百分比計算
+            const total = data.amounts.reduce((a, b) => a + b, 0);
 
             const ctx = document.getElementById('expensePieChart').getContext('2d');
             expensePieChart = new Chart(ctx, {
@@ -363,6 +369,30 @@
                         padding: 20
                     },
                     plugins: {
+                        // 配置 datalabels
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${percentage}%`;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 14
+                            },
+                            textAlign: 'center',
+                            // 添加文字陰影效果，提高可讀性
+                            textShadow: true,
+                            shadowBlur: 3,
+                            shadowColor: 'rgba(0,0,0,0.5)',
+                            // 只在扇形區域夠大時顯示標籤
+                            display: function(context) {
+                                const dataset = context.dataset;
+                                const value = dataset.data[context.dataIndex];
+                                const percentage = value / total * 100;
+                                return percentage > 3; // 只有當比例大於 3% 時才顯示標籤
+                            }
+                        },
                         legend: {
                             position: 'right',
                             align: 'center',
@@ -383,6 +413,15 @@
                                 top: 10,
                                 bottom: 20
                             }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `NT$${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
                         }
                     }
                 }
@@ -392,12 +431,18 @@
             const categoryList = document.getElementById('categoryList');
             categoryList.innerHTML = `
                 <ul class="list-group list-group-flush">
-                    ${data.categories.map((category, index) => `
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-tag me-2 text-muted"></i>${category}</span>
-                            <span class="fw-bold">NT$${data.amounts[index].toLocaleString()}</span>
-                        </li>
-                    `).join('')}
+                    ${data.categories.map((category, index) => {
+                        const percentage = ((data.amounts[index] / total) * 100).toFixed(1);
+                        return `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-tag me-2 text-muted"></i>${category}</span>
+                                <div class="text-end">
+                                    <div class="fw-bold">NT$${data.amounts[index].toLocaleString()}</div>
+                                    <small class="text-muted">${percentage}%</small>
+                                </div>
+                            </li>
+                        `;
+                    }).join('')}
                 </ul>
             `;
         }
