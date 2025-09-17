@@ -19,6 +19,38 @@
     var savingGoals = ViewBag.SavingGoals as List<MyPocket.Core.Models.SavingGoal>;
     var selectedGoal = savingGoals?.FirstOrDefault();
     var savingPercent = (selectedGoal != null && selectedGoal.TargetAmount > 0) ? Math.Min(100, (int)((selectedGoal.CurrentAmount / selectedGoal.TargetAmount) * 100)) : 0;
+
+    // Add time filter variables
+    var today = DateTime.Now.Date;
+    var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
+    var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+    var firstDayOfYear = new DateTime(now.Year, 1, 1);
+    var lastDayOfYear = new DateTime(now.Year, 12, 31);
+
+    // 修正篩選條件，加入結束日期
+    var dailyExpenses = expenseList.Where(x => x.TransactionDate.Date == today);
+    var monthlyExpenses = expenseList.Where(x => 
+        x.TransactionDate.Date >= firstDayOfMonth && 
+        x.TransactionDate.Date <= lastDayOfMonth);
+    var yearlyExpenses = expenseList.Where(x => 
+        x.TransactionDate.Date >= firstDayOfYear && 
+        x.TransactionDate.Date <= lastDayOfYear);
+
+    // Create category expense data for different time periods
+    var dailyExpensesByCategory = dailyExpenses
+        .GroupBy(x => x.Category.CategoryName)
+        .Select(g => new { Category = g.Key, Amount = g.Sum(x => x.Amount) })
+        .ToList();
+
+    var monthlyExpensesByCategory = monthlyExpenses
+        .GroupBy(x => x.Category.CategoryName)
+        .Select(g => new { Category = g.Key, Amount = g.Sum(x => x.Amount) })
+        .ToList();
+
+    var yearlyExpensesByCategory = yearlyExpenses
+        .GroupBy(x => x.Category.CategoryName)
+        .Select(g => new { Category = g.Key, Amount = g.Sum(x => x.Amount) })
+        .ToList();
 }
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -157,6 +189,14 @@
                 <div class="card-body p-4">
                     <div class="row">
                         <div class="col-md-7">
+                            <div class="d-flex justify-content-center mb-3">
+                                <div class="btn-group" role="group" aria-label="Time filter">
+                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="daily">Today</button>
+                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="monthly">This Month</button>
+                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="yearly">This Year</button>
+                                    <button type="button" class="btn btn-outline-primary time-filter active" data-period="all">All Time</button>
+                                </div>
+                            </div>
                             <div class="chart-container">
                                 <canvas id="expensePieChart"></canvas>
                             </div>
@@ -165,7 +205,7 @@
                             <div class="fw-bold mb-3">
                                 <i class="bi bi-pie-chart-fill me-2"></i>Expense by Category
                             </div>
-                            <div class="expense-category-list">
+                            <div class="expense-category-list" id="categoryList">
                                 <ul class="list-group list-group-flush">
                                     @foreach (var item in expenseByCategory)
                                     {
@@ -271,51 +311,157 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script>
-        const ctx = document.getElementById('expensePieChart').getContext('2d');
-        const data = {
-            labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(expenseByCategory.Select(x => x.Category).ToList())),
-            datasets: [{
-                data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(expenseByCategory.Select(x => x.Amount).ToList())),
-                backgroundColor: [
-                    '#f87171', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa', '#f472b6', '#facc15', '#38bdf8', '#4ade80', '#fca5a5'
-                ],
-                borderWidth: 1
-            }]
+        // 註冊 datalabels 插件
+        Chart.register(ChartDataLabels);
+
+        let expensePieChart;
+        const chartColors = [
+            '#f87171', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa',
+            '#f472b6', '#facc15', '#38bdf8', '#4ade80', '#fca5a5'
+        ];
+
+        const expenseData = {
+            all: {
+                categories: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(expenseByCategory.Select(x => x.Category).ToList())),
+                amounts: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(expenseByCategory.Select(x => x.Amount).ToList()))
+            },
+            daily: {
+                categories: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(dailyExpensesByCategory.Select(x => x.Category).ToList())),
+                amounts: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(dailyExpensesByCategory.Select(x => x.Amount).ToList()))
+            },
+            monthly: {
+                categories: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(monthlyExpensesByCategory.Select(x => x.Category).ToList())),
+                amounts: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(monthlyExpensesByCategory.Select(x => x.Amount).ToList()))
+            },
+            yearly: {
+                categories: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(yearlyExpensesByCategory.Select(x => x.Category).ToList())),
+                amounts: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(yearlyExpensesByCategory.Select(x => x.Amount).ToList()))
+            }
         };
-        new Chart(ctx, {
-            type: 'pie',
-            data: data,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: 20
+
+        function updateChart(period) {
+            const data = expenseData[period];
+
+            if (expensePieChart) {
+                expensePieChart.destroy();
+            }
+
+            // 計算總金額用於百分比計算
+            const total = data.amounts.reduce((a, b) => a + b, 0);
+
+            const ctx = document.getElementById('expensePieChart').getContext('2d');
+            expensePieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.categories,
+                    datasets: [{
+                        data: data.amounts,
+                        backgroundColor: chartColors,
+                        borderWidth: 1
+                    }]
                 },
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        align: 'center',
-                        labels: {
-                            padding: 15,
-                            font: {
-                                size: 12
-                            }
-                        }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: 20
                     },
-                    title: {
-                        display: true,
-                        text: 'Expenses by Category',
-                        font: {
-                            size: 16
+                    plugins: {
+                        // 配置 datalabels
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${percentage}%`;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 14
+                            },
+                            textAlign: 'center',
+                            // 添加文字陰影效果，提高可讀性
+                            textShadow: true,
+                            shadowBlur: 3,
+                            shadowColor: 'rgba(0,0,0,0.5)',
+                            // 只在扇形區域夠大時顯示標籤
+                            display: function(context) {
+                                const dataset = context.dataset;
+                                const value = dataset.data[context.dataIndex];
+                                const percentage = value / total * 100;
+                                return percentage > 3; // 只有當比例大於 3% 時才顯示標籤
+                            }
                         },
-                        padding: {
-                            top: 10,
-                            bottom: 20
+                        legend: {
+                            position: 'right',
+                            align: 'center',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Expenses by Category',
+                            font: {
+                                size: 16
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `NT$${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
                         }
                     }
                 }
-            }
+            });
+
+            // Update category list
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = `
+                <ul class="list-group list-group-flush">
+                    ${data.categories.map((category, index) => {
+                        const percentage = ((data.amounts[index] / total) * 100).toFixed(1);
+                        return `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-tag me-2 text-muted"></i>${category}</span>
+                                <div class="text-end">
+                                    <div class="fw-bold">NT$${data.amounts[index].toLocaleString()}</div>
+                                    <small class="text-muted">${percentage}%</small>
+                                </div>
+                            </li>
+                        `;
+                    }).join('')}
+                </ul>
+            `;
+        }
+
+        // Initialize chart with all-time data
+        updateChart('all');
+
+        // Add click event listeners to filter buttons
+        document.querySelectorAll('.time-filter').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.time-filter').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                // Add active class to clicked button
+                this.classList.add('active');
+                // Update chart with selected period
+                updateChart(this.dataset.period);
+            });
         });
     </script>
     @{
