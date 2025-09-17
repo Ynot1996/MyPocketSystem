@@ -1,27 +1,40 @@
 @model MyPocket.Core.Models.SavingGoal
 @{
-    ViewData["Title"] = "刪除儲蓄目標";
+    ViewData["Title"] = "Delete Saving Goal";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
 }
-<h2>刪除儲蓄目標</h2>
-<h4>確定要刪除此儲蓄目標嗎？</h4>
-<div class="mb-3">
-    <label class="form-label">名稱</label>
-    <div class="form-control-plaintext">@Model.GoalName</div>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white fw-bold">Delete Saving Goal</div>
+                <div class="card-body">
+                    <h4 class="mb-4">Are you sure you want to delete this saving goal?</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Goal Name</label>
+                        <div class="form-control-plaintext">@Model.GoalName</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Target Amount</label>
+                        <div class="form-control-plaintext">@Model.TargetAmount.ToString("N0")</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Current Amount</label>
+                        <div class="form-control-plaintext">@Model.CurrentAmount.ToString("N0")</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Target Date</label>
+                        <div class="form-control-plaintext">@Model.TargetDate.ToString("yyyy-MM-dd")</div>
+                    </div>
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="GoalId" />
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="mb-3">
-    <label class="form-label">目標金額</label>
-    <div class="form-control-plaintext">@Model.TargetAmount.ToString("N0")</div>
-</div>
-<div class="mb-3">
-    <label class="form-label">目前金額</label>
-    <div class="form-control-plaintext">@Model.CurrentAmount.ToString("N0")</div>
-</div>
-<div class="mb-3">
-    <label class="form-label">目標日期</label>
-    <div class="form-control-plaintext">@Model.TargetDate.ToString("yyyy-MM-dd")</div>
-</div>
-<form asp-action="Delete" method="post">
-    <input type="hidden" asp-for="GoalId" />
-    <button type="submit" class="btn btn-danger">確定刪除</button>
-    <a asp-action="Index" class="btn btn-secondary">取消</a>
-</form>

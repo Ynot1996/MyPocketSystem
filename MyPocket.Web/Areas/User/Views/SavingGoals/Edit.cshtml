@@ -1,33 +1,43 @@
 @model MyPocket.Core.Models.SavingGoal
 @{
-    ViewData["Title"] = "編輯儲蓄目標";
+    ViewData["Title"] = "Edit Saving Goal";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
 }
-<h2>編輯儲蓄目標</h2>
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="GoalId" />
-    <div class="mb-3">
-        <label asp-for="GoalName" class="form-label"></label>
-        <input asp-for="GoalName" class="form-control" />
-        <span asp-validation-for="GoalName" class="text-danger"></span>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark fw-bold">Edit Saving Goal</div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" name="goalId" value="@Model.GoalId" />
+                        <div class="mb-3">
+                            <label class="form-label">Goal Name</label>
+                            <input class="form-control" value="@Model.GoalName" disabled />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Target Date</label>
+                            <input class="form-control" value="@Model.TargetDate.ToString("yyyy-MM-dd")" disabled />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Target Amount</label>
+                            <input name="targetAmount" class="form-control" type="number" min="1" step="1" value="@Model.TargetAmount" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Current Amount</label>
+                            <input class="form-control" value="@Model.CurrentAmount.ToString("N0")" disabled />
+                        </div>
+                        <div class="alert alert-info">Current amount will be recalculated automatically based on your transactions.</div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-warning text-white">Save Changes</button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-        <label asp-for="TargetAmount" class="form-label"></label>
-        <input asp-for="TargetAmount" class="form-control" />
-        <span asp-validation-for="TargetAmount" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="CurrentAmount" class="form-label"></label>
-        <input asp-for="CurrentAmount" class="form-control" />
-        <span asp-validation-for="CurrentAmount" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="TargetDate" class="form-label"></label>
-        <input asp-for="TargetDate" class="form-control" type="date" />
-        <span asp-validation-for="TargetDate" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">儲存變更</button>
-    <a asp-action="Index" class="btn btn-secondary">返回</a>
-</form>
+</div>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
