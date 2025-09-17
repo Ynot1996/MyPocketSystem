@@ -25,12 +25,16 @@ namespace MyPocket.Web.Areas.User.Controllers
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
                 return RedirectToAction("Login", "Account", new { area = "" });
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            var user = await _context.Users
+                .Include(u => u.UserSubscriptions)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+            
+            // Get both past and future transactions
             var recentTransactions = await _context.Transactions
                 .Include(t => t.Category)
-                .Where(t => t.UserId == userId)
+                .Where(t => t.UserId == userId && !t.IsDeleted)
                 .OrderByDescending(t => t.TransactionDate)
-                .Take(5)
+                .Take(10)  // Increased to 10 transactions
                 .ToListAsync();
 
             var transactionVMs = recentTransactions.Select(t => new TransactionViewModel
@@ -39,7 +43,11 @@ namespace MyPocket.Web.Areas.User.Controllers
                 CategoryName = t.Category?.CategoryName ?? ""
             }).ToList();
 
-            var announcements = await _context.Announcements.OrderByDescending(a => a.PublishDate).Take(3).ToListAsync();
+            var announcements = await _context.Announcements
+                .OrderByDescending(a => a.PublishDate)
+                .Take(3)
+                .ToListAsync();
+                
             ViewBag.User = user;
             ViewBag.RecentTransactions = transactionVMs;
             ViewBag.Announcements = announcements;
