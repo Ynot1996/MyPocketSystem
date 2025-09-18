@@ -167,7 +167,7 @@ namespace MyPocket.Web.Areas.User.Controllers
                 return RedirectToAction("Login", "Account", new { area = "" });
 
             await _savingGoalService.DeleteGoalAsync(userId, id);
-            TempData["SuccessMessage"] = "儲蓄目標已成功刪除。";
+            TempData["SuccessMessage"] = "Saving goal deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
     }
