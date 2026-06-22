@@ -20,7 +20,7 @@ namespace MyPocket.Services
         public async Task<List<Transaction>> GetUserTransactionsAsync(Guid userId)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException(@"用戶ID不能為空", nameof(userId));
+                throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
             return await _context.Transactions
                 .Include(t => t.Category)
@@ -32,11 +32,11 @@ namespace MyPocket.Services
         public async Task<List<Transaction>> GetUserTransactionsByMonthAsync(Guid userId, int year, int month)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException(@"用戶ID不能為空", nameof(userId));
+                throw new ArgumentException("User ID cannot be empty.", nameof(userId));
             if (year < 1900 || year > 9999)
-                throw new ArgumentException(@"無效的年份", nameof(year));
+                throw new ArgumentException("Invalid year.", nameof(year));
             if (month < 1 || month > 12)
-                throw new ArgumentException(@"無效的月份", nameof(month));
+                throw new ArgumentException("Invalid month.", nameof(month));
 
             return await _context.Transactions
                 .Include(t => t.Category)
@@ -51,9 +51,9 @@ namespace MyPocket.Services
         public async Task<Transaction?> GetTransactionAsync(Guid userId, Guid transactionId)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException(@"用戶ID不能為空", nameof(userId));
+                throw new ArgumentException("User ID cannot be empty.", nameof(userId));
             if (transactionId == Guid.Empty)
-                throw new ArgumentException(@"交易ID不能為空", nameof(transactionId));
+                throw new ArgumentException("Transaction ID cannot be empty.", nameof(transactionId));
 
             return await _context.Transactions
                 .Include(t => t.Category)
@@ -65,7 +65,7 @@ namespace MyPocket.Services
         public async Task<decimal> CalculateCurrentSavingAsync(Guid userId, DateTime start, DateTime end)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException(@"用戶ID不能為空", nameof(userId));
+                throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
             var income = await _context.Transactions
                 .Where(t => t.UserId == userId &&
@@ -89,11 +89,11 @@ namespace MyPocket.Services
         public async Task<(bool success, string message, Transaction? transaction)> CreateTransactionAsync(Guid userId, TransactionCreateModel model)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException(@"用戶ID不能為空", nameof(userId));
+                throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
             try
             {
-                // 查找分類並確認其屬於該用戶或是系統默認分類
+                // Find the category and verify it belongs to the user or is a system default.
                 var categoryViewModel = await _categoryService.GetUserCategoriesAsync(userId);
                 var category = categoryViewModel.DefaultIncomeCategories
                     .Concat(categoryViewModel.DefaultExpenseCategories)
@@ -121,7 +121,7 @@ namespace MyPocket.Services
                 _context.Transactions.Add(transaction);
                 await _context.SaveChangesAsync();
 
-                // 重新加載分類關聯
+                // Reload the category navigation property.
                 await _context.Entry(transaction)
                     .Reference(t => t.Category)
                     .LoadAsync();
@@ -137,9 +137,9 @@ namespace MyPocket.Services
         public async Task<(bool success, string message)> DeleteTransactionAsync(Guid userId, Guid transactionId)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException(@"用戶ID不能為空", nameof(userId));
+                throw new ArgumentException("User ID cannot be empty.", nameof(userId));
             if (transactionId == Guid.Empty)
-                throw new ArgumentException(@"交易ID不能為空", nameof(transactionId));
+                throw new ArgumentException("Transaction ID cannot be empty.", nameof(transactionId));
 
             try
             {

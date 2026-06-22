@@ -11,7 +11,6 @@ namespace MyPocket.Mobile
         public MainPage()
         {
             InitializeComponent();
-            // 使用 XAML 定義的 UsersListView
             UsersListView.ItemsSource = Users;
             LoadUsers();
         }
@@ -20,8 +19,8 @@ namespace MyPocket.Mobile
         {
             try
             {
-                // 請根據實際 API 網址調整 baseUrl
-                string baseUrl = "http://10.0.2.2:5000"; // Android 模擬器用 10.0.2.2 連本機
+                // Adjust baseUrl to match the actual API endpoint
+                string baseUrl = "http://10.0.2.2:5000"; // 10.0.2.2 is the host loopback for the Android emulator
                 var httpClient = new HttpClient();
                 var users = await httpClient.GetFromJsonAsync<List<UserDTO>>($"{baseUrl}/api/Users");
                 if (users != null)
@@ -53,6 +52,5 @@ namespace MyPocket.Mobile
         public Guid UserId { get; set; }
         public string Email { get; set; } = string.Empty;
         public string Nickname { get; set; } = string.Empty;
-        // 其他欄位可依需求擴充
     }
 }

@@ -8,8 +8,12 @@ namespace MyPocket.Services
 {
     public class CategoryService : ICategoryService
     {
+        private const string AdminEmail = "admin@example.com";
+        private const string IncomeType = "æ”¶å…¥";
+        private const string ExpenseType = "æ”¯å‡º";
+
         private readonly MyPocketDBContext _context;
-        private static readonly Guid AdminUserId = Guid.Parse("ef908f96-9557-477d-97f1-4b1d766150bc");
+
         public CategoryService(MyPocketDBContext context)
         {
             _context = context;
@@ -17,31 +21,32 @@ namespace MyPocket.Services
 
         public async Task<UserCategoryViewModel> GetUserCategoriesAsync(Guid userId)
         {
-            // °O¿ý¶Ç¤Jªº userId
-            System.Diagnostics.Debug.WriteLine($"CategoryService called with userId: {userId}");
-            System.Diagnostics.Debug.WriteLine($"Hardcoded AdminUserId: {AdminUserId}");
+            // Resolve the admin user dynamically so defaults survive a fresh DB seed.
+            var adminUserId = await _context.Users
+                .Where(u => u.Email == AdminEmail)
+                .Select(u => (Guid?)u.UserId)
+                .FirstOrDefaultAsync();
 
-            var categories = await _context.Categories.Where(c => !c.IsDeleted).ToListAsync();
-
-            // °O¿ý¿z¿ï«áªºÃþ§O¼Æ¶q
-            System.Diagnostics.Debug.WriteLine($"Total categories from DB: {categories.Count}");
-            System.Diagnostics.Debug.WriteLine($"DefaultIncomeCategories count: {categories.Count(c => c.UserId == AdminUserId && c.CategoryType == "¦¬¤J")}");
-            System.Diagnostics.Debug.WriteLine($"DefaultExpenseCategories count: {categories.Count(c => c.UserId == AdminUserId && c.CategoryType == "¤ä¥X")}");
-            System.Diagnostics.Debug.WriteLine($"UserIncomeCategories count: {categories.Count(c => c.UserId == userId && c.CategoryType == "¦¬¤J")}");
-            System.Diagnostics.Debug.WriteLine($"UserExpenseCategories count: {categories.Count(c => c.UserId == userId && c.CategoryType == "¤ä¥X")}");
+            var categories = await _context.Categories
+                .Where(c => !c.IsDeleted)
+                .ToListAsync();
 
             return new UserCategoryViewModel
             {
-                DefaultIncomeCategories = categories.Where(c => c.UserId == AdminUserId && c.CategoryType == "¦¬¤J").ToList(),
-                DefaultExpenseCategories = categories.Where(c => c.UserId == AdminUserId && c.CategoryType == "¤ä¥X").ToList(),
-                UserIncomeCategories = categories.Where(c => c.UserId == userId && c.CategoryType == "¦¬¤J").ToList(),
-                UserExpenseCategories = categories.Where(c => c.UserId == userId && c.CategoryType == "¤ä¥X").ToList()
+                DefaultIncomeCategories = adminUserId is null
+                    ? new List<Category>()
+                    : categories.Where(c => c.UserId == adminUserId && c.CategoryType == IncomeType).ToList(),
+                DefaultExpenseCategories = adminUserId is null
+                    ? new List<Category>()
+                    : categories.Where(c => c.UserId == adminUserId && c.CategoryType == ExpenseType).ToList(),
+                UserIncomeCategories = categories.Where(c => c.UserId == userId && c.CategoryType == IncomeType).ToList(),
+                UserExpenseCategories = categories.Where(c => c.UserId == userId && c.CategoryType == ExpenseType).ToList()
             };
         }
 
         public async Task CreateCategoryAsync(Guid userId, string name, string type)
         {
-            if (!string.IsNullOrWhiteSpace(name) && (type == "¦¬¤J" || type == "¤ä¥X"))
+            if (!string.IsNullOrWhiteSpace(name) && (type == IncomeType || type == ExpenseType))
             {
                 var category = new Category
                 {

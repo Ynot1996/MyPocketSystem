@@ -65,8 +65,19 @@ App 程式碼**不用改**。Program.cs 從設定讀 `ConnectionStrings:MyPocket
 ## 完成
 App Service → Overview → **Default domain** 點開，網站就活了。
 
-### 之後要更新版本
-在 VS 重新按 Publish 即可。
+### 之後要更新版本（macOS / dotnet CLI）
+在專案根目錄執行：
+```bash
+dotnet publish MyPocket.Web/MyPocket.Web.csproj -c Release -o ./publish
+cd publish && zip -r ../publish.zip . > /dev/null && cd ..
+az webapp deployment source config-zip --resource-group mypocket-rg --name mypocket-web-app --src publish.zip
+```
+
+### 預設管理員帳號
+種子資料於 `DbInitializer.cs` 建立：
+- Email：`admin@example.com`
+- 密碼：`12345678`
+- ⚠️ 公開 repo 可見，建議登入後立即修改。
 
 ### F1 免費層限制（Demo 夠用）
 - 每天 60 分鐘 CPU、會休眠（第一次開比較慢）、不能綁自訂網域 SSL。

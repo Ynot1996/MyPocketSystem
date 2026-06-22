@@ -29,22 +29,22 @@ namespace MyPocket.Web.Areas.User.Controllers
         }
 
         /// <summary>
-        /// 獲取當前用戶ID
+        /// Gets the current user's ID from the authentication claims.
         /// </summary>
-        /// <returns>用戶ID</returns>
-        /// <exception cref="UnauthorizedAccessException">當無法獲取用戶ID時拋出</exception>
+        /// <returns>The current user's ID.</returns>
+        /// <exception cref="UnauthorizedAccessException">Thrown when the user ID cannot be resolved.</exception>
         private Guid GetUserId()
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
             {
-                throw new UnauthorizedAccessException("無法識別用戶身份");
+                throw new UnauthorizedAccessException("Unable to identify the current user.");
             }
             return userId;
         }
 
         /// <summary>
-        /// 交易記錄首頁
+        /// Transaction list home page.
         /// </summary>
         public async Task<IActionResult> Index()
         {
@@ -54,24 +54,19 @@ namespace MyPocket.Web.Areas.User.Controllers
                 var currentYear = DateTime.Now.Year;
                 var currentMonth = DateTime.Now.Month;
 
-                // 在這裡加入日誌記錄
                 System.Diagnostics.Debug.WriteLine($"User ID in Index action: {userId}");
 
-                // 獲取交易記錄
                 var transactions = await _transactionService.GetUserTransactionsAsync(userId);
 
-                // 獲取儲蓄目標
                 var savingGoals = await _savingGoalService.GetUserGoalsAsync(userId);
                 ViewBag.SavingGoals = savingGoals;
 
-                // 獲取預算資訊
                 var budgets = await _budgetService.GetUserBudgetsAsync(userId, currentYear, currentMonth);
                 ViewBag.Budgets = budgets;
 
-                // 獲取分類列表
                 var categoryViewModel = await _categoryService.GetUserCategoriesAsync(userId);
 
-                // 合併收入和支出分類
+                // Merge income and expense categories into a single list for the dropdown.
                 var allCategories = categoryViewModel.DefaultIncomeCategories
                     .Concat(categoryViewModel.DefaultExpenseCategories)
                     .Concat(categoryViewModel.UserIncomeCategories)
@@ -106,7 +101,7 @@ namespace MyPocket.Web.Areas.User.Controllers
         }
 
         /// <summary>
-        /// 新增交易記錄
+        /// Creates a new transaction.
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -148,7 +143,7 @@ namespace MyPocket.Web.Areas.User.Controllers
         }
 
         /// <summary>
-        /// 刪除交易記錄
+        /// Deletes a transaction.
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]

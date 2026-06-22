@@ -62,7 +62,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                         return View(model);
                     }
 
-                    // 檢查用戶是否存在且是管理員
+                    // Verify the user exists and has the Admin role
                     var admin = await _context.Users
                         .FirstOrDefaultAsync(u => u.UserId == adminId && u.Role == "Admin");
                     if (admin == null)
