@@ -1,24 +1,22 @@
 @{
-    ViewData["Title"] = "付費會員專區";
+    ViewData["Title"] = Localizer["PremiumArea"];
 }
 
-<h2>付費會員專屬頁面</h2>
-<p>歡迎，@User.Identity?.Name！這裡是您的專屬功能。</p>
+<h2>@Localizer["PremiumMemberArea"]</h2>
+<p>@string.Format(Localizer["PremiumWelcome"], User.Identity?.Name)</p>
 
 <hr />
-<h4>一般會員功能</h4>
+<h4>@Localizer["StandardFeatures"]</h4>
 <ul>
-    <li>記帳、類別管理、預算管理、儲蓄目標 ...</li>
-    <!-- 可加上連結到原有功能 -->
+    <li>@Localizer["StandardFeaturesList"]</li>
 </ul>
 
 <hr />
-<h4>付費會員專屬功能</h4>
+<h4>@Localizer["PremiumFeatures"]</h4>
 <ul>
-    <li>多重預算管理</li>
-    <li>詳細圖表分析</li>
-    <li>目標儲蓄追蹤</li>
-    <li>自訂分類</li>
-    <li>資料匯出</li>
-    <!-- 依需求擴充 -->
+    <li>@Localizer["FeatureMultiBudgets"]</li>
+    <li>@Localizer["FeatureDetailedCharts"]</li>
+    <li>@Localizer["FeatureGoalTracking"]</li>
+    <li>@Localizer["FeatureCustomCategories"]</li>
+    <li>@Localizer["FeatureDataExport"]</li>
 </ul>

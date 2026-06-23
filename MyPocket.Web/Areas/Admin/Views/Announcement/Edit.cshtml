@@ -1,23 +1,23 @@
 @model MyPocket.Core.Models.Announcement
 @{
-    ViewData["Title"] = "編輯公告";
+    ViewData["Title"] = Localizer["EditAnnouncement"];
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h2>編輯公告</h2>
+<h2>@Localizer["EditAnnouncement"]</h2>
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="AnnouncementId" />
     <div class="mb-3">
-        <label asp-for="Title" class="form-label">標題</label>
+        <label asp-for="Title" class="form-label">@Localizer["Title"]</label>
         <input asp-for="Title" class="form-control" />
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="Content" class="form-label">內容</label>
+        <label asp-for="Content" class="form-label">@Localizer["Content"]</label>
         <textarea asp-for="Content" class="form-control" rows="5"></textarea>
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-warning">儲存</button>
-    <a asp-action="Index" class="btn btn-secondary">返回</a>
+    <button type="submit" class="btn btn-warning">@Localizer["Save"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["Back"]</a>
 </form>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -5,34 +5,34 @@
 }
 <div class="card shadow-sm">
     <div class="card-body">
-        <h5 class="card-title mb-3 fw-bold text-primary">新增交易</h5>
+        <h5 class="card-title mb-3 fw-bold text-primary">@Localizer["AddTransaction"]</h5>
         <form asp-action="Create" method="post" autocomplete="off">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
             <div class="mb-3">
-                <label for="CategoryId" class="form-label">類別 <span class="text-danger">*</span></label>
+                <label for="CategoryId" class="form-label">@Localizer["Category"] <span class="text-danger">*</span></label>
                 <select name="CategoryId" id="CategoryId" class="form-select" required>
-                    <option value="">-- 選擇類別 --</option>
+                    <option value="">-- @Localizer["SelectCategory"] --</option>
                     @if (categories != null && categories.Any())
                     {
                         foreach (var categoryGroup in categories.Where(c => c.Group != null).GroupBy(c => c.Group.Name))
                         {
-                            <optgroup label="@categoryGroup.Key">
+                            <optgroup label="@Localizer[categoryGroup.Key]">
                                 @foreach (var category in categoryGroup)
                                 {
-                                    <option value="@category.Value">@category.Text</option>
+                                    <option value="@category.Value">@Localizer[category.Text]</option>
                                 }
                             </optgroup>
                         }
-                        // 處理沒有 Group 的分類
+                        // Fall through any categories that were not assigned to a group.
                         var noGroupCategories = categories.Where(c => c.Group == null);
                         foreach (var category in noGroupCategories)
                         {
-                            <option value="@category.Value">@category.Text</option>
+                            <option value="@category.Value">@Localizer[category.Text]</option>
                         }
                     }
                     else
                     {
-                        <option value="">搜尋不到類別</option>
+                        <option value="">@Localizer["NoCategoriesFound"]</option>
                     }
                 </select>
                 @if (!string.IsNullOrEmpty(categoryError))
@@ -41,18 +41,18 @@
                 }
             </div>
             <div class="mb-3">
-                <label for="Amount" class="form-label">金額 <span class="text-danger">*</span></label>
+                <label for="Amount" class="form-label">@Localizer["Amount"] <span class="text-danger">*</span></label>
                 <input type="number" name="Amount" class="form-control" step="0.01" min="0" required />
             </div>
             <div class="mb-3">
-                <label for="TransactionDate" class="form-label">交易日期 <span class="text-danger">*</span></label>
+                <label for="TransactionDate" class="form-label">@Localizer["TransactionDate"] <span class="text-danger">*</span></label>
                 <input type="datetime-local" name="TransactionDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
             </div>
             <div class="mb-3">
-                <label for="Description" class="form-label">備註</label>
+                <label for="Description" class="form-label">@Localizer["Description"]</label>
                 <textarea name="Description" class="form-control" rows="2" maxlength="100"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary w-100">新增</button>
+            <button type="submit" class="btn btn-primary w-100">@Localizer["Add"]</button>
         </form>
     </div>
 </div>

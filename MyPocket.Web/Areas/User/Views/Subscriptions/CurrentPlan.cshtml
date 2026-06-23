@@ -1,29 +1,30 @@
 @model MyPocket.Core.Models.UserSubscription
 @{
-    ViewData["Title"] = "當前訂閱方案";
+    ViewData["Title"] = Localizer["CurrentPlan"];
+    var confirmCancel = Localizer["ConfirmCancelSubscriptionLong"];
 }
 
 <div class="container py-5">
-    <h2 class="mb-4">當前訂閱方案</h2>
+    <h2 class="mb-4">@Localizer["CurrentPlan"]</h2>
 
     <div class="row">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title text-primary">@Model.Plan.PlanName</h5>
+                    <h5 class="card-title text-primary">@Localizer[Model.Plan.PlanName]</h5>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>訂閱開始日期：</strong></p>
+                            <p class="mb-1"><strong>@Localizer["SubscriptionStartDate"]:</strong></p>
                             <p>@Model.StartDate.ToLocalTime().ToString("yyyy/MM/dd")</p>
                         </div>
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>訂閱到期日期：</strong></p>
+                            <p class="mb-1"><strong>@Localizer["SubscriptionEndDate"]:</strong></p>
                             <p>@Model.EndDate.ToLocalTime().ToString("yyyy/MM/dd")</p>
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <h6>方案內容：</h6>
+                        <h6>@Localizer["PlanContent"]:</h6>
                         @foreach (var line in (Model.Plan.Description ?? "").Split('\n'))
                         {
                             <p class="mb-1">@line</p>
@@ -32,13 +33,13 @@
 
                     <div class="d-flex justify-content-between align-items-center">
                         <a asp-action="Plans" class="btn btn-outline-primary">
-                            查看所有方案
+                            @Localizer["ViewAllPlans"]
                         </a>
                         <form asp-action="Cancel" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-danger"
-                                    onclick="return confirm('確定要取消訂閱嗎？這會立即終止您的會員權益。');">
-                                取消訂閱
+                                    onclick="return confirm('@confirmCancel');">
+                                @Localizer["CancelSubscription"]
                             </button>
                         </form>
                     </div>
@@ -49,15 +50,15 @@
             {
                 <div class="card mt-4">
                     <div class="card-body">
-                        <h5 class="card-title">付款記錄</h5>
+                        <h5 class="card-title">@Localizer["PaymentHistory"]</h5>
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>付款日期</th>
-                                        <th>金額</th>
-                                        <th>付款方式</th>
-                                        <th>狀態</th>
+                                        <th>@Localizer["PaymentDate"]</th>
+                                        <th>@Localizer["Amount"]</th>
+                                        <th>@Localizer["PaymentMethod"]</th>
+                                        <th>@Localizer["Status"]</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -85,27 +86,27 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">訂閱提醒</h5>
-                    <p>您的訂閱將在 @((Model.EndDate - DateTime.UtcNow).Days) 天後到期。</p>
-                    
+                    <h5 class="card-title">@Localizer["SubscriptionReminder"]</h5>
+                    <p>@string.Format(Localizer["SubscriptionExpiresInDays"], (Model.EndDate - DateTime.UtcNow).Days)</p>
+
                     @if ((Model.EndDate - DateTime.UtcNow).Days < 7)
                     {
                         <div class="alert alert-warning">
                             <i class="bi bi-exclamation-triangle"></i>
-                            您的訂閱即將到期，建議您及時續訂以避免服務中斷。
+                            @Localizer["SubscriptionExpiringWarning"]
                         </div>
                     }
 
-                    <a asp-action="Plans" class="btn btn-primary w-100">續訂服務</a>
+                    <a asp-action="Plans" class="btn btn-primary w-100">@Localizer["RenewService"]</a>
                 </div>
             </div>
 
             <div class="card mt-3">
                 <div class="card-body">
-                    <h5 class="card-title">需要幫助？</h5>
-                    <p class="card-text">如果您有任何問題或需要協助，請隨時聯繫我們的客服團隊。</p>
+                    <h5 class="card-title">@Localizer["NeedHelp"]</h5>
+                    <p class="card-text">@Localizer["NeedHelpDescription"]</p>
                     <a href="mailto:support@mypocket.com" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-envelope"></i> 聯繫客服
+                        <i class="bi bi-envelope"></i> @Localizer["ContactSupport"]
                     </a>
                 </div>
             </div>

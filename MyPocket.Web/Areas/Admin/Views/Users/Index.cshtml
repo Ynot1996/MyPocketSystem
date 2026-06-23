@@ -1,17 +1,17 @@
-﻿@model IEnumerable<MyPocket.Core.Models.User>
+@model IEnumerable<MyPocket.Core.Models.User>
 
 @{
-    ViewData["Title"] = "使用者管理";
+    ViewData["Title"] = Localizer["UsersManagement"];
 }
 
-<h1>使用者管理</h1>
+<h1>@Localizer["UsersManagement"]</h1>
 
 <div class="mb-2">
-    <input type="text" id="tableFilter" class="form-control" placeholder="搜尋...">
+    <input type="text" id="tableFilter" class="form-control" placeholder="@Localizer["Search"]...">
 </div>
 
 <p>
-    <a asp-action="Create" class="btn btn-success mb-2">新增使用者</a>
+    <a asp-action="Create" class="btn btn-success mb-2">@Localizer["AddUser"]</a>
 </p>
 <table class="table table-striped align-middle">
     <thead>
@@ -21,7 +21,7 @@
             <th>@Html.DisplayNameFor(model => model.Role)</th>
             <th>@Html.DisplayNameFor(model => model.CreationDate)</th>
             <th>@Html.DisplayNameFor(model => model.IsDeleted)</th>
-            <th>操作</th>
+            <th>@Localizer["Action"]</th>
         </tr>
     </thead>
     <tbody>
@@ -35,18 +35,18 @@
                 <td>
                     @if (item.IsDeleted)
                     {
-                        <span class="badge bg-danger">已停用</span>
+                        <span class="badge bg-danger">@Localizer["Disabled"]</span>
                     }
                     else
                     {
-                        <span class="badge bg-success">啟用中</span>
+                        <span class="badge bg-success">@Localizer["Active"]</span>
                     }
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-primary">編輯</a>
-                    <a asp-action="Details" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-secondary">詳細</a>
-                    <a asp-action="Delete" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-danger">刪除</a>                    
-                    <a asp-area="Admin" asp-controller="UsersManagement" asp-action="UserSubscriptionHistory" asp-route-userId="@item.UserId" class="btn btn-sm btn-outline-info">訂閱管理</a>                    
+                    <a asp-action="Edit" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-primary">@Localizer["Edit"]</a>
+                    <a asp-action="Details" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-secondary">@Localizer["Details"]</a>
+                    <a asp-action="Delete" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-danger">@Localizer["Delete"]</a>
+                    <a asp-area="Admin" asp-controller="UsersManagement" asp-action="UserSubscriptionHistory" asp-route-userId="@item.UserId" class="btn btn-sm btn-outline-info">@Localizer["SubscriptionManagement"]</a>
                 </td>
             </tr>
         }

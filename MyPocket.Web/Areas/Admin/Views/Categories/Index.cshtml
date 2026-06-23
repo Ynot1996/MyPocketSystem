@@ -1,45 +1,45 @@
-﻿@model IEnumerable<MyPocket.Core.Models.Category>
+@model IEnumerable<MyPocket.Core.Models.Category>
 
 @{
-    ViewData["Title"] = "分類管理";
+    ViewData["Title"] = Localizer["CategoriesManagement"];
     Func<MyPocket.Core.Models.Category, bool> isAdminCategory = c => c.User != null && c.User.Email == "admin@example.com";
     var incomeCategories = Model.Where(c => c.CategoryType == "收入").ToList();
     var expenseCategories = Model.Where(c => c.CategoryType == "支出").ToList();
 }
 
-<h1>分類管理</h1>
+<h1>@Localizer["CategoriesManagement"]</h1>
 
 <div class="row mb-3">
     <div class="col-md-4 mb-2">
-        <input type="text" id="tableFilter" class="form-control" placeholder="搜尋...">
+        <input type="text" id="tableFilter" class="form-control" placeholder="@Localizer["Search"]...">
     </div>
     <div class="col-md-3 mb-2">
         <select id="typeFilter" class="form-select">
-            <option value="">全部類型</option>
-            <option value="收入">收入</option>
-            <option value="支出">支出</option>
+            <option value="">@Localizer["AllTypes"]</option>
+            <option value="收入">@Localizer["Income"]</option>
+            <option value="支出">@Localizer["Expense"]</option>
         </select>
     </div>
     <div class="col-md-3 mb-2 d-flex align-items-center">
         <input type="checkbox" id="showUserCategory" class="form-check-input me-2">
-        <label for="showUserCategory" class="form-check-label">顯示使用者自訂類別</label>
+        <label for="showUserCategory" class="form-check-label">@Localizer["ShowUserCategories"]</label>
     </div>
     <div class="col-md-2 mb-2 text-end">
-        <a asp-action="Create" class="btn btn-success">新增分類</a>
+        <a asp-action="Create" class="btn btn-success">@Localizer["AddCategory"]</a>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-6 category-block" data-block="收入">
         <div class="card mb-4">
-            <div class="card-header bg-success text-white">收入分類</div>
+            <div class="card-header bg-success text-white">@Localizer["IncomeCategories"]</div>
             <div class="card-body p-0">
                 <table class="table table-striped align-middle mb-0 category-table" data-type="收入">
                     <thead>
                         <tr>
-                            <th>分類名稱</th>
-                            <th>來源</th>
-                            <th>操作</th>
+                            <th>@Localizer["CategoryName"]</th>
+                            <th>@Localizer["Source"]</th>
+                            <th>@Localizer["Action"]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,21 +47,21 @@
                         {
                             var isAdmin = isAdminCategory(item);
                             <tr data-type="收入" data-admin="@(isAdmin ? "1" : "0")">
-                                <td>@item.CategoryName</td>
+                                <td>@Localizer[item.CategoryName]</td>
                                 <td>
                                     @if (isAdmin)
                                     {
-                                        <span class="badge bg-primary">管理者</span>
+                                        <span class="badge bg-primary">@Localizer["Admin"]</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-info text-dark">使用者</span>
+                                        <span class="badge bg-info text-dark">@Localizer["User"]</span>
                                     }
                                 </td>
                                 <td>
-                                    <a asp-action="Edit" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-primary">編輯</a>
-                                    <a asp-action="Details" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-secondary">詳細</a>
-                                    <a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-danger">刪除</a>
+                                    <a asp-action="Edit" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-primary">@Localizer["Edit"]</a>
+                                    <a asp-action="Details" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-secondary">@Localizer["Details"]</a>
+                                    <a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-danger">@Localizer["Delete"]</a>
                                 </td>
                             </tr>
                         }
@@ -72,14 +72,14 @@
     </div>
     <div class="col-md-6 category-block" data-block="支出">
         <div class="card mb-4">
-            <div class="card-header bg-danger text-white">支出分類</div>
+            <div class="card-header bg-danger text-white">@Localizer["ExpenseCategories"]</div>
             <div class="card-body p-0">
                 <table class="table table-striped align-middle mb-0 category-table" data-type="支出">
                     <thead>
                         <tr>
-                            <th>分類名稱</th>
-                            <th>來源</th>
-                            <th>操作</th>
+                            <th>@Localizer["CategoryName"]</th>
+                            <th>@Localizer["Source"]</th>
+                            <th>@Localizer["Action"]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -87,21 +87,21 @@
                         {
                             var isAdmin = isAdminCategory(item);
                             <tr data-type="支出" data-admin="@(isAdmin ? "1" : "0")">
-                                <td>@item.CategoryName</td>
+                                <td>@Localizer[item.CategoryName]</td>
                                 <td>
                                     @if (isAdmin)
                                     {
-                                        <span class="badge bg-primary">管理者</span>
+                                        <span class="badge bg-primary">@Localizer["Admin"]</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-info text-dark">使用者</span>
+                                        <span class="badge bg-info text-dark">@Localizer["User"]</span>
                                     }
                                 </td>
                                 <td>
-                                    <a asp-action="Edit" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-primary">編輯</a>
-                                    <a asp-action="Details" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-secondary">詳細</a>
-                                    <a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-danger">刪除</a>
+                                    <a asp-action="Edit" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-primary">@Localizer["Edit"]</a>
+                                    <a asp-action="Details" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-secondary">@Localizer["Details"]</a>
+                                    <a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-outline-danger">@Localizer["Delete"]</a>
                                 </td>
                             </tr>
                         }
@@ -118,7 +118,7 @@
         var type = $('#typeFilter').val();
         var showUser = $('#showUserCategory').is(':checked');
 
-        // 區塊顯示控制
+        // Block visibility based on the type filter.
         if (type === "") {
             $('.category-block').show();
         } else {
@@ -127,7 +127,7 @@
             });
         }
 
-        // 列顯示控制
+        // Row visibility based on text and admin/user filter.
         $('.category-table tbody tr').each(function () {
             var row = $(this);
             var isAdmin = row.data('admin') == 1;

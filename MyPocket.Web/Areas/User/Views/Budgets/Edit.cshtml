@@ -1,22 +1,22 @@
 @model MyPocket.Shared.ViewModels.Budgets.BudgetViewModel
 @{
-    ViewData["Title"] = "編輯預算";
+    ViewData["Title"] = Localizer["EditBudget"];
     Layout = "~/Views/Shared/_LayoutUser.cshtml";
 }
-<h2>編輯預算</h2>
+<h2>@Localizer["EditBudget"]</h2>
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="BudgetId" />
     <div class="mb-3">
-        <label asp-for="CategoryName" class="form-label">分類</label>
+        <label asp-for="CategoryName" class="form-label">@Localizer["Category"]</label>
         <input asp-for="CategoryName" class="form-control" readonly />
     </div>
     <div class="mb-3">
-        <label asp-for="Amount" class="form-label">預算金額</label>
+        <label asp-for="Amount" class="form-label">@Localizer["BudgetAmount"]</label>
         <input asp-for="Amount" class="form-control" type="number" min="1" required />
         <span asp-validation-for="Amount" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-success">儲存</button>
-    <a asp-action="Index" class="btn btn-secondary">取消</a>
+    <button type="submit" class="btn btn-success">@Localizer["Save"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["Cancel"]</a>
 </form>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

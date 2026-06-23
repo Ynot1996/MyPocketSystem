@@ -1,10 +1,10 @@
 @model MyPocket.Core.Models.SubscriptionPlan
 
 @{
-    ViewData["Title"] = "編輯訂閱方案";
+    ViewData["Title"] = Localizer["EditSubscriptionPlan"];
 }
 
-<h1>編輯訂閱方案</h1>
+<h1>@Localizer["EditSubscriptionPlan"]</h1>
 
 <hr />
 <div class="row">
@@ -13,28 +13,28 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="PlanId" />
             <div class="form-group">
-                <label asp-for="PlanName" class="control-label">方案名稱</label>
+                <label asp-for="PlanName" class="control-label">@Localizer["PlanName"]</label>
                 <input asp-for="PlanName" class="form-control" />
                 <span asp-validation-for="PlanName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Price" class="control-label">價格</label>
+                <label asp-for="Price" class="control-label">@Localizer["Price"]</label>
                 <input asp-for="Price" class="form-control" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="DurationDays" class="control-label">天數</label>
+                <label asp-for="DurationDays" class="control-label">@Localizer["DurationDays"]</label>
                 <input asp-for="DurationDays" class="form-control" />
                 <span asp-validation-for="DurationDays" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Description" class="control-label">說明</label>
+                <label asp-for="Description" class="control-label">@Localizer["Description"]</label>
                 <textarea asp-for="Description" class="form-control"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="form-group mt-3">
-                <input type="submit" value="儲存" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+                <input type="submit" value="@Localizer["Save"]" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">@Localizer["BackToList"]</a>
             </div>
         </form>
     </div>

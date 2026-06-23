@@ -1,6 +1,6 @@
 @model IEnumerable<MyPocket.Core.Models.Transaction>
 @{
-    ViewData["Title"] = "Transactions";
+    ViewData["Title"] = Localizer["Transactions"];
     var incomeList = Model.Where(x => x.TransactionType.Trim() == "收入").ToList();
     var expenseList = Model.Where(x => x.TransactionType.Trim() == "支出").ToList();
     var totalIncome = incomeList.Sum(x => x.Amount);
@@ -27,7 +27,7 @@
     var firstDayOfYear = new DateTime(now.Year, 1, 1);
     var lastDayOfYear = new DateTime(now.Year, 12, 31);
 
-    // 修正篩選條件，加入結束日期
+    // Inclusive end-date filter for monthly/yearly buckets.
     var dailyExpenses = expenseList.Where(x => x.TransactionDate.Date == today);
     var monthlyExpenses = expenseList.Where(x => 
         x.TransactionDate.Date >= firstDayOfMonth && 
@@ -166,21 +166,21 @@
                         <div class="stat-icon bg-success bg-opacity-10">
                             <i class="bi bi-arrow-down-circle text-success"></i>
                         </div>
-                        <div class="fw-bold text-success" style="font-size:1.2rem">Total Income</div>
+                        <div class="fw-bold text-success" style="font-size:1.2rem">@Localizer["TotalIncome"]</div>
                         <div class="fs-4 fw-bold text-success">NT$@totalIncome.ToString("#,##0")</div>
                     </div>
                     <div class="text-center">
                         <div class="stat-icon bg-danger bg-opacity-10">
                             <i class="bi bi-arrow-up-circle text-danger"></i>
                         </div>
-                        <div class="fw-bold text-danger" style="font-size:1.2rem">Total Expense</div>
+                        <div class="fw-bold text-danger" style="font-size:1.2rem">@Localizer["TotalExpense"]</div>
                         <div class="fs-4 fw-bold text-danger">NT$@totalExpense.ToString("#,##0")</div>
                     </div>
                     <div class="text-center">
                         <div class="stat-icon bg-primary bg-opacity-10">
                             <i class="bi bi-cash-stack text-primary"></i>
                         </div>
-                        <div class="fw-bold text-primary" style="font-size:1.2rem">Balance</div>
+                        <div class="fw-bold text-primary" style="font-size:1.2rem">@Localizer["Balance"]</div>
                         <div class="fs-4 fw-bold text-primary">NT$@balance.ToString("#,##0")</div>
                     </div>
                 </div>
@@ -191,10 +191,10 @@
                         <div class="col-md-7">
                             <div class="d-flex justify-content-center mb-3">
                                 <div class="btn-group" role="group" aria-label="Time filter">
-                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="daily">Today</button>
-                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="monthly">This Month</button>
-                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="yearly">This Year</button>
-                                    <button type="button" class="btn btn-outline-primary time-filter active" data-period="all">All Time</button>
+                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="daily">@Localizer["Today"]</button>
+                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="monthly">@Localizer["ThisMonth"]</button>
+                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="yearly">@Localizer["ThisYear"]</button>
+                                    <button type="button" class="btn btn-outline-primary time-filter active" data-period="all">@Localizer["AllTime"]</button>
                                 </div>
                             </div>
                             <div class="chart-container">
@@ -203,14 +203,14 @@
                         </div>
                         <div class="col-md-5 align-self-center">
                             <div class="fw-bold mb-3">
-                                <i class="bi bi-pie-chart-fill me-2"></i>Expense by Category
+                                <i class="bi bi-pie-chart-fill me-2"></i>@Localizer["ExpenseByCategory"]
                             </div>
                             <div class="expense-category-list" id="categoryList">
                                 <ul class="list-group list-group-flush">
                                     @foreach (var item in expenseByCategory)
                                     {
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span><i class="bi bi-tag me-2 text-muted"></i>@item.Category</span>
+                                            <span><i class="bi bi-tag me-2 text-muted"></i>@Localizer[item.Category]</span>
                                             <span class="fw-bold">NT$@item.Amount.ToString("#,##0")</span>
                                         </li>
                                     }
@@ -227,14 +227,14 @@
                     <div class="stat-icon bg-primary bg-opacity-10">
                         <i class="bi bi-wallet2 text-primary"></i>
                     </div>
-                    <div class="fw-bold mb-2">Monthly Budget</div>
+                    <div class="fw-bold mb-2">@Localizer["MonthlyBudget"]</div>
                     <div class="fs-4 fw-bold">NT$@totalBudget.ToString("#,##0")</div>
                     <div class="mb-3">
                         <div class="text-danger mb-1">
-                            <i class="bi bi-dash-circle me-1"></i>Spent: NT$@totalBudgetSpent.ToString("#,##0")
+                            <i class="bi bi-dash-circle me-1"></i>@Localizer["Spent"]: NT$@totalBudgetSpent.ToString("#,##0")
                         </div>
                         <div class="text-success">
-                            <i class="bi bi-plus-circle me-1"></i>Remaining: NT$@totalBudgetRemaining.ToString("#,##0")
+                            <i class="bi bi-plus-circle me-1"></i>@Localizer["Remaining"]: NT$@totalBudgetRemaining.ToString("#,##0")
                         </div>
                     </div>
                     <div class="progress mb-3" style="height: 1.2rem;">
@@ -246,7 +246,7 @@
                     </div>
                     <a href="@Url.Action("Index", "Budgets", new { area = "User" })"
                        class="btn btn-outline-primary btn-sm custom-btn">
-                        <i class="bi bi-gear me-1"></i>Manage Budget
+                        <i class="bi bi-gear me-1"></i>@Localizer["ManageBudget"]
                     </a>
                 </div>
             </div>
@@ -255,17 +255,17 @@
                     <div class="stat-icon bg-success bg-opacity-10">
                         <i class="bi bi-piggy-bank text-success"></i>
                     </div>
-                    <div class="fw-bold mb-3">Saving Goals Progress</div>
+                    <div class="fw-bold mb-3">@Localizer["SavingGoalsProgress"]</div>
                     @if (selectedGoal != null)
                     {
                         <div class="mb-2">
                             <i class="bi bi-bullseye me-1"></i>@selectedGoal.GoalName
                         </div>
                         <div class="mb-2">
-                            Target Amount: <span class="fw-bold">NT$@selectedGoal.TargetAmount.ToString("#,##0")</span>
+                            @Localizer["TargetAmount"]: <span class="fw-bold">NT$@selectedGoal.TargetAmount.ToString("#,##0")</span>
                         </div>
                         <div class="mb-2">
-                            Current Amount: <span class="fw-bold">NT$@selectedGoal.CurrentAmount.ToString("#,##0")</span>
+                            @Localizer["CurrentAmount"]: <span class="fw-bold">NT$@selectedGoal.CurrentAmount.ToString("#,##0")</span>
                         </div>
                         <div class="progress mb-3" style="height: 1.2rem;">
                             <div class="progress-bar @(savingPercent >= 100 ? "bg-success" : "bg-info")"
@@ -277,22 +277,22 @@
                         @if (savingPercent >= 100)
                         {
                             <div class="alert alert-success mt-3">
-                                <i class="bi bi-trophy me-2"></i>Congratulations! Goal Achieved!
+                                <i class="bi bi-trophy me-2"></i>@Localizer["GoalAchieved"]
                             </div>
                         }
                         <a href="@Url.Action("Index", "SavingGoals", new { area = "User" })"
                            class="btn btn-outline-success btn-sm custom-btn">
-                            <i class="bi bi-gear me-1"></i>Manage Goals
+                            <i class="bi bi-gear me-1"></i>@Localizer["ManageGoals"]
                         </a>
                     }
                     else
                     {
                         <div class="text-muted mb-3">
-                            <i class="bi bi-info-circle me-1"></i>No saving goals set
+                            <i class="bi bi-info-circle me-1"></i>@Localizer["NoSavingGoalsSet"]
                         </div>
                         <a href="@Url.Action("Index", "SavingGoals", new { area = "User" })"
                            class="btn btn-outline-success btn-sm custom-btn">
-                            <i class="bi bi-plus me-1"></i>Add Goal
+                            <i class="bi bi-plus me-1"></i>@Localizer["AddGoal"]
                         </a>
                     }
                 </div>
@@ -313,7 +313,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script>
-        // 註冊 datalabels 插件
+        // Register datalabels plugin
         Chart.register(ChartDataLabels);
 
         let expensePieChart;
@@ -348,7 +348,7 @@
                 expensePieChart.destroy();
             }
 
-            // 計算總金額用於百分比計算
+            // Total amount, used for percentage calculation
             const total = data.amounts.reduce((a, b) => a + b, 0);
 
             const ctx = document.getElementById('expensePieChart').getContext('2d');
@@ -369,7 +369,7 @@
                         padding: 20
                     },
                     plugins: {
-                        // 配置 datalabels
+                        // datalabels options
                         datalabels: {
                             formatter: (value, ctx) => {
                                 const percentage = ((value / total) * 100).toFixed(1);
@@ -381,16 +381,16 @@
                                 size: 14
                             },
                             textAlign: 'center',
-                            // 添加文字陰影效果，提高可讀性
+                            // Drop shadow improves label readability against slice colors
                             textShadow: true,
                             shadowBlur: 3,
                             shadowColor: 'rgba(0,0,0,0.5)',
-                            // 只在扇形區域夠大時顯示標籤
+                            // Only render the label when the slice is large enough to fit it.
                             display: function(context) {
                                 const dataset = context.dataset;
                                 const value = dataset.data[context.dataIndex];
                                 const percentage = value / total * 100;
-                                return percentage > 3; // 只有當比例大於 3% 時才顯示標籤
+                                return percentage > 3; // hide labels below 3% to avoid clutter
                             }
                         },
                         legend: {

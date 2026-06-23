@@ -1,9 +1,9 @@
 @model MyPocket.Shared.ViewModels.Announcements.AnnouncementCreateModel
 @{
-    ViewData["Title"] = "新增公告";
+    ViewData["Title"] = Localizer["AddAnnouncement"];
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h2>新增公告</h2>
+<h2>@Localizer["AddAnnouncement"]</h2>
 
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -16,17 +16,17 @@
 
 <form asp-action="Create" method="post">
     <div class="mb-3">
-        <label asp-for="Title" class="form-label">標題</label>
+        <label asp-for="Title" class="form-label">@Localizer["Title"]</label>
         <input asp-for="Title" class="form-control" />
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="Content" class="form-label">內容</label>
+        <label asp-for="Content" class="form-label">@Localizer["Content"]</label>
         <textarea asp-for="Content" class="form-control" rows="5"></textarea>
         <span asp-validation-for="Content" class="text-danger"></span>
-    </div>  
-    <button type="submit" class="btn btn-success">儲存</button>
-    <a asp-action="Index" class="btn btn-secondary">返回</a>
+    </div>
+    <button type="submit" class="btn btn-success">@Localizer["Save"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["Back"]</a>
 </form>
 
 @section Scripts {

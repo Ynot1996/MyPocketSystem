@@ -1,20 +1,23 @@
 @model IEnumerable<MyPocket.Core.Models.User>
 @{
-    ViewData["Title"] = "用戶訂閱管理";
+    ViewData["Title"] = Localizer["UsersSubscription"];
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var confirmBulkUpdate = Localizer["ConfirmBulkSubscriptionUpdate"];
+    var errorPrefix = Localizer["ErrorPrefix"];
+    var bulkUpdateErrorPrefix = Localizer["BulkUpdateError"];
 }
 
-<h1>用戶訂閱管理</h1>
+<h1>@Localizer["UsersSubscription"]</h1>
 
 <div class="mb-2">
-    <input type="text" id="tableFilter" class="form-control" placeholder="搜尋...">
+    <input type="text" id="tableFilter" class="form-control" placeholder="@Localizer["Search"]...">
 </div>
 
 <div class="alert alert-info">
-    選擇用戶並更新其訂閱計劃。你可以：
+    @Localizer["UsersSubscriptionHint"]
     <ul>
-        <li>點擊單一用戶的「詳細」查看其訂閱歷史</li>
-        <li>勾選多個用戶並選擇訂閱計劃進行批次更新</li>
+        <li>@Localizer["UsersSubscriptionHint1"]</li>
+        <li>@Localizer["UsersSubscriptionHint2"]</li>
     </ul>
 </div>
 
@@ -35,12 +38,12 @@
                     <th>
                         <input type="checkbox" id="selectAll" />
                     </th>
-                    <th>電子郵件</th>
-                    <th>暱稱</th>
-                    <th>角色</th>
-                    <th>目前訂閱</th>
-                    <th>訂閱到期日</th>
-                    <th>操作</th>
+                    <th>@Localizer["EmailAddress"]</th>
+                    <th>@Localizer["Nickname"]</th>
+                    <th>@Localizer["Role"]</th>
+                    <th>@Localizer["CurrentSubscription"]</th>
+                    <th>@Localizer["SubscriptionEndDate"]</th>
+                    <th>@Localizer["Action"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -54,11 +57,11 @@
                         <td>@user.Email</td>
                         <td>@user.Nickname</td>
                         <td>@user.Role</td>
-                        <td>@(currentSub?.Plan?.PlanName ?? "無訂閱")</td>
+                        <td>@(currentSub?.Plan?.PlanName != null ? Localizer[currentSub.Plan.PlanName] : Localizer["NoSubscription"])</td>
                         <td>@(currentSub?.EndDate.ToString("yyyy/MM/dd") ?? "---")</td>
                         <td>
-                            <a asp-action="UserSubscriptionHistory" asp-route-userId="@user.UserId" 
-                               class="btn btn-info btn-sm">詳細</a>
+                            <a asp-action="UserSubscriptionHistory" asp-route-userId="@user.UserId"
+                               class="btn btn-info btn-sm">@Localizer["Details"]</a>
                         </td>
                     </tr>
                 }
@@ -68,20 +71,20 @@
 
     <div class="card mt-3">
         <div class="card-body">
-            <h5 class="card-title">批次更新訂閱</h5>
+            <h5 class="card-title">@Localizer["BulkUpdateSubscription"]</h5>
             <div class="row">
                 <div class="col-md-6">
                     <select id="planSelection" class="form-control">
-                        <option value="">選擇訂閱計劃...</option>
+                        <option value="">@Localizer["SelectAPlan"]...</option>
                         @foreach (var plan in (IEnumerable<MyPocket.Core.Models.SubscriptionPlan>)ViewBag.SubscriptionPlans)
                         {
-                            <option value="@plan.PlanId">@plan.PlanName</option>
+                            <option value="@plan.PlanId">@Localizer[plan.PlanName]</option>
                         }
                     </select>
                 </div>
                 <div class="col-md-6">
                     <button type="button" id="updateSelected" class="btn btn-primary" disabled>
-                        更新選定用戶的訂閱
+                        @Localizer["UpdateSelectedUsers"]
                     </button>
                 </div>
             </div>
@@ -92,42 +95,36 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Select All 功能
+            // Select-all toggle
             $("#selectAll").change(function () {
                 $(".user-checkbox").prop('checked', $(this).prop('checked'));
                 updateButtonState();
             });
 
-            // 個別checkbox變更時更新按鈕狀態
+            // Sync individual rows back to the header checkbox
             $(".user-checkbox").change(function () {
                 updateButtonState();
-                // 檢查是否所有checkbox都被選中
                 var allChecked = $(".user-checkbox:not(:checked)").length === 0;
                 $("#selectAll").prop('checked', allChecked);
             });
 
-            // 訂閱計劃選擇變更時更新按鈕狀態
             $("#planSelection").change(function () {
                 updateButtonState();
             });
 
-            // 更新按鈕啟用狀態
             function updateButtonState() {
                 var hasSelection = $(".user-checkbox:checked").length > 0;
                 var hasPlan = $("#planSelection").val() !== "";
                 $("#updateSelected").prop('disabled', !hasSelection || !hasPlan);
             }
 
-            // 處理批次更新
             $("#updateSelected").click(function (e) {
                 e.preventDefault();
 
-                // 顯示確認對話框
-                if (!confirm("確定要更新選定用戶的訂閱計劃嗎？")) {
+                if (!confirm("@confirmBulkUpdate")) {
                     return;
                 }
-                
-                // 收集選中的用戶ID
+
                 var selectedUsers = [];
                 $(".user-checkbox:checked").each(function () {
                     selectedUsers.push($(this).val());
@@ -135,9 +132,9 @@
 
                 var planId = $("#planSelection").val();
 
-                // 禁用按鈕，避免重複提交
+                // Disable while the request is in flight to prevent duplicate submissions.
                 $("#updateSelected").prop('disabled', true);
-                
+
                 $.ajax({
                     url: '@Url.Action("UpdateSelectedSubscriptions")',
                     type: 'POST',
@@ -151,14 +148,12 @@
                             alert(result.message);
                             location.reload();
                         } else {
-                            alert('錯誤：' + result.message);
-                            // 重新啟用按鈕
+                            alert('@errorPrefix' + result.message);
                             updateButtonState();
                         }
                     },
                     error: function (xhr, status, error) {
-                        alert('更新訂閱時發生錯誤：' + error);
-                        // 重新啟用按鈕
+                        alert('@bulkUpdateErrorPrefix' + error);
                         updateButtonState();
                     }
                 });

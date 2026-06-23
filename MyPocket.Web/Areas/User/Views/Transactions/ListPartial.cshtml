@@ -2,26 +2,27 @@
 @{
     var incomeList = Model.Where(x => x.TransactionType.Trim() == "收入").ToList();
     var expenseList = Model.Where(x => x.TransactionType.Trim() == "支出").ToList();
+    var confirmDelete = Localizer["ConfirmDeleteTransaction"];
 }
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <h5 class="card-title mb-3 fw-bold text-success">收入紀錄</h5>
+        <h5 class="card-title mb-3 fw-bold text-success">@Localizer["IncomeRecords"]</h5>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>日期</th>
-                        <th>類別</th>
-                        <th>金額</th>
-                        <th>備註</th>
-                        <th>操作</th>
+                        <th>@Localizer["Date"]</th>
+                        <th>@Localizer["Category"]</th>
+                        <th>@Localizer["Amount"]</th>
+                        <th>@Localizer["Description"]</th>
+                        <th>@Localizer["Action"]</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (!incomeList.Any())
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-muted">尚無收入紀錄</td>
+                            <td colspan="5" class="text-center text-muted">@Localizer["NoIncomeRecords"]</td>
                         </tr>
                     }
                     else
@@ -30,15 +31,15 @@
                         {
                             <tr>
                                 <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
-                                <td>@item.Category.CategoryName</td>
+                                <td>@Localizer[item.Category.CategoryName]</td>
                                 <td class="text-success fw-bold">+@item.Amount.ToString("N0")</td>
                                 <td>@item.Description</td>
                                 <td>
                                     <form asp-action="Delete" method="post" class="d-inline">
                                         <input type="hidden" name="id" value="@item.TransactionId" />
                                         <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('確定要刪除此筆交易?');">
-                                            刪除
+                                                onclick="return confirm('@confirmDelete');">
+                                            @Localizer["Delete"]
                                         </button>
                                     </form>
                                 </td>
@@ -53,23 +54,23 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <h5 class="card-title mb-3 fw-bold text-danger">支出紀錄</h5>
+        <h5 class="card-title mb-3 fw-bold text-danger">@Localizer["ExpenseRecords"]</h5>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>日期</th>
-                        <th>類別</th>
-                        <th>金額</th>
-                        <th>備註</th>
-                        <th>操作</th>
+                        <th>@Localizer["Date"]</th>
+                        <th>@Localizer["Category"]</th>
+                        <th>@Localizer["Amount"]</th>
+                        <th>@Localizer["Description"]</th>
+                        <th>@Localizer["Action"]</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (!expenseList.Any())
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-muted">尚無支出紀錄</td>
+                            <td colspan="5" class="text-center text-muted">@Localizer["NoExpenseRecords"]</td>
                         </tr>
                     }
                     else
@@ -78,15 +79,15 @@
                         {
                             <tr>
                                 <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
-                                <td>@item.Category.CategoryName</td>
+                                <td>@Localizer[item.Category.CategoryName]</td>
                                 <td class="text-danger fw-bold">-@item.Amount.ToString("N0")</td>
                                 <td>@item.Description</td>
                                 <td>
                                     <form asp-action="Delete" method="post" class="d-inline">
                                         <input type="hidden" name="id" value="@item.TransactionId" />
                                         <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('確定要刪除此筆交易?');">
-                                            刪除
+                                                onclick="return confirm('@confirmDelete');">
+                                            @Localizer["Delete"]
                                         </button>
                                     </form>
                                 </td>
