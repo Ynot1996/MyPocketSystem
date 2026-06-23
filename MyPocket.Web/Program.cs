@@ -17,7 +17,12 @@ builder.Services.AddControllersWithViews()
     });
 
 builder.Services.AddDbContext<MyPocketDBContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MyPocketDBConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("MyPocketDBConnection"),
+        sql => sql.EnableRetryOnFailure(
+            maxRetryCount: 6,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)));
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -56,15 +61,29 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    try
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var context = services.GetRequiredService<MyPocketDBContext>();
+
+    // Azure SQL Serverless may be paused on cold start; retry seeding until the DB is reachable.
+    const int maxAttempts = 8;
+    for (int attempt = 1; attempt <= maxAttempts; attempt++)
     {
-        var context = services.GetRequiredService<MyPocketDBContext>();
-        await DbInitializer.Initialize(context);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        try
+        {
+            await DbInitializer.Initialize(context);
+            logger.LogInformation("Database seed completed on attempt {Attempt}.", attempt);
+            break;
+        }
+        catch (Exception ex) when (attempt < maxAttempts)
+        {
+            var delay = TimeSpan.FromSeconds(Math.Min(30, attempt * 5));
+            logger.LogWarning(ex, "Database seed attempt {Attempt} failed; retrying in {Delay}s.", attempt, delay.TotalSeconds);
+            await Task.Delay(delay);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Database seed failed after {MaxAttempts} attempts.", maxAttempts);
+        }
     }
 }
 

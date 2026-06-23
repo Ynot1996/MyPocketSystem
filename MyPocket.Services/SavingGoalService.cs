@@ -33,7 +33,7 @@ namespace MyPocket.Services
                     GoalId = Guid.NewGuid(),
                     UserId = userId,
                     GoalName = name,
-                    TargetAmount = 0, // 用戶可後續設定
+                    TargetAmount = 0, // User can set this later
                     CurrentAmount = await _transactionService.CalculateCurrentSavingAsync(userId, start, end),
                     TargetDate = end,
                     CreatedAt = DateTime.UtcNow,
@@ -65,7 +65,7 @@ namespace MyPocket.Services
                     GoalId = Guid.NewGuid(),
                     UserId = userId,
                     GoalName = name,
-                    TargetAmount = 0, // 用戶可後續設定
+                    TargetAmount = 0, // User can set this later
                     CurrentAmount = await _transactionService.CalculateCurrentSavingAsync(userId, start, end),
                     TargetDate = end,
                     CreatedAt = DateTime.UtcNow,
@@ -86,7 +86,7 @@ namespace MyPocket.Services
 
         public async Task<decimal> CalculateCurrentSavingAsync(Guid userId, DateTime start, DateTime end)
         {
-            // 已遷移到 TransactionService，這裡僅為相容性保留
+            // Logic has been moved to TransactionService; kept here for backward compatibility.
             return await _transactionService.CalculateCurrentSavingAsync(userId, start, end);
         }
 

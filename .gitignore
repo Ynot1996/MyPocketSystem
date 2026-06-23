@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# 本機密鑰筆記，請勿提交
+azure-secrets.local.md
+publish.zip
+.claude/launch.json
+publish/

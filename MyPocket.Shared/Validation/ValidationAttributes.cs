@@ -4,7 +4,7 @@ using MyPocket.Shared.Resources;
 
 namespace MyPocket.Shared.Validation
 {
-    // 本地化 Required
+    // Localized Required
     public class LocalizedRequiredAttribute : RequiredAttribute
     {
         public LocalizedRequiredAttribute(string resourceKey)
@@ -13,7 +13,7 @@ namespace MyPocket.Shared.Validation
         }
     }
 
-    // 本地化 Range
+    // Localized Range
     public class LocalizedRangeAttribute : RangeAttribute
     {
         public LocalizedRangeAttribute(double minimum, double maximum, string resourceKey)
@@ -23,7 +23,7 @@ namespace MyPocket.Shared.Validation
         }
     }
 
-    // 本地化 StringLength
+    // Localized StringLength
     public class LocalizedStringLengthAttribute : StringLengthAttribute
     {
         public LocalizedStringLengthAttribute(int maximumLength, string resourceKey)
@@ -33,7 +33,7 @@ namespace MyPocket.Shared.Validation
         }
     }
 
-    // (可選) 本地化 RegularExpression
+    // Localized RegularExpression (optional)
     public class LocalizedRegularExpressionAttribute : RegularExpressionAttribute
     {
         public LocalizedRegularExpressionAttribute(string pattern, string resourceKey)

@@ -19,7 +19,7 @@ namespace MyPocket.DataAccess.Data
                         PlanId = Guid.NewGuid(),
                         PlanName = "免費基本會員",
                         Price = 0M,
-                        DurationDays = 36500, // 100年，實質上就是永久
+                        DurationDays = 36500, // 100 years, effectively permanent.
                         Description = "基本功能：\n- 基本收支記錄\n- 單一預算設定\n- 基礎收支報表"
                     },
                     new SubscriptionPlan
