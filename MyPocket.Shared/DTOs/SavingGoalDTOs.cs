@@ -23,7 +23,7 @@ namespace MyPocket.Shared.DTOs
         public string GoalName { get; set; } = null!;
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "目標金額必須大於0")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Target amount must be greater than 0")]
         public decimal TargetAmount { get; set; }
 
         [Required]
@@ -39,7 +39,7 @@ namespace MyPocket.Shared.DTOs
         public string GoalName { get; set; } = null!;
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "目標金額必須大於0")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Target amount must be greater than 0")]
         public decimal TargetAmount { get; set; }
 
         [Required]

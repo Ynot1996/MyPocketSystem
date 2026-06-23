@@ -10,53 +10,53 @@ namespace MyPocket.Shared.Metadata
     public class UserMetadata
     {
         [Required]
-        [Display(Name = "用戶ID")]
+        [Display(Name = "User ID")]
         public Guid UserId { get; set; }
 
         [Required]
-        [Display(Name = "電子郵件")]
+        [Display(Name = "Email")]
         [EmailAddress]
         public string Email { get; set; } = null!;
 
         [Required]
-        [Display(Name = "密碼雜湊")]
+        [Display(Name = "Password Hash")]
         public string PasswordHash { get; set; } = null!;
 
-        [Display(Name = "暱稱")]
+        [Display(Name = "Nickname")]
         public string? Nickname { get; set; }
 
         [Required]
-        [Display(Name = "角色")]
+        [Display(Name = "Role")]
         public string Role { get; set; } = null!;
 
-        [Display(Name = "建立日期")]
+        [Display(Name = "Created Date")]
         public DateTime CreationDate { get; set; }
 
-        [Display(Name = "最後登入日期")]
+        [Display(Name = "Last Login")]
         public DateTime LastLoginDate { get; set; }
 
-        [Display(Name = "更新時間")]
+        [Display(Name = "Updated At")]
         public DateTime UpdatedAt { get; set; }
 
-        [Display(Name = "已刪除")]
+        [Display(Name = "Deleted")]
         public bool IsDeleted { get; set; }
 
-        [Display(Name = "公告")]
+        [Display(Name = "Announcements")]
         public virtual ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
 
-        [Display(Name = "預算")]
+        [Display(Name = "Budgets")]
         public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
-        [Display(Name = "分類")]
+        [Display(Name = "Categories")]
         public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
 
-        [Display(Name = "儲蓄目標")]
+        [Display(Name = "Saving Goals")]
         public virtual ICollection<SavingGoal> SavingGoals { get; set; } = new List<SavingGoal>();
 
-        [Display(Name = "交易")]
+        [Display(Name = "Transactions")]
         public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 
-        [Display(Name = "訂閱")]
+        [Display(Name = "Subscriptions")]
         public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
     }
 }

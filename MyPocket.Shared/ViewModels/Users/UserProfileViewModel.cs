@@ -7,11 +7,11 @@ namespace MyPocket.Shared.ViewModels.Users
         public Guid UserId { get; set; }
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
-        [Display(Name = "暱稱")]
+        [Display(Name = "Nickname")]
         public string? Nickname { get; set; }
-        [Display(Name = "註冊日期")]
+        [Display(Name = "Registration Date")]
         public DateTime CreationDate { get; set; }
-        [Display(Name = "最後登入")]
+        [Display(Name = "Last Login")]
         public DateTime LastLoginDate { get; set; }
     }
 }

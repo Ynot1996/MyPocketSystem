@@ -11,7 +11,7 @@ namespace MyPocket.Shared.ViewModels.Budgets
         public decimal Amount { get; set; }
         public string BudgetYear { get; set; } = string.Empty;
         public string BudgetMonth { get; set; } = string.Empty;
-        public decimal Spent { get; set; } // 本月已花費
+        public decimal Spent { get; set; } // Amount spent this month
         public decimal Remaining => Amount - Spent;
     }
 }

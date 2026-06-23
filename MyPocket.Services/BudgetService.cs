@@ -65,7 +65,7 @@ namespace MyPocket.Services
         {
             var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Role == "Admin");
             return await _context.Categories
-                .Where(c => !c.IsDeleted && c.CategoryType == "¤ä¥X" && (c.UserId == userId || (adminUser != null && c.UserId == adminUser.UserId)))
+                .Where(c => !c.IsDeleted && c.CategoryType == "æ”¯å‡º" && (c.UserId == userId || (adminUser != null && c.UserId == adminUser.UserId)))
                 .OrderBy(c => c.CategoryName)
                 .ToListAsync();
         }

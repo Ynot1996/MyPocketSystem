@@ -16,7 +16,7 @@ namespace MyPocket.Shared.DTOs
         public string PlanName { get; set; } = null!;
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "價格必須大於0")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
         public decimal Price { get; set; }
     }
 
@@ -27,7 +27,7 @@ namespace MyPocket.Shared.DTOs
         public string PlanName { get; set; } = null!;
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "價格必須大於0")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
         public decimal Price { get; set; }
     }
 

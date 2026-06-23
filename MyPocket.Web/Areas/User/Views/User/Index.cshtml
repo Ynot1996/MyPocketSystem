@@ -1,21 +1,21 @@
 @model MyPocket.Shared.ViewModels.Users.UserProfileViewModel
 @{
-    ViewData["Title"] = "個人資訊";
+    ViewData["Title"] = Localizer["ProfileInfo"];
     Layout = "~/Views/Shared/_LayoutUser.cshtml";
 }
-<h2>個人資訊</h2>
+<h2>@Localizer["ProfileInfo"]</h2>
 <div class="card">
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">Email</dt>
+            <dt class="col-sm-3">@Localizer["EmailAddress"]</dt>
             <dd class="col-sm-9">@Model.Email</dd>
-            <dt class="col-sm-3">暱稱</dt>
+            <dt class="col-sm-3">@Localizer["Nickname"]</dt>
             <dd class="col-sm-9">@Model.Nickname</dd>
-            <dt class="col-sm-3">註冊日期</dt>
+            <dt class="col-sm-3">@Localizer["RegistrationDate"]</dt>
             <dd class="col-sm-9">@Model.CreationDate.ToString("yyyy-MM-dd HH:mm")</dd>
-            <dt class="col-sm-3">最後登入</dt>
+            <dt class="col-sm-3">@Localizer["LastLogin"]</dt>
             <dd class="col-sm-9">@Model.LastLoginDate.ToString("yyyy-MM-dd HH:mm")</dd>
         </dl>
-        <a asp-action="Edit" class="btn btn-primary">編輯暱稱</a>
+        <a asp-action="Edit" class="btn btn-primary">@Localizer["EditNickname"]</a>
     </div>
 </div>

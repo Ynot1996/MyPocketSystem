@@ -23,15 +23,15 @@ namespace MyPocket.Shared.DTOs
         public Guid CategoryId { get; set; }
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "預算金額必須大於0")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Budget amount must be greater than 0")]
         public decimal Amount { get; set; }
 
         [Required]
-        [RegularExpression(@"^\d{4}$", ErrorMessage = "年份格式必須為4位數字")]
+        [RegularExpression(@"^\d{4}$", ErrorMessage = "Year must be a 4-digit number")]
         public string BudgetYear { get; set; } = null!;
 
         [Required]
-        [RegularExpression(@"^(0[1-9]|1[0-2])$", ErrorMessage = "月份格式必須為01-12")]
+        [RegularExpression(@"^(0[1-9]|1[0-2])$", ErrorMessage = "Month must be between 01 and 12")]
         public string BudgetMonth { get; set; } = null!;
     }
 
@@ -39,13 +39,13 @@ namespace MyPocket.Shared.DTOs
     {
         public Guid CategoryId { get; set; }
 
-        [Range(0.01, double.MaxValue, ErrorMessage = "預算金額必須大於0")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Budget amount must be greater than 0")]
         public decimal Amount { get; set; }
 
-        [RegularExpression(@"^\d{4}$", ErrorMessage = "年份格式必須為4位數字")]
+        [RegularExpression(@"^\d{4}$", ErrorMessage = "Year must be a 4-digit number")]
         public string BudgetYear { get; set; } = null!;
 
-        [RegularExpression(@"^(0[1-9]|1[0-2])$", ErrorMessage = "月份格式必須為01-12")]
+        [RegularExpression(@"^(0[1-9]|1[0-2])$", ErrorMessage = "Month must be between 01 and 12")]
         public string BudgetMonth { get; set; } = null!;
     }
 }

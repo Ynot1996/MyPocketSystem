@@ -1,8 +1,12 @@
-# 部署到 Azure（Visual Studio 一鍵 Publish + Azure SQL 免費方案）
+# 部署到 Azure（App Service + Azure SQL 免費方案）
 
 把原本 GCP（Cloud Run + Cloud SQL）的架構搬到 Azure：
-- **App → Azure App Service（F1 免費層）**，用 Visual Studio Enterprise 直接 Publish，不碰 Docker
+- **App → Azure App Service（F1 免費層）**
 - **資料庫 → Azure SQL Database（Free offer）**
+- **日常更新 → push 到 `main` 由 GitHub Actions 自動部署**（見最後一節）
+
+> 已經部署完成的目前線上網址：https://mypocket-web-app.azurewebsites.net
+> 以下步驟 1–3 是「從零重建」時的紀錄；日常更新只需 `git push`。
 
 > 你有 Azure for Students：US$100 額度（到 2027-06-22）、免綁信用卡。
 > 就算偶爾超出免費額度，也是從這 $100 扣，碰不到你自己的錢。
@@ -15,7 +19,7 @@ App 程式碼**不用改**。Program.cs 從設定讀 `ConnectionStrings:MyPocket
 
 ## 前置
 - 已登入 Azure for Students 的帳號
-- Visual Studio Enterprise 2022（你的學生方案已含，免費）
+- 本機已裝 .NET 8 SDK 與 Azure CLI（`az`）；macOS 用 `brew install azure-cli`
 
 ---
 
@@ -34,16 +38,19 @@ App 程式碼**不用改**。Program.cs 從設定讀 `ConnectionStrings:MyPocket
 
 ---
 
-## 步驟 2：用 Visual Studio Publish 到 App Service
+## 步驟 2：建立 App Service 並首次部署（az CLI）
 
-1. Visual Studio 開啟 `MyPocketSystem.sln`
-2. 右鍵 **MyPocket.Web** 專案 → **Publish**
-3. Target 選 **Azure** → **Azure App Service (Linux)** → Next
-4. 登入你的 Azure 帳號 → **Create new** App Service：
-   - Resource group：用同一個 `mypocket-rg`
-   - **Hosting Plan → 新建 → Size 選 Free (F1)**
-   - 建立並選取
-5. 按 **Finish** → **Publish**，VS 會自動 build 並上傳，完成後會打開網站網址。
+```bash
+az login
+# 建立 App Service（Linux, F1 免費層）並部署目前程式碼
+cd <專案根目錄>
+dotnet publish MyPocket.Web/MyPocket.Web.csproj -c Release -o ./publish
+cd publish && zip -r ../publish.zip . > /dev/null && cd ..
+az webapp create --resource-group mypocket-rg --plan <plan名> --name mypocket-web-app --runtime "DOTNETCORE:8.0"
+az webapp deployment source config-zip --resource-group mypocket-rg --name mypocket-web-app --src publish.zip
+```
+
+> 之後的更新不必再跑這些，已改由 GitHub Actions 自動處理（見最後一節）。
 
 ---
 
@@ -65,13 +72,32 @@ App 程式碼**不用改**。Program.cs 從設定讀 `ConnectionStrings:MyPocket
 ## 完成
 App Service → Overview → **Default domain** 點開，網站就活了。
 
-### 之後要更新版本（macOS / dotnet CLI）
-在專案根目錄執行：
+### 之後要更新版本 → push 即自動部署（GitHub Actions）
+
+已設定 CI/CD：**只要 push 到 `main`，GitHub Actions 會自動 build 並部署到 Azure**。
+你不需要手動跑任何指令。
+
+```bash
+git add -A
+git commit -m "你的修改說明"
+git push        # 推上 main 後，幾分鐘內網站自動更新
+```
+
+- workflow 設定檔：[.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+- 登入方式：OIDC 聯合憑證（GitHub Secrets 只存 `AZURE_CLIENT_ID` /
+  `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID`，**無長期密碼**）
+- 手動觸發：GitHub repo → **Actions** 分頁 → 「Build and deploy to Azure」→ Run workflow
+- 看部署狀態 / log：同樣在 **Actions** 分頁
+
+<details>
+<summary>備援：手動部署指令（CI 壞掉時才需要）</summary>
+
 ```bash
 dotnet publish MyPocket.Web/MyPocket.Web.csproj -c Release -o ./publish
 cd publish && zip -r ../publish.zip . > /dev/null && cd ..
 az webapp deployment source config-zip --resource-group mypocket-rg --name mypocket-web-app --src publish.zip
 ```
+</details>
 
 ### 預設管理員帳號
 種子資料於 `DbInitializer.cs` 建立：

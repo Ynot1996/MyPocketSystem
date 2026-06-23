@@ -6,7 +6,7 @@
     var label = currentCulture == "zh-TW" ? "EN" : "中";
     var title = currentCulture == "zh-TW" ? "Switch to English" : "切換為中文";
 }
-<form method="post" asp-controller="Language" asp-action="Set" class="d-inline">
+<form method="post" asp-area="" asp-controller="Language" asp-action="Set" class="d-inline">
     @Html.AntiForgeryToken()
     <input type="hidden" name="culture" value="@target" />
     <input type="hidden" name="returnUrl" value="@returnUrl" />

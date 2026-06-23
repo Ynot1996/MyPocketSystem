@@ -19,7 +19,7 @@ namespace MyPocket.Shared.DTOs
         public Guid SubscriptionId { get; set; }
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "付款金額必須大於0")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Payment amount must be greater than 0")]
         public decimal PaymentAmount { get; set; }
 
         [Required]

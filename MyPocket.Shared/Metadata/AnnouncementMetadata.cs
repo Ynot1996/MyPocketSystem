@@ -9,29 +9,29 @@ namespace MyPocket.Shared.Metadata
 
     public class AnnouncementMetadata
     {
-        [Required(ErrorMessage = "公告ID為必填")]
-        [Display(Name = "公告ID")]
+        [Required(ErrorMessage = "Announcement ID is required.")]
+        [Display(Name = "Announcement ID")]
         public Guid AnnouncementId { get; set; }
 
-        [Required(ErrorMessage = "管理員ID為必填")]
-        [Display(Name = "管理員ID")]
+        [Required(ErrorMessage = "Admin ID is required.")]
+        [Display(Name = "Admin ID")]
         public Guid AdminId { get; set; }
 
-        [Required(ErrorMessage = "標題為必填")]
-        [Display(Name = "標題")]
-        [StringLength(200, ErrorMessage = "{0}長度不能超過{1}個字元")]
+        [Required(ErrorMessage = "Title is required.")]
+        [Display(Name = "Title")]
+        [StringLength(200, ErrorMessage = "{0} cannot exceed {1} characters.")]
         public string Title { get; set; } = null!;
 
-        [Required(ErrorMessage = "內容為必填")]
-        [Display(Name = "內容")]
+        [Required(ErrorMessage = "Content is required.")]
+        [Display(Name = "Content")]
         public string Content { get; set; } = null!;
 
-        [Required(ErrorMessage = "發布日期為必填")]
-        [Display(Name = "發布日期")]
+        [Required(ErrorMessage = "Publish date is required.")]
+        [Display(Name = "Publish Date")]
         [DataType(DataType.DateTime)]
         public DateTime PublishDate { get; set; }
 
-        [Display(Name = "管理員")]
+        [Display(Name = "Admin")]
         public virtual User Admin { get; set; } = null!;
     }
 }

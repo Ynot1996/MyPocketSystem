@@ -24,7 +24,7 @@ namespace MyPocket.Shared.DTOs
         public Guid CategoryId { get; set; }
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "金額必須大於0")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
         public decimal Amount { get; set; }
 
         [Required]
@@ -41,7 +41,7 @@ namespace MyPocket.Shared.DTOs
     {
         public Guid CategoryId { get; set; }
         
-        [Range(0.01, double.MaxValue, ErrorMessage = "金額必須大於0")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
         public decimal Amount { get; set; }
         
         public string TransactionType { get; set; } = null!;

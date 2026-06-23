@@ -59,10 +59,10 @@ namespace MyPocket.Services
             if (plan == null)
                 return false;
 
-            // ¨ú±o¥Î¤á·í«eªº­q¾\
+            // Get the user's current subscription.
             var currentSubscription = await GetActiveSubscriptionAsync(userId);
-            
-            // ¦pªG¦³²{¦³­q¾\¡A«h©µªøµ²§ô¤é´Á
+
+            // If a subscription already exists, extend from its end date.
             var startDate = currentSubscription?.EndDate ?? DateTime.UtcNow;
 
             var subscription = new UserSubscription
@@ -79,7 +79,7 @@ namespace MyPocket.Services
                     {
                         PaymentId = Guid.NewGuid(),
                         PaymentAmount = plan.Price,
-                        PaymentWay = "«H¥Î¥d",
+                        PaymentWay = "Credit Card",
                         PaymentDate = DateTime.UtcNow,
                         Status = "Completed",
                         TransactionCode = Guid.NewGuid().ToString()
@@ -89,9 +89,9 @@ namespace MyPocket.Services
 
             await _context.UserSubscriptions.AddAsync(subscription);
 
-            // §ó·s¥Î¤á¨¤¦â¬°¥I¶O·|­û
+            // Promote the user to paid member.
             var user = await _context.Users.FindAsync(userId);
-            if (user != null && plan.Price > 0) // ¥I¶O¤è®×
+            if (user != null && plan.Price > 0) // paid plan
             {
                 user.Role = "PaidMember";
                 user.UpdatedAt = DateTime.UtcNow;
@@ -111,7 +111,7 @@ namespace MyPocket.Services
             subscription.EndDate = DateTime.UtcNow;
             subscription.Status = "Cancelled";
 
-            // ±N¥Î¤á¨¤¦â§ï¦^°ò¥»·|­û
+            // Revert the user's role back to free member.
             var user = await _context.Users.FindAsync(userId);
             if (user != null)
             {
@@ -128,19 +128,19 @@ namespace MyPocket.Services
         {
             try
             {
-                // ´M§ä§K¶O°ò¥»·|­û¤è®×
+                // Find the free basic plan. The name must match the seeded plan in the DB.
                 var basicPlan = await _context.SubscriptionPlans
-                    .FirstOrDefaultAsync(p => p.Price == 0 && p.PlanName.Contains("§K¶O°ò¥»·|­û"));
+                    .FirstOrDefaultAsync(p => p.Price == 0 && p.PlanName.Contains("å…è²»åŸºæœ¬æœƒå“¡"));
 
                 if (basicPlan == null)
                     return false;
 
-                // ÀË¬d¥Î¤á¬O§_¤w¸g¦³¬¡ÅDªº­q¾\
+                // Skip if the user already has an active subscription.
                 var activeSubscription = await GetActiveSubscriptionAsync(userId);
                 if (activeSubscription != null)
-                    return true; // ¤w¸g¦³­q¾\¤F¡A¤£»İ­n­«·s­q¾\
+                    return true; // already subscribed, nothing to do
 
-                // «Ø¥ß·sªº­q¾\
+                // Create a new subscription.
                 var subscription = new UserSubscription
                 {
                     SubscriptionId = Guid.NewGuid(),
