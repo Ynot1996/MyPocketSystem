@@ -36,10 +36,13 @@
                 <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                     <ul class="navbar-nav align-items-center">
                         <li class="nav-item ms-2">
-                            <a class="btn btn-dark px-4" asp-controller="Account" asp-action="Register">Sign Up</a>
+                            <a class="btn btn-dark px-4" asp-controller="Account" asp-action="Register">@Localizer["SignUp"]</a>
                         </li>
                         <li class="nav-item ms-2">
-                            <a class="btn btn-outline-dark px-4" asp-controller="Account" asp-action="Login">Log In</a>
+                            <a class="btn btn-outline-dark px-4" asp-controller="Account" asp-action="Login">@Localizer["Login"]</a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <partial name="_LanguageSwitcher" />
                         </li>
                     </ul>
                 </div>

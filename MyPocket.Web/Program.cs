@@ -39,11 +39,11 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[]
     {
-        new CultureInfo("zh-TW"), 
-        new CultureInfo("en-US")  
+        new CultureInfo("en-US"),
+        new CultureInfo("zh-TW")
     };
 
-    options.DefaultRequestCulture = new RequestCulture("zh-TW");
+    options.DefaultRequestCulture = new RequestCulture("en-US");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
 });

@@ -1,4 +1,4 @@
-@* 管理員用 Layout *@
+@* Admin-only layout *@
 @{
     Layout = null;
     string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
@@ -23,47 +23,48 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item dropdown">
-                            @* 新增一個下拉選單主項目，並加上 dropdown 類別 *@
                             <a class="nav-link dropdown-toggle text-dark @(currentController == "Users" || currentController == "UsersManagement" ? "active fw-bold" : "")" href="#" id="usersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-people-fill"></i> Users
+                                <i class="bi bi-people-fill"></i> @Localizer["Users"]
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="usersDropdown">
-                                @* 下拉選單容器 *@
                                 <li>
                                     <a class="dropdown-item @(currentController == "Users" && currentAction == "Index" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="Users" asp-action="Index">
-                                        Users Management
+                                        @Localizer["UsersManagement"]
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item @(currentController == "UsersManagement" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="UsersManagement" asp-action="Index">
-                                        Users Subscription
+                                        @Localizer["UsersSubscription"]
                                     </a>
                                 </li>
                             </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark @(currentController == "Categories" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="Categories" asp-action="Index">
-                                <i class="bi bi-tags-fill"></i> Categories Management
+                                <i class="bi bi-tags-fill"></i> @Localizer["CategoriesManagement"]
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark @(currentController == "Announcement" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="Announcement" asp-action="Index">
-                                <i class="bi bi-megaphone-fill"></i> Announcement
+                                <i class="bi bi-megaphone-fill"></i> @Localizer["Announcement"]
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark @(currentController == "SubscriptionPlans" ? "active fw-bold" : "")" asp-area="Admin" asp-controller="SubscriptionPlans" asp-action="Index">
-                                <i class="bi bi-credit-card-fill"></i> Subscription Plans
+                                <i class="bi bi-credit-card-fill"></i> @Localizer["SubscriptionPlans"]
                             </a>
                         </li>
                     </ul>
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav align-items-center">
                         <li class="nav-item">
                             <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-link nav-link text-primary">
-                                    登出 (@(User?.Identity?.Name ?? ""))
+                                    @Localizer["Logout"] (@(User?.Identity?.Name ?? ""))
                                 </button>
                             </form>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <partial name="_LanguageSwitcher" />
                         </li>
                     </ul>
                 </div>

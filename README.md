@@ -2,7 +2,7 @@
 
 MyPocket is a comprehensive web application designed to help users manage their personal finances effectively. It provides a suite of tools for tracking expenses, setting saving goals, and gaining insights into spending habits. The system also includes an administrative backend for user and subscription management.
 
-**Live Demo:** [https://mypocket-cd-30212629511-asia-east1.run.app/](https://mypocket-cd-30212629511-asia-east1.run.app/)
+**Live Demo:** [https://mypocket-web-app.azurewebsites.net/](https://mypocket-web-app.azurewebsites.net/)
 
 ## Key Features
 
@@ -25,12 +25,14 @@ MyPocket is a comprehensive web application designed to help users manage their 
 
 * **Backend:** ASP.NET Core, Entity Framework Core
 * **Frontend:** ASP.NET Core MVC (Razor Views)
-* **Database:** Google Cloud SQL for SQL Server
+* **Database:** Azure SQL Database (Serverless, Free offer)
 * **Authentication:** BCrypt.Net for password hashing
 * **Containerization:** Docker
 * **Deployment & Services:**
-    * Google Cloud Run for serverless deployment.
-    * Google Secret Manager for managing sensitive data.
+    * Azure App Service (Linux, F1 free tier) for hosting.
+    * Connection string injected as an App Service environment variable.
+
+See [DEPLOY_AZURE.md](DEPLOY_AZURE.md) for the step-by-step deployment guide.
 
 ## Getting Started
 
@@ -46,6 +48,6 @@ To get a local copy up and running, follow these simple steps.
 
 1.  **Clone the repo**
 2.  **Configure the database connection**
-    * Update the connection string in `appsettings.json`. For production, this is managed via Google Secret Manager.
+    * Update the connection string in `appsettings.json`. In production, it is injected as the App Service environment variable `ConnectionStrings__MyPocketDBConnection`.
 3.  **Run database migrations**
 4.  **Run the application**

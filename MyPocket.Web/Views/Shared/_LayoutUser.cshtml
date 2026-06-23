@@ -140,25 +140,25 @@
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Transactions" ? "active" : "")"
                                asp-area="User" asp-controller="Transactions" asp-action="Index">
-                                <i class="bi bi-journal-text"></i> Transactions
+                                <i class="bi bi-journal-text"></i> @Localizer["Transactions"]
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Categories" ? "active" : "")"
                                asp-area="User" asp-controller="Categories" asp-action="Index">
-                                <i class="bi bi-tags"></i> Categories
+                                <i class="bi bi-tags"></i> @Localizer["Categories"]
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Budgets" ? "active" : "")"
                                asp-area="User" asp-controller="Budgets" asp-action="Index">
-                                <i class="bi bi-wallet2"></i> Budgets
+                                <i class="bi bi-wallet2"></i> @Localizer["Budgets"]
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "SavingGoals" ? "active" : "")"
                                asp-area="User" asp-controller="SavingGoals" asp-action="Index">
-                                <i class="bi bi-piggy-bank"></i> Saving Goals
+                                <i class="bi bi-piggy-bank"></i> @Localizer["SavingGoals"]
                             </a>
                         </li>
                         @if (User.IsInRole("PaidMember"))
@@ -166,19 +166,19 @@
                             <li class="nav-item">
                                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "PaidMember" ? "active" : "")"
                                    asp-area="User" asp-controller="PaidMember" asp-action="Index">
-                                    <i class="bi bi-gem"></i> Premium Area
+                                    <i class="bi bi-gem"></i> @Localizer["PremiumArea"]
                                 </a>
                             </li>
                         }
                     </ul>
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav align-items-center">
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Subscriptions" ? "active" : "")"
                                asp-area="User" asp-controller="Subscriptions" asp-action="Plans">
-                                <i class="bi bi-star"></i> Plans
+                                <i class="bi bi-star"></i> @Localizer["Plans"]
                                 @if (User.IsInRole("FreeMember"))
                                 {
-                                    <span class="badge bg-warning text-dark">Upgrade</span>
+                                    <span class="badge bg-warning text-dark">@Localizer["Upgrade"]</span>
                                 }
                             </a>
                         </li>
@@ -186,28 +186,31 @@
                             <a class="nav-link dropdown-toggle d-flex align-items-center @(ViewContext.RouteData.Values["Controller"].ToString() == "User" ? "active" : "")"
                                href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle"></i>
-                                <span>@(User.FindFirst("Nickname")?.Value ?? User.Identity?.Name ?? "Member")</span>
+                                <span>@(User.FindFirst("Nickname")?.Value ?? User.Identity?.Name ?? Localizer["Member"])</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li>
                                     <a class="dropdown-item" asp-area="User" asp-controller="User" asp-action="Index">
-                                        <i class="bi bi-gear"></i> Settings
+                                        <i class="bi bi-gear"></i> @Localizer["Settings"]
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" asp-area="User" asp-controller="Subscriptions" asp-action="CurrentPlan">
-                                        <i class="bi bi-star"></i> Membership
+                                        <i class="bi bi-star"></i> @Localizer["Membership"]
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                         <button type="submit" class="dropdown-item">
-                                            <i class="bi bi-box-arrow-right"></i> Logout
+                                            <i class="bi bi-box-arrow-right"></i> @Localizer["Logout"]
                                         </button>
                                     </form>
                                 </li>
                             </ul>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <partial name="_LanguageSwitcher" />
                         </li>
                     </ul>
                 </div>
