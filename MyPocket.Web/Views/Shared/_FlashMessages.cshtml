@@ -1,0 +1,29 @@
+@* Global toast/banner area for TempData["SuccessMessage"] / TempData["ErrorMessage"].
+   Include via <partial name="_FlashMessages" /> in any layout that wants to surface
+   controller feedback to the user. *@
+@{
+    var success = TempData.Peek("SuccessMessage") as string;
+    var error = TempData.Peek("ErrorMessage") as string;
+    // Consume both so they don't leak into the next request.
+    TempData.Remove("SuccessMessage");
+    TempData.Remove("ErrorMessage");
+}
+@if (!string.IsNullOrEmpty(success) || !string.IsNullOrEmpty(error))
+{
+    <div class="container mt-3">
+        @if (!string.IsNullOrEmpty(success))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>@success
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>@error
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+    </div>
+}
