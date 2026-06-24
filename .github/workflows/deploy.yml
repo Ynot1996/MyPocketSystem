@@ -27,6 +27,11 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Test
+        # Run unit tests before deploying; a failure aborts the deploy.
+        # Targets the test project directly to avoid pulling in MyPocket.Mobile (MAUI).
+        run: dotnet test MyPocket.Tests/MyPocket.Tests.csproj -c Release --logger "console;verbosity=normal"
+
       - name: Publish
         run: dotnet publish ${{ env.PROJECT_PATH }} -c Release -o ./publish
 
