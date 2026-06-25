@@ -1,0 +1,26 @@
+@using MyPocket.Web.Services
+@inject ICurrencyService Currency
+@{
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var current = Currency.CurrentCode;
+}
+<div class="dropdown d-inline">
+    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="@Localizer["Currency"]">
+        @Currency.CurrentSymbol @current
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end">
+        @foreach (var c in Currency.Supported)
+        {
+            <li>
+                <form method="post" asp-area="" asp-controller="Currency" asp-action="Set" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="code" value="@c.Code" />
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+                    <button type="submit" class="dropdown-item @(c.Code == current ? "active" : "")">
+                        <span class="me-2">@c.Symbol</span>@c.Code <small class="text-muted">— @c.DisplayName</small>
+                    </button>
+                </form>
+            </li>
+        }
+    </ul>
+</div>

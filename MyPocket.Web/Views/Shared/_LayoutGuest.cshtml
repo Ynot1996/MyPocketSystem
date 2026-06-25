@@ -26,6 +26,9 @@
                             <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">@Localizer["Login"]</a>
                         </li>
                         <li class="nav-item ms-2">
+                            <partial name="_CurrencySwitcher" />
+                        </li>
+                        <li class="nav-item ms-2">
                             <partial name="_LanguageSwitcher" />
                         </li>
                     </ul>

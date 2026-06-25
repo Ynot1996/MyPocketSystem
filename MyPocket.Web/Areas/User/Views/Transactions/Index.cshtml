@@ -167,21 +167,21 @@
                             <i class="bi bi-arrow-down-circle text-success"></i>
                         </div>
                         <div class="fw-bold text-success" style="font-size:1.2rem">@Localizer["TotalIncome"]</div>
-                        <div class="fs-4 fw-bold text-success">NT$@totalIncome.ToString("#,##0")</div>
+                        <div class="fs-4 fw-bold text-success">@Currency.Format(totalIncome)</div>
                     </div>
                     <div class="text-center">
                         <div class="stat-icon bg-danger bg-opacity-10">
                             <i class="bi bi-arrow-up-circle text-danger"></i>
                         </div>
                         <div class="fw-bold text-danger" style="font-size:1.2rem">@Localizer["TotalExpense"]</div>
-                        <div class="fs-4 fw-bold text-danger">NT$@totalExpense.ToString("#,##0")</div>
+                        <div class="fs-4 fw-bold text-danger">@Currency.Format(totalExpense)</div>
                     </div>
                     <div class="text-center">
                         <div class="stat-icon bg-primary bg-opacity-10">
                             <i class="bi bi-cash-stack text-primary"></i>
                         </div>
                         <div class="fw-bold text-primary" style="font-size:1.2rem">@Localizer["Balance"]</div>
-                        <div class="fs-4 fw-bold text-primary">NT$@balance.ToString("#,##0")</div>
+                        <div class="fs-4 fw-bold text-primary">@Currency.Format(balance)</div>
                     </div>
                 </div>
             </div>
@@ -211,7 +211,7 @@
                                     {
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <span><i class="bi bi-tag me-2 text-muted"></i>@Localizer[item.Category]</span>
-                                            <span class="fw-bold">NT$@item.Amount.ToString("#,##0")</span>
+                                            <span class="fw-bold">@Currency.Format(item.Amount)</span>
                                         </li>
                                     }
                                 </ul>
@@ -228,13 +228,13 @@
                         <i class="bi bi-wallet2 text-primary"></i>
                     </div>
                     <div class="fw-bold mb-2">@Localizer["MonthlyBudget"]</div>
-                    <div class="fs-4 fw-bold">NT$@totalBudget.ToString("#,##0")</div>
+                    <div class="fs-4 fw-bold">@Currency.Format(totalBudget)</div>
                     <div class="mb-3">
                         <div class="text-danger mb-1">
-                            <i class="bi bi-dash-circle me-1"></i>@Localizer["Spent"]: NT$@totalBudgetSpent.ToString("#,##0")
+                            <i class="bi bi-dash-circle me-1"></i>@Localizer["Spent"]: @Currency.Format(totalBudgetSpent)
                         </div>
                         <div class="text-success">
-                            <i class="bi bi-plus-circle me-1"></i>@Localizer["Remaining"]: NT$@totalBudgetRemaining.ToString("#,##0")
+                            <i class="bi bi-plus-circle me-1"></i>@Localizer["Remaining"]: @Currency.Format(totalBudgetRemaining)
                         </div>
                     </div>
                     <div class="progress mb-3" style="height: 1.2rem;">
@@ -259,13 +259,13 @@
                     @if (selectedGoal != null)
                     {
                         <div class="mb-2">
-                            <i class="bi bi-bullseye me-1"></i>@selectedGoal.GoalName
+                            <i class="bi bi-bullseye me-1"></i>@Localizer.LocalizeGoalName(selectedGoal.GoalName)
                         </div>
                         <div class="mb-2">
-                            @Localizer["TargetAmount"]: <span class="fw-bold">NT$@selectedGoal.TargetAmount.ToString("#,##0")</span>
+                            @Localizer["TargetAmount"]: <span class="fw-bold">@Currency.Format(selectedGoal.TargetAmount)</span>
                         </div>
                         <div class="mb-2">
-                            @Localizer["CurrentAmount"]: <span class="fw-bold">NT$@selectedGoal.CurrentAmount.ToString("#,##0")</span>
+                            @Localizer["CurrentAmount"]: <span class="fw-bold">@Currency.Format(selectedGoal.CurrentAmount)</span>
                         </div>
                         <div class="progress mb-3" style="height: 1.2rem;">
                             <div class="progress-bar @(savingPercent >= 100 ? "bg-success" : "bg-info")"
@@ -313,6 +313,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script>
+        const CURRENCY_SYMBOL = '@Currency.CurrentSymbol';
         // Register datalabels plugin
         Chart.register(ChartDataLabels);
 
@@ -419,7 +420,7 @@
                                 label: function(context) {
                                     const value = context.raw;
                                     const percentage = ((value / total) * 100).toFixed(1);
-                                    return `NT$${value.toLocaleString()} (${percentage}%)`;
+                                    return `${CURRENCY_SYMBOL}${value.toLocaleString()} (${percentage}%)`;
                                 }
                             }
                         }
@@ -437,7 +438,7 @@
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="bi bi-tag me-2 text-muted"></i>${category}</span>
                                 <div class="text-end">
-                                    <div class="fw-bold">NT$${data.amounts[index].toLocaleString()}</div>
+                                    <div class="fw-bold">${CURRENCY_SYMBOL}${data.amounts[index].toLocaleString()}</div>
                                     <small class="text-muted">${percentage}%</small>
                                 </div>
                             </li>

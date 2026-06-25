@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MyPocket.Services;
+using MyPocket.Shared.Resources;
+using ISubscriptionService = MyPocket.Services.ISubscriptionService;
 using System.Security.Claims;
 
 namespace MyPocket.Web.Areas.User.Controllers
@@ -10,10 +12,12 @@ namespace MyPocket.Web.Areas.User.Controllers
     public class SubscriptionsController : Controller
     {
         private readonly ISubscriptionService _subscriptionService;
+        private readonly ILocalizationService _localizer;
 
-        public SubscriptionsController(ISubscriptionService subscriptionService)
+        public SubscriptionsController(ISubscriptionService subscriptionService, ILocalizationService localizer)
         {
             _subscriptionService = subscriptionService;
+            _localizer = localizer;
         }
 
         [HttpGet]
@@ -47,7 +51,7 @@ namespace MyPocket.Web.Areas.User.Controllers
             var subscription = await _subscriptionService.GetActiveSubscriptionAsync(userId);
             if (subscription == null)
             {
-                TempData["ErrorMessage"] = "您目前沒有活躍的訂閱方案。";
+                TempData["ErrorMessage"] = _localizer.GetString("NoActiveSubscription");
                 return RedirectToAction("Plans");
             }
 
@@ -67,18 +71,20 @@ namespace MyPocket.Web.Areas.User.Controllers
             var plan = await _subscriptionService.GetPlanByIdAsync(planId);
             if (plan == null)
             {
-                TempData["ErrorMessage"] = "找不到指定的訂閱方案。";
+                TempData["ErrorMessage"] = _localizer.GetString("PlanNotFound");
                 return RedirectToAction("Plans");
             }
 
             var result = await _subscriptionService.SubscribeAsync(userId, planId);
             if (result)
             {
-                TempData["SuccessMessage"] = $"成功訂閱 {plan.PlanName}！";
+                TempData["SuccessMessage"] = string.Format(
+                    _localizer.GetString("SubscribedSuccess"),
+                    _localizer.GetString(plan.PlanName));
                 return RedirectToAction("Plans");
             }
 
-            TempData["ErrorMessage"] = "訂閱失敗，請稍後再試。";
+            TempData["ErrorMessage"] = _localizer.GetString("SubscribeFailed");
             return RedirectToAction("Plans");
         }
 
@@ -95,18 +101,18 @@ namespace MyPocket.Web.Areas.User.Controllers
             var isActive = await _subscriptionService.IsSubscriptionActiveAsync(userId);
             if (!isActive)
             {
-                TempData["ErrorMessage"] = "您目前沒有活躍的訂閱。";
+                TempData["ErrorMessage"] = _localizer.GetString("NoActiveSubscription");
                 return RedirectToAction("Plans");
             }
 
             var result = await _subscriptionService.CancelSubscriptionAsync(userId);
             if (result)
             {
-                TempData["SuccessMessage"] = "已成功取消訂閱。";
+                TempData["SuccessMessage"] = _localizer.GetString("CancelledSuccess");
             }
             else
             {
-                TempData["ErrorMessage"] = "取消訂閱失敗，請稍後再試。";
+                TempData["ErrorMessage"] = _localizer.GetString("CancelFailed");
             }
 
             return RedirectToAction("Plans");

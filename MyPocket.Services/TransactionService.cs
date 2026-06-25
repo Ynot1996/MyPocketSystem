@@ -102,7 +102,7 @@ namespace MyPocket.Services
                     .FirstOrDefault(c => c.CategoryId == model.CategoryId);
 
                 if (category == null)
-                    return (false, @"無效的分類", null);
+                    return (false, "InvalidCategory", null);
 
                 var transaction = new Transaction
                 {
@@ -126,11 +126,11 @@ namespace MyPocket.Services
                     .Reference(t => t.Category)
                     .LoadAsync();
 
-                return (true, @"交易紀錄已成功新增", transaction);
+                return (true, "TransactionCreated", transaction);
             }
             catch (Exception ex)
             {
-                return (false, @$"新增失敗: {ex.Message}", null);
+                return (false, $"CreateFailed|{ex.Message}", null);
             }
         }
 
@@ -149,17 +149,17 @@ namespace MyPocket.Services
                                             !t.IsDeleted);
 
                 if (transaction == null)
-                    return (false, @"找不到要刪除的交易紀錄");
+                    return (false, "TransactionNotFound");
 
                 transaction.IsDeleted = true;
                 transaction.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                return (true, @"交易紀錄已成功刪除");
+                return (true, "TransactionDeleted");
             }
             catch (Exception ex)
             {
-                return (false, @$"刪除失敗: {ex.Message}");
+                return (false, $"DeleteFailed|{ex.Message}");
             }
         }
     }

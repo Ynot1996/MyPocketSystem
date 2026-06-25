@@ -77,10 +77,14 @@ namespace MyPocket.DataAccess.Data
                 entity.Property(e => e.TransactionId).HasDefaultValueSql("(newid())");
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
                 entity.Property(e => e.TransactionDate).HasDefaultValueSql("(getdate())");
-                entity.Property(e => e.TransactionType).IsFixedLength();
+                // TransactionType holds "支出" / "收入" (2 CJK chars). The old
+                // IsFixedLength() mapping produced NCHAR(1), which truncated
+                // any insert. Explicit NVARCHAR(10) leaves room for future labels.
+                entity.Property(e => e.TransactionType).HasMaxLength(10);
+                entity.Property(e => e.Amount).HasPrecision(18, 2);
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
-                entity.HasOne(d => d.Category).WithMany(p => p.Transactions).OnDelete(DeleteBehavior.Restrict); 
-                entity.HasOne(d => d.User).WithMany(p => p.Transactions).OnDelete(DeleteBehavior.Restrict); 
+                entity.HasOne(d => d.Category).WithMany(p => p.Transactions).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(d => d.User).WithMany(p => p.Transactions).OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<User>(entity =>

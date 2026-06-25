@@ -24,7 +24,7 @@
                             }
                             else
                             {
-                                <span>NT$@plan.Price</span>
+                                <span>@Currency.Format(plan.Price)</span>
                                 @if (plan.DurationDays == 30)
                                 {
                                     <small class="text-body-secondary fw-light">/@Localizer["PerMonth"]</small>
@@ -38,7 +38,7 @@
                         <ul class="list-unstyled mt-3 mb-4">
                             @foreach (var feature in plan.Description.Split('\n'))
                             {
-                                <li class="mb-2">@feature</li>
+                                <li class="mb-2">@Localizer[feature.Trim()]</li>
                             }
                         </ul>
 

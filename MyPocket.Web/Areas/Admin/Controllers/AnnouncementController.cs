@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPocket.DataAccess.Data;
 using MyPocket.Core.Models;
+using MyPocket.Shared.Resources;
 using MyPocket.Shared.ViewModels.Announcements;
 
 namespace MyPocket.Web.Areas.Admin.Controllers
@@ -12,10 +13,12 @@ namespace MyPocket.Web.Areas.Admin.Controllers
     public class AnnouncementController : Controller
     {
         private readonly MyPocketDBContext _context;
+        private readonly ILocalizationService _localizer;
 
-        public AnnouncementController(MyPocketDBContext context)
+        public AnnouncementController(MyPocketDBContext context, ILocalizationService localizer)
         {
             _context = context;
+            _localizer = localizer;
         }
 
         // GET: Admin/Announcement
@@ -58,7 +61,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                     var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                     if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid adminId))
                     {
-                        ModelState.AddModelError("", "無法識別管理員身份");
+                        ModelState.AddModelError("", _localizer.GetString("UnknownAdmin"));
                         return View(model);
                     }
 
@@ -67,7 +70,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                         .FirstOrDefaultAsync(u => u.UserId == adminId && u.Role == "Admin");
                     if (admin == null)
                     {
-                        ModelState.AddModelError("", "管理員帳戶不存在或權限不足");
+                        ModelState.AddModelError("", _localizer.GetString("AdminAccountMissing"));
                         return View(model);
                     }
 
@@ -83,12 +86,12 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                     _context.Announcements.Add(announcement);
                     await _context.SaveChangesAsync();
 
-                    TempData["SuccessMessage"] = "公告已成功發布";
+                    TempData["SuccessMessage"] = _localizer.GetString("AnnouncementPublished");
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", $"發生錯誤: {ex.Message}");
+                    ModelState.AddModelError("", $"{_localizer.GetString("ErrorOccurred")}: {ex.Message}");
                 }
             }
 

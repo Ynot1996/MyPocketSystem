@@ -8,6 +8,12 @@ namespace MyPocket.Shared.Resources
     {
         string GetString(string key, string? culture = null);
         string this[string key] { get; }
+        /// <summary>
+        /// Resolves a SavingGoal.GoalName into a localized label.
+        /// Accepts machine identifiers (e.g. "MonthlyGoal:2026-06", "YearlyGoal:2026")
+        /// and legacy Chinese names. Unknown formats fall through unchanged.
+        /// </summary>
+        string LocalizeGoalName(string goalName);
     }
 
     public class JsonLocalizationService : ILocalizationService
@@ -73,6 +79,24 @@ namespace MyPocket.Shared.Resources
 
             // Last resort: return the key itself so missing translations are obvious in the UI.
             return key;
+        }
+
+        public string LocalizeGoalName(string goalName)
+        {
+            if (string.IsNullOrEmpty(goalName)) return string.Empty;
+
+            if (goalName.StartsWith("MonthlyGoal:", StringComparison.Ordinal))
+            {
+                var payload = goalName["MonthlyGoal:".Length..];
+                return string.Format(GetString("MonthlyGoalLabel"), payload);
+            }
+            if (goalName.StartsWith("YearlyGoal:", StringComparison.Ordinal))
+            {
+                var payload = goalName["YearlyGoal:".Length..];
+                return string.Format(GetString("YearlyGoalLabel"), payload);
+            }
+            // Legacy Chinese names stored before this refactor.
+            return goalName;
         }
     }
 }

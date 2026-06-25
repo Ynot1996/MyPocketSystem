@@ -27,7 +27,7 @@
                         <h6>@Localizer["PlanContent"]:</h6>
                         @foreach (var line in (Model.Plan.Description ?? "").Split('\n'))
                         {
-                            <p class="mb-1">@line</p>
+                            <p class="mb-1">@Localizer[line.Trim()]</p>
                         }
                     </div>
 
@@ -66,7 +66,7 @@
                                     {
                                         <tr>
                                             <td>@payment.PaymentDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
-                                            <td>NT$ @payment.PaymentAmount.ToString("N0")</td>
+                                            <td>@Currency.Format(payment.PaymentAmount)</td>
                                             <td>@payment.PaymentWay</td>
                                             <td>
                                                 <span class="badge @(payment.Status == "Completed" ? "bg-success" : "bg-warning")">

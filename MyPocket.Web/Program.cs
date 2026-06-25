@@ -35,6 +35,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Add localization service
 builder.Services.AddSingleton<ILocalizationService, JsonLocalizationService>();
 
+// Currency formatting service (cookie-based preference, default GBP)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<MyPocket.Web.Services.ICurrencyService, MyPocket.Web.Services.CurrencyService>();
+
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[]

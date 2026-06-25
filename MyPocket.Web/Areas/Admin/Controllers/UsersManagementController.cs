@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPocket.DataAccess.Data;
 using MyPocket.Services;
+using MyPocket.Shared.Resources;
+using ISubscriptionService = MyPocket.Services.ISubscriptionService;
 
 namespace MyPocket.Web.Areas.Admin.Controllers
 {
@@ -12,11 +14,16 @@ namespace MyPocket.Web.Areas.Admin.Controllers
     {
         private readonly MyPocketDBContext _context;
         private readonly ISubscriptionService _subscriptionService;
+        private readonly ILocalizationService _localizer;
 
-        public UsersManagementController(MyPocketDBContext context, ISubscriptionService subscriptionService)
+        public UsersManagementController(
+            MyPocketDBContext context,
+            ISubscriptionService subscriptionService,
+            ILocalizationService localizer)
         {
             _context = context;
             _subscriptionService = subscriptionService;
+            _localizer = localizer;
         }
 
         public async Task<IActionResult> Index()
@@ -52,11 +59,13 @@ namespace MyPocket.Web.Areas.Admin.Controllers
             try
             {
                 var success = await _subscriptionService.SubscribeAsync(userId, planId);
-                TempData["SuccessMessage"] = success ? "訂閱計劃更新成功。" : "更新訂閱時發生錯誤。";
+                TempData["SuccessMessage"] = success
+                    ? _localizer.GetString("SubscriptionUpdateOk")
+                    : _localizer.GetString("SubscriptionUpdateError");
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"更新訂閱時發生錯誤：{ex.Message}";
+                TempData["ErrorMessage"] = $"{_localizer.GetString("SubscriptionUpdateError")}: {ex.Message}";
             }
 
             return RedirectToAction(nameof(UserSubscriptionHistory), new { userId });
@@ -67,7 +76,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
         {
             if (request?.UserIds == null || request.UserIds.Count == 0 || request.PlanId == Guid.Empty)
             {
-                return Json(new { success = false, message = "無效的請求參數。" });
+                return Json(new { success = false, message = _localizer.GetString("InvalidRequest") });
             }
 
             try
@@ -76,7 +85,11 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                 {
                     await _subscriptionService.SubscribeAsync(userId, request.PlanId);
                 }
-                return Json(new { success = true, message = $"已成功更新 {request.UserIds.Count} 位使用者的訂閱計劃。" });
+                return Json(new
+                {
+                    success = true,
+                    message = string.Format(_localizer.GetString("BulkSubscriptionUpdateOk"), request.UserIds.Count)
+                });
             }
             catch (Exception ex)
             {
@@ -93,12 +106,14 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                     .Where(u => u.Role != "Admin" && !u.IsDeleted)
                     .ToListAsync();
 
+                // Match the seeded free plan by its DB literal name; do not
+                // localize this — it must match the row produced by DbInitializer.
                 var basicPlan = await _context.SubscriptionPlans
                     .FirstOrDefaultAsync(p => p.PlanName.Contains("基本") || p.PlanName.Contains("免費"));
 
                 if (basicPlan == null)
                 {
-                    TempData["ErrorMessage"] = "找不到基本方案。";
+                    TempData["ErrorMessage"] = _localizer.GetString("FreePlanNotFound");
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -110,11 +125,11 @@ namespace MyPocket.Web.Areas.Admin.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "已成功將所有使用者更新為免費會員，並訂閱基本方案。";
+                TempData["SuccessMessage"] = _localizer.GetString("AllUsersSetToFreeMember");
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"更新使用者狀態時發生錯誤：{ex.Message}";
+                TempData["ErrorMessage"] = $"{_localizer.GetString("UpdateUserStatusError")}: {ex.Message}";
             }
 
             return RedirectToAction(nameof(Index));
@@ -123,7 +138,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
 
     public class UpdateSubscriptionRequest
     {
-        public List<Guid> UserIds { get; set; }
+        public List<Guid> UserIds { get; set; } = new();
         public Guid PlanId { get; set; }
     }
 }

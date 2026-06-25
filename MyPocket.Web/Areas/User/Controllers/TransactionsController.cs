@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MyPocket.Services.Interfaces;
+using MyPocket.Shared.Resources;
 using MyPocket.Shared.ViewModels.Transactions;
 using System.Security.Claims;
 
@@ -15,17 +16,33 @@ namespace MyPocket.Web.Areas.User.Controllers
         private readonly ISavingGoalService _savingGoalService;
         private readonly ICategoryService _categoryService;
         private readonly IBudgetService _budgetService;
+        private readonly ILocalizationService _localizer;
 
         public TransactionsController(
             ITransactionService transactionService,
             ISavingGoalService savingGoalService,
             ICategoryService categoryService,
-            IBudgetService budgetService)
+            IBudgetService budgetService,
+            ILocalizationService localizer)
         {
             _transactionService = transactionService;
             _savingGoalService = savingGoalService;
             _categoryService = categoryService;
             _budgetService = budgetService;
+            _localizer = localizer;
+        }
+
+        // Translates a service-returned key. Service may encode an inner error
+        // detail as "Key|detail" (e.g. "CreateFailed|sql exception"); we look up
+        // the key and append the detail for diagnostic visibility.
+        private string Translate(string keyOrComposite)
+        {
+            if (string.IsNullOrEmpty(keyOrComposite)) return string.Empty;
+            var pipe = keyOrComposite.IndexOf('|');
+            if (pipe < 0) return _localizer.GetString(keyOrComposite);
+            var key = keyOrComposite[..pipe];
+            var detail = keyOrComposite[(pipe + 1)..];
+            return $"{_localizer.GetString(key)}: {detail}";
         }
 
         /// <summary>
@@ -95,7 +112,7 @@ namespace MyPocket.Web.Areas.User.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"載入資料時發生錯誤: {ex.Message}";
+                TempData["ErrorMessage"] = $"{_localizer.GetString("ErrorLoadingData")}: {ex.Message}";
                 return View(Enumerable.Empty<Core.Models.Transaction>());
             }
         }
@@ -112,7 +129,7 @@ namespace MyPocket.Web.Areas.User.Controllers
                 var errors = string.Join(" ", ModelState.Values
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage));
-                TempData["ErrorMessage"] = $"請檢查輸入資料是否正確: {errors}";
+                TempData["ErrorMessage"] = $"{_localizer.GetString("ValidationFailed")}: {errors}";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -122,9 +139,9 @@ namespace MyPocket.Web.Areas.User.Controllers
                 var (success, message, _) = await _transactionService.CreateTransactionAsync(userId, model);
 
                 if (success)
-                    TempData["SuccessMessage"] = message;
+                    TempData["SuccessMessage"] = Translate(message);
                 else
-                    TempData["ErrorMessage"] = message;
+                    TempData["ErrorMessage"] = Translate(message);
             }
             catch (UnauthorizedAccessException)
             {
@@ -136,7 +153,7 @@ namespace MyPocket.Web.Areas.User.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"新增失敗: {ex.Message}";
+                TempData["ErrorMessage"] = $"{_localizer.GetString("CreateFailed")}: {ex.Message}";
             }
 
             return RedirectToAction(nameof(Index));
@@ -155,9 +172,9 @@ namespace MyPocket.Web.Areas.User.Controllers
                 var (success, message) = await _transactionService.DeleteTransactionAsync(userId, id);
 
                 if (success)
-                    TempData["SuccessMessage"] = message;
+                    TempData["SuccessMessage"] = Translate(message);
                 else
-                    TempData["ErrorMessage"] = message;
+                    TempData["ErrorMessage"] = Translate(message);
             }
             catch (UnauthorizedAccessException)
             {
@@ -169,7 +186,7 @@ namespace MyPocket.Web.Areas.User.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"刪除失敗: {ex.Message}";
+                TempData["ErrorMessage"] = $"{_localizer.GetString("DeleteFailed")}: {ex.Message}";
             }
 
             return RedirectToAction(nameof(Index));

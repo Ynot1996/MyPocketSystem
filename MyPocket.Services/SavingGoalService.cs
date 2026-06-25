@@ -22,7 +22,8 @@ namespace MyPocket.Services
 
         public async Task<SavingGoal> GetOrCreateMonthlyGoalAsync(Guid userId, int year, int month)
         {
-            var name = $"{year}年{month:D2}月儲蓄目標";
+            // Stable machine-readable identifier; the UI parses & localizes this.
+            var name = $"MonthlyGoal:{year}-{month:D2}";
             var start = new DateTime(year, month, 1);
             var end = start.AddMonths(1).AddDays(-1);
             var goal = await _context.SavingGoals.FirstOrDefaultAsync(g => g.UserId == userId && g.GoalName == name && !g.IsDeleted);
@@ -54,7 +55,7 @@ namespace MyPocket.Services
 
         public async Task<SavingGoal> GetOrCreateYearlyGoalAsync(Guid userId, int year)
         {
-            var name = $"{year}年儲蓄目標";
+            var name = $"YearlyGoal:{year}";
             var start = new DateTime(year, 1, 1);
             var end = new DateTime(year, 12, 31);
             var goal = await _context.SavingGoals.FirstOrDefaultAsync(g => g.UserId == userId && g.GoalName == name && !g.IsDeleted);

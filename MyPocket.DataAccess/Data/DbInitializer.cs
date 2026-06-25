@@ -8,6 +8,7 @@ namespace MyPocket.DataAccess.Data
         public static async Task Initialize(MyPocketDBContext context)
         {
             await context.Database.EnsureCreatedAsync();
+            await ApplySchemaFixes(context);
 
             // Initialize subscription plans if they don't exist
             if (!await context.SubscriptionPlans.AnyAsync())
@@ -134,6 +135,33 @@ namespace MyPocket.DataAccess.Data
                 }
             }
             await context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Idempotent schema fixes for databases that were created with older,
+        /// buggy mappings. Safe to run on every startup; uses ALTER COLUMN with
+        /// existence checks. InMemory provider (used by tests) is skipped.
+        /// </summary>
+        private static async Task ApplySchemaFixes(MyPocketDBContext context)
+        {
+            if (!context.Database.IsRelational())
+            {
+                return;
+            }
+
+            // Original mapping built [TransactionType] as NCHAR(1); restore as NVARCHAR(10)
+            // so 2-character labels ("支出" / "收入") fit.
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF EXISTS (
+                    SELECT 1 FROM sys.columns
+                    WHERE object_id = OBJECT_ID(N'[dbo].[Transaction]')
+                    AND name = N'TransactionType'
+                    AND (system_type_id = TYPE_ID(N'nchar') OR max_length < 20)
+                )
+                BEGIN
+                    ALTER TABLE [dbo].[Transaction] ALTER COLUMN [TransactionType] NVARCHAR(10) NOT NULL;
+                END
+            ");
         }
     }
 }
