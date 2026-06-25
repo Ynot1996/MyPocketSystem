@@ -1,0 +1,117 @@
+@model MyPocket.Shared.ViewModels.Transactions.TransactionCreateModel
+@using MyPocket.Web.Services
+@{
+    ViewData["Title"] = Localizer["EditTransaction"];
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    var categories = ViewBag.Categories as IEnumerable<SelectListItem>;
+    var txId = (Guid)ViewBag.TransactionId;
+    var currentMeta = Currency.Get(Model.Currency);
+}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-3 fw-bold text-primary">@Localizer["EditTransaction"]</h4>
+                    <form asp-action="Edit" asp-route-id="@txId" method="post" autocomplete="off">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                        <div class="mb-3">
+                            <label class="form-label">@Localizer["Category"] <span class="text-danger">*</span></label>
+                            <select asp-for="CategoryId" class="form-select" required>
+                                <option value="">-- @Localizer["SelectCategory"] --</option>
+                                @if (categories != null)
+                                {
+                                    foreach (var grp in categories.Where(c => c.Group != null).GroupBy(c => c.Group.Name))
+                                    {
+                                        <optgroup label="@Localizer[grp.Key]">
+                                            @foreach (var c in grp)
+                                            {
+                                                <option value="@c.Value" selected="@(c.Value == Model.CategoryId.ToString())">@Localizer[c.Text]</option>
+                                            }
+                                        </optgroup>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">@Localizer["Currency"] <span class="text-danger">*</span></label>
+                            <select asp-for="Currency" id="Currency" class="form-select">
+                                @foreach (var c in Currency.Supported)
+                                {
+                                    <option value="@c.Code"
+                                            data-symbol="@c.Symbol"
+                                            data-decimals="@c.Decimals"
+                                            data-step="@c.Step"
+                                            selected="@(c.Code == Model.Currency)">
+                                        @c.Symbol @c.Code — @c.DisplayName
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">@Localizer["Amount"] <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="amountSymbol">@currentMeta.Symbol</span>
+                                <button type="button" class="btn btn-outline-secondary" id="amountDown">−</button>
+                                <input asp-for="Amount" type="number" id="Amount"
+                                       class="form-control text-center"
+                                       step="any" min="0" inputmode="decimal" required />
+                                <button type="button" class="btn btn-outline-secondary" id="amountUp">+</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">@Localizer["TransactionDate"] <span class="text-danger">*</span></label>
+                            <input asp-for="TransactionDate" type="datetime-local" class="form-control"
+                                   value="@Model.TransactionDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">@Localizer["Description"]</label>
+                            <textarea asp-for="Description" class="form-control" rows="2" maxlength="100"></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">@Localizer["Save"]</button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">@Localizer["Cancel"]</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const select = document.getElementById('Currency');
+        const symbolEl = document.getElementById('amountSymbol');
+        const amount = document.getElementById('Amount');
+        const upBtn = document.getElementById('amountUp');
+        const downBtn = document.getElementById('amountDown');
+
+        function applyCurrency() {
+            const opt = select.options[select.selectedIndex];
+            symbolEl.textContent = opt.dataset.symbol;
+            const decimals = parseInt(opt.dataset.decimals, 10);
+            const current = parseFloat(amount.value);
+            if (!isNaN(current)) amount.value = current.toFixed(decimals);
+        }
+
+        function nudge(dir) {
+            const opt = select.options[select.selectedIndex];
+            const step = parseFloat(opt.dataset.step);
+            const decimals = parseInt(opt.dataset.decimals, 10);
+            const current = parseFloat(amount.value) || 0;
+            const next = Math.max(0, current + dir * step);
+            amount.value = next.toFixed(decimals);
+        }
+
+        select.addEventListener('change', applyCurrency);
+        upBtn.addEventListener('click', () => nudge(1));
+        downBtn.addEventListener('click', () => nudge(-1));
+    })();
+</script>

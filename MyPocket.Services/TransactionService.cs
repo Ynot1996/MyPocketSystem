@@ -135,6 +135,51 @@ namespace MyPocket.Services
             }
         }
 
+        public async Task<(bool success, string message)> UpdateTransactionAsync(Guid userId, Guid transactionId, TransactionCreateModel model)
+        {
+            if (userId == Guid.Empty)
+                throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+            if (transactionId == Guid.Empty)
+                throw new ArgumentException("Transaction ID cannot be empty.", nameof(transactionId));
+
+            try
+            {
+                var transaction = await _context.Transactions
+                    .FirstOrDefaultAsync(t => t.TransactionId == transactionId &&
+                                              t.UserId == userId &&
+                                              !t.IsDeleted);
+
+                if (transaction == null)
+                    return (false, "TransactionNotFound");
+
+                // Re-validate the chosen category belongs to this user (or is a default).
+                var categoryViewModel = await _categoryService.GetUserCategoriesAsync(userId);
+                var category = categoryViewModel.DefaultIncomeCategories
+                    .Concat(categoryViewModel.DefaultExpenseCategories)
+                    .Concat(categoryViewModel.UserIncomeCategories)
+                    .Concat(categoryViewModel.UserExpenseCategories)
+                    .FirstOrDefault(c => c.CategoryId == model.CategoryId);
+
+                if (category == null)
+                    return (false, "InvalidCategory");
+
+                transaction.CategoryId = model.CategoryId;
+                transaction.Amount = model.Amount;
+                transaction.Currency = string.IsNullOrWhiteSpace(model.Currency) ? "GBP" : model.Currency.ToUpperInvariant();
+                transaction.TransactionType = category.CategoryType;
+                transaction.TransactionDate = model.TransactionDate;
+                transaction.Description = model.Description;
+                transaction.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                return (true, "TransactionUpdated");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"UpdateFailed|{ex.Message}");
+            }
+        }
+
         public async Task<(bool success, string message)> DeleteTransactionAsync(Guid userId, Guid transactionId)
         {
             if (userId == Guid.Empty)

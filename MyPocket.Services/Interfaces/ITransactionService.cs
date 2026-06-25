@@ -15,6 +15,8 @@ namespace MyPocket.Services.Interfaces
 
         Task<(bool success, string message, Transaction? transaction)> CreateTransactionAsync(Guid userId, TransactionCreateModel model);
 
+        Task<(bool success, string message)> UpdateTransactionAsync(Guid userId, Guid transactionId, TransactionCreateModel model);
+
         Task<(bool success, string message)> DeleteTransactionAsync(Guid userId, Guid transactionId);
     }
 }

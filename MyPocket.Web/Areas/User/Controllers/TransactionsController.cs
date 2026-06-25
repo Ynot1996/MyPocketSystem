@@ -160,6 +160,101 @@ namespace MyPocket.Web.Areas.User.Controllers
         }
 
         /// <summary>
+        /// Renders the edit form for a transaction the current user owns.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            try
+            {
+                var userId = GetUserId();
+                var tx = await _transactionService.GetTransactionAsync(userId, id);
+                if (tx == null)
+                {
+                    TempData["ErrorMessage"] = _localizer.GetString("TransactionNotFound");
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Reuse the same category dropdown as Create.
+                var categoryViewModel = await _categoryService.GetUserCategoriesAsync(userId);
+                var allCategories = categoryViewModel.DefaultIncomeCategories
+                    .Concat(categoryViewModel.DefaultExpenseCategories)
+                    .Concat(categoryViewModel.UserIncomeCategories)
+                    .Concat(categoryViewModel.UserExpenseCategories);
+
+                ViewBag.Categories = allCategories
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.CategoryId.ToString(),
+                        Text = c.CategoryName,
+                        Group = new SelectListGroup { Name = c.CategoryType }
+                    })
+                    .OrderBy(x => x.Group.Name)
+                    .ThenBy(x => x.Text);
+
+                ViewBag.TransactionId = id;
+
+                return View(new TransactionCreateModel
+                {
+                    CategoryId = tx.CategoryId,
+                    Amount = tx.Amount,
+                    Currency = string.IsNullOrEmpty(tx.Currency) ? "GBP" : tx.Currency,
+                    TransactionDate = tx.TransactionDate,
+                    Description = tx.Description
+                });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
+        }
+
+        /// <summary>
+        /// Persists edits to a transaction.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, TransactionCreateModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(" ", ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage));
+                TempData["ErrorMessage"] = $"{_localizer.GetString("ValidationFailed")}: {errors}";
+                return RedirectToAction(nameof(Edit), new { id });
+            }
+
+            try
+            {
+                var userId = GetUserId();
+                var (success, message) = await _transactionService.UpdateTransactionAsync(userId, id, model);
+                if (success)
+                {
+                    TempData["SuccessMessage"] = Translate(message);
+                    return RedirectToAction(nameof(Index));
+                }
+
+                TempData["ErrorMessage"] = Translate(message);
+                return RedirectToAction(nameof(Edit), new { id });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
+            catch (ArgumentException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Edit), new { id });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"{_localizer.GetString("UpdateFailed")}: {ex.Message}";
+                return RedirectToAction(nameof(Edit), new { id });
+            }
+        }
+
+        /// <summary>
         /// Deletes a transaction.
         /// </summary>
         [HttpPost]

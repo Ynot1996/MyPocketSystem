@@ -280,9 +280,12 @@
 
   "InvalidCategory": "無效的分類。",
   "TransactionCreated": "交易紀錄已成功新增。",
+  "TransactionUpdated": "交易紀錄已成功更新。",
   "TransactionDeleted": "交易紀錄已成功刪除。",
-  "TransactionNotFound": "找不到要刪除的交易紀錄。",
+  "TransactionNotFound": "找不到此交易紀錄。",
+  "EditTransaction": "編輯交易",
   "CreateFailed": "新增失敗",
+  "UpdateFailed": "更新失敗",
   "DeleteFailed": "刪除失敗",
   "ValidationFailed": "請檢查輸入資料是否正確",
   "ErrorLoadingData": "載入資料時發生錯誤",

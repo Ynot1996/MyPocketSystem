@@ -68,7 +68,7 @@
                     <button type="button" class="btn btn-outline-secondary" id="amountDown" title="−">−</button>
                     <input type="number" name="Amount" id="Amount"
                            class="form-control text-center"
-                           step="@defaultMeta.Step.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                           step="any"
                            min="0"
                            inputmode="decimal"
                            required />
@@ -112,11 +112,11 @@
             const opt = select.options[select.selectedIndex];
             const symbol = opt.dataset.symbol;
             const decimals = parseInt(opt.dataset.decimals, 10);
-            const step = parseFloat(opt.dataset.step);
             const presetList = opt.dataset.presets.split(',').map(Number);
 
             symbolEl.textContent = symbol;
-            amount.step = step;
+            // Keep `step="any"` on the field so the user can type any decimal
+            // (e.g. £3.67). The per-currency step is only used by the ± buttons.
 
             // Snap current value to the new decimals (avoid stale precision).
             const current = parseFloat(amount.value);

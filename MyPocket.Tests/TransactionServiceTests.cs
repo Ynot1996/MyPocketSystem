@@ -253,6 +253,54 @@ namespace MyPocket.Tests
         }
 
         [Fact]
+        public async Task Update_ChangesFields_AndOnlyForOwner()
+        {
+            using var context = TestHelper.NewContext();
+            var admin = TestHelper.SeedAdmin(context);
+            var dining = TestHelper.SeedCategory(context, admin.UserId, "餐飲", "支出");
+            var transport = TestHelper.SeedCategory(context, admin.UserId, "交通", "支出");
+            var alice = TestHelper.SeedUser(context, "alice@example.com");
+            var bob = TestHelper.SeedUser(context, "bob@example.com");
+
+            var categoryService = new CategoryService(context);
+            var service = new TransactionService(context, categoryService);
+
+            var (_, _, tx) = await service.CreateTransactionAsync(alice.UserId, new TransactionCreateModel
+            {
+                CategoryId = dining.CategoryId,
+                Amount = 1.8m,
+                Currency = "GBP",
+                TransactionDate = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc)
+            });
+
+            // Bob cannot edit Alice's transaction.
+            var (bobOk, _) = await service.UpdateTransactionAsync(bob.UserId, tx!.TransactionId, new TransactionCreateModel
+            {
+                CategoryId = transport.CategoryId,
+                Amount = 99m,
+                Currency = "USD",
+                TransactionDate = DateTime.UtcNow
+            });
+            Assert.False(bobOk);
+
+            var (aliceOk, message) = await service.UpdateTransactionAsync(alice.UserId, tx.TransactionId, new TransactionCreateModel
+            {
+                CategoryId = transport.CategoryId,
+                Amount = 3.67m,
+                Currency = "USD",
+                TransactionDate = new DateTime(2026, 6, 10, 0, 0, 0, DateTimeKind.Utc),
+                Description = "edited"
+            });
+
+            Assert.True(aliceOk, message);
+            var updated = context.Transactions.Single();
+            Assert.Equal(transport.CategoryId, updated.CategoryId);
+            Assert.Equal(3.67m, updated.Amount);
+            Assert.Equal("USD", updated.Currency);
+            Assert.Equal("edited", updated.Description);
+        }
+
+        [Fact]
         public async Task Delete_SoftDeletes_AndOnlyForOwner()
         {
             using var context = TestHelper.NewContext();

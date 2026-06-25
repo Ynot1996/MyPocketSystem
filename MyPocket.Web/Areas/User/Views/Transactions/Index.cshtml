@@ -25,11 +25,15 @@
         .Select(g => new { Code = g.Key, Amount = g.Sum(r => r.Amount) })
         .OrderByDescending(g => g.Amount)
         .ToList();
-    // Group by raw CategoryName (DB literal) and translate at projection time
-    // so the chart legend / category list never leak the seeded Chinese name.
+    // Convert each row to display currency *before* summing so the chart
+    // legend reflects accurate cross-currency totals (no naive Sum across GBP/JPY/etc.).
+    decimal Converted(MyPocket.Core.Models.Transaction t) =>
+        ExchangeRates.Convert(t.Amount, string.IsNullOrEmpty(t.Currency) ? "GBP" : t.Currency, displayCurrency);
+
+    // Group by raw CategoryName (DB literal) and translate at projection time.
     var expenseByCategory = expenseList
         .GroupBy(x => x.Category.CategoryName)
-        .Select(g => new { Category = Localizer[g.Key], Amount = g.Sum(x => x.Amount) })
+        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(Converted) })
         .ToList();
     var now = DateTime.UtcNow;
     var budgets = ViewBag.Budgets as List<MyPocket.Shared.ViewModels.Budgets.BudgetViewModel>;
@@ -57,20 +61,20 @@
         x.TransactionDate.Date >= firstDayOfYear && 
         x.TransactionDate.Date <= lastDayOfYear);
 
-    // Translate each category name once so chart labels / list rows render localized.
+    // Same conversion-before-sum applies for the time-bucketed pies.
     var dailyExpensesByCategory = dailyExpenses
         .GroupBy(x => x.Category.CategoryName)
-        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(x => x.Amount) })
+        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(Converted) })
         .ToList();
 
     var monthlyExpensesByCategory = monthlyExpenses
         .GroupBy(x => x.Category.CategoryName)
-        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(x => x.Amount) })
+        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(Converted) })
         .ToList();
 
     var yearlyExpensesByCategory = yearlyExpenses
         .GroupBy(x => x.Category.CategoryName)
-        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(x => x.Amount) })
+        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(Converted) })
         .ToList();
 }
 

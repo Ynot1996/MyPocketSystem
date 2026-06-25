@@ -280,9 +280,12 @@
 
   "InvalidCategory": "Invalid category.",
   "TransactionCreated": "Transaction added successfully.",
+  "TransactionUpdated": "Transaction updated successfully.",
   "TransactionDeleted": "Transaction deleted successfully.",
   "TransactionNotFound": "Transaction not found.",
+  "EditTransaction": "Edit Transaction",
   "CreateFailed": "Failed to add",
+  "UpdateFailed": "Failed to update",
   "DeleteFailed": "Failed to delete",
   "ValidationFailed": "Please check your input",
   "ErrorLoadingData": "Error loading data",
