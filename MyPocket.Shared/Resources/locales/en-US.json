@@ -273,6 +273,10 @@
   "YearlyGoalLabel": "Yearly Saving Goal ({0})",
 
   "Currency": "Currency",
+  "TotalsInDisplayCurrency": "Totals in",
+  "IncomeByCurrency": "Income by currency",
+  "ExpenseByCurrency": "Expense by currency",
+  "ExchangeRateDisclaimer": "Totals use approximate reference rates — not live FX.",
 
   "InvalidCategory": "Invalid category.",
   "TransactionCreated": "Transaction added successfully.",

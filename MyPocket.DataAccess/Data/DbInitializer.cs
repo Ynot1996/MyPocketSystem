@@ -162,6 +162,19 @@ namespace MyPocket.DataAccess.Data
                     ALTER TABLE [dbo].[Transaction] ALTER COLUMN [TransactionType] NVARCHAR(10) NOT NULL;
                 END
             ");
+
+            // Add the per-transaction Currency column (ISO 4217). Existing rows
+            // default to GBP. Safe to run repeatedly; only adds when missing.
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM sys.columns
+                    WHERE object_id = OBJECT_ID(N'[dbo].[Transaction]')
+                    AND name = N'Currency'
+                )
+                BEGIN
+                    ALTER TABLE [dbo].[Transaction] ADD [Currency] NVARCHAR(3) NOT NULL CONSTRAINT DF_Transaction_Currency DEFAULT (N'GBP');
+                END
+            ");
         }
     }
 }

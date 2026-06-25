@@ -273,6 +273,10 @@
   "YearlyGoalLabel": "{0} 年儲蓄目標",
 
   "Currency": "貨幣",
+  "TotalsInDisplayCurrency": "總計幣別",
+  "IncomeByCurrency": "各幣別收入",
+  "ExpenseByCurrency": "各幣別支出",
+  "ExchangeRateDisclaimer": "總計使用參考匯率換算，非即時匯率。",
 
   "InvalidCategory": "無效的分類。",
   "TransactionCreated": "交易紀錄已成功新增。",

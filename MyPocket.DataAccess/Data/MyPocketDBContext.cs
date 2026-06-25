@@ -82,6 +82,7 @@ namespace MyPocket.DataAccess.Data
                 // any insert. Explicit NVARCHAR(10) leaves room for future labels.
                 entity.Property(e => e.TransactionType).HasMaxLength(10);
                 entity.Property(e => e.Amount).HasPrecision(18, 2);
+                entity.Property(e => e.Currency).HasMaxLength(3).HasDefaultValue("GBP");
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
                 entity.HasOne(d => d.Category).WithMany(p => p.Transactions).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(d => d.User).WithMany(p => p.Transactions).OnDelete(DeleteBehavior.Restrict);

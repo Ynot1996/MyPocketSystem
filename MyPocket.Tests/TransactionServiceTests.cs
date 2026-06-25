@@ -37,6 +37,53 @@ namespace MyPocket.Tests
         }
 
         [Fact]
+        public async Task Create_PreservesDecimalAmount()
+        {
+            // Regression: a 1.8 GBP entry used to render as 2 because of N0
+            // formatting. Service must store the exact decimal value.
+            using var context = TestHelper.NewContext();
+            var admin = TestHelper.SeedAdmin(context);
+            var category = TestHelper.SeedCategory(context, admin.UserId, "餐飲", "支出");
+            var user = TestHelper.SeedUser(context);
+            var categoryService = new CategoryService(context);
+            var service = new TransactionService(context, categoryService);
+
+            var (success, _, transaction) = await service.CreateTransactionAsync(
+                user.UserId,
+                new TransactionCreateModel
+                {
+                    CategoryId = category.CategoryId,
+                    Amount = 1.8m,
+                    Currency = "GBP",
+                    TransactionDate = DateTime.UtcNow
+                });
+
+            Assert.True(success);
+            Assert.Equal(1.8m, transaction!.Amount);
+        }
+
+        [Fact]
+        public async Task Create_PersistsCurrencyCode()
+        {
+            using var context = TestHelper.NewContext();
+            var admin = TestHelper.SeedAdmin(context);
+            var category = TestHelper.SeedCategory(context, admin.UserId, "餐飲", "支出");
+            var user = TestHelper.SeedUser(context);
+            var categoryService = new CategoryService(context);
+            var service = new TransactionService(context, categoryService);
+
+            var (_, _, tx) = await service.CreateTransactionAsync(user.UserId, new TransactionCreateModel
+            {
+                CategoryId = category.CategoryId,
+                Amount = 100m,
+                Currency = "jpy", // intentionally lowercase
+                TransactionDate = DateTime.UtcNow
+            });
+
+            Assert.Equal("JPY", tx!.Currency);
+        }
+
+        [Fact]
         public async Task Create_AddsIncome_UsingOwnCategory()
         {
             using var context = TestHelper.NewContext();

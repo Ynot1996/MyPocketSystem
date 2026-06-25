@@ -13,6 +13,9 @@ namespace MyPocket.Shared.ViewModels.Transactions
         [LocalizedRange(0.01, double.MaxValue, "AmountRange")]
         public decimal Amount { get; set; }
 
+        /// <summary>ISO 4217 code of the currency the user is entering this amount in.</summary>
+        public string Currency { get; set; } = "GBP";
+
         [LocalizedRequired("DateRequired")]
         public DateTime TransactionDate { get; set; }
 

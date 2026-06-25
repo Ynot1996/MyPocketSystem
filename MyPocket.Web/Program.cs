@@ -38,6 +38,7 @@ builder.Services.AddSingleton<ILocalizationService, JsonLocalizationService>();
 // Currency formatting service (cookie-based preference, default GBP)
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<MyPocket.Web.Services.ICurrencyService, MyPocket.Web.Services.CurrencyService>();
+builder.Services.AddSingleton<MyPocket.Web.Services.IExchangeRateService, MyPocket.Web.Services.ExchangeRateService>();
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {

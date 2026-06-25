@@ -1,13 +1,17 @@
 @model IEnumerable<MyPocket.Core.Models.Transaction>
+@using MyPocket.Web.Services
 @{
     var categoryError = ViewData.ModelState["CategoryId"]?.Errors.FirstOrDefault()?.ErrorMessage;
     var categories = ViewBag.Categories as IEnumerable<SelectListItem>;
+    var defaultCurrency = Currency.CurrentCode;
+    var defaultMeta = Currency.Get(defaultCurrency);
 }
 <div class="card shadow-sm">
     <div class="card-body">
         <h5 class="card-title mb-3 fw-bold text-primary">@Localizer["AddTransaction"]</h5>
-        <form asp-action="Create" method="post" autocomplete="off">
+        <form asp-action="Create" method="post" autocomplete="off" id="createTransactionForm">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
             <div class="mb-3">
                 <label for="CategoryId" class="form-label">@Localizer["Category"] <span class="text-danger">*</span></label>
                 <select name="CategoryId" id="CategoryId" class="form-select" required>
@@ -23,7 +27,6 @@
                                 }
                             </optgroup>
                         }
-                        // Fall through any categories that were not assigned to a group.
                         var noGroupCategories = categories.Where(c => c.Group == null);
                         foreach (var category in noGroupCategories)
                         {
@@ -40,19 +43,116 @@
                     <span class="text-danger small">@categoryError</span>
                 }
             </div>
+
             <div class="mb-3">
-                <label for="Amount" class="form-label">@Localizer["Amount"] <span class="text-danger">*</span></label>
-                <input type="number" name="Amount" class="form-control" step="0.01" min="0" required />
+                <label class="form-label">@Localizer["Currency"] <span class="text-danger">*</span></label>
+                <select name="Currency" id="Currency" class="form-select" data-decimals="@defaultMeta.Decimals" data-step="@defaultMeta.Step">
+                    @foreach (var c in Currency.Supported)
+                    {
+                        <option value="@c.Code"
+                                data-symbol="@c.Symbol"
+                                data-decimals="@c.Decimals"
+                                data-step="@c.Step"
+                                data-presets="@string.Join(",", c.Presets)"
+                                selected="@(c.Code == defaultCurrency)">
+                            @c.Symbol @c.Code — @c.DisplayName
+                        </option>
+                    }
+                </select>
             </div>
+
+            <div class="mb-2">
+                <label for="Amount" class="form-label">@Localizer["Amount"] <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text" id="amountSymbol">@defaultMeta.Symbol</span>
+                    <button type="button" class="btn btn-outline-secondary" id="amountDown" title="−">−</button>
+                    <input type="number" name="Amount" id="Amount"
+                           class="form-control text-center"
+                           step="@defaultMeta.Step.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                           min="0"
+                           inputmode="decimal"
+                           required />
+                    <button type="button" class="btn btn-outline-secondary" id="amountUp" title="+">+</button>
+                </div>
+            </div>
+            <div class="mb-3 d-flex flex-wrap gap-1" id="amountPresets">
+                @foreach (var preset in defaultMeta.Presets)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-primary preset-btn" data-value="@preset.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                        @defaultMeta.Symbol@preset.ToString("N" + defaultMeta.Decimals, System.Globalization.CultureInfo.InvariantCulture)
+                    </button>
+                }
+            </div>
+
             <div class="mb-3">
                 <label for="TransactionDate" class="form-label">@Localizer["TransactionDate"] <span class="text-danger">*</span></label>
                 <input type="datetime-local" name="TransactionDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
             </div>
+
             <div class="mb-3">
                 <label for="Description" class="form-label">@Localizer["Description"]</label>
                 <textarea name="Description" class="form-control" rows="2" maxlength="100"></textarea>
             </div>
+
             <button type="submit" class="btn btn-primary w-100">@Localizer["Add"]</button>
         </form>
     </div>
 </div>
+
+<script>
+    (function () {
+        const select = document.getElementById('Currency');
+        const symbolEl = document.getElementById('amountSymbol');
+        const amount = document.getElementById('Amount');
+        const presets = document.getElementById('amountPresets');
+        const upBtn = document.getElementById('amountUp');
+        const downBtn = document.getElementById('amountDown');
+
+        function applyCurrency() {
+            const opt = select.options[select.selectedIndex];
+            const symbol = opt.dataset.symbol;
+            const decimals = parseInt(opt.dataset.decimals, 10);
+            const step = parseFloat(opt.dataset.step);
+            const presetList = opt.dataset.presets.split(',').map(Number);
+
+            symbolEl.textContent = symbol;
+            amount.step = step;
+
+            // Snap current value to the new decimals (avoid stale precision).
+            const current = parseFloat(amount.value);
+            if (!isNaN(current)) {
+                amount.value = current.toFixed(decimals);
+            }
+
+            // Rebuild preset buttons for the chosen currency.
+            presets.innerHTML = '';
+            presetList.forEach(v => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'btn btn-sm btn-outline-primary preset-btn';
+                b.dataset.value = v;
+                b.textContent = symbol + v.toFixed(decimals);
+                b.addEventListener('click', () => { amount.value = v.toFixed(decimals); });
+                presets.appendChild(b);
+            });
+        }
+
+        function nudge(direction) {
+            const opt = select.options[select.selectedIndex];
+            const step = parseFloat(opt.dataset.step);
+            const decimals = parseInt(opt.dataset.decimals, 10);
+            const current = parseFloat(amount.value) || 0;
+            const next = Math.max(0, current + direction * step);
+            amount.value = next.toFixed(decimals);
+        }
+
+        select.addEventListener('change', applyCurrency);
+        upBtn.addEventListener('click', () => nudge(1));
+        downBtn.addEventListener('click', () => nudge(-1));
+
+        // Wire the initially-rendered preset buttons too.
+        presets.querySelectorAll('.preset-btn').forEach(b => {
+            b.addEventListener('click', () => { amount.value = b.dataset.value; });
+        });
+    })();
+</script>

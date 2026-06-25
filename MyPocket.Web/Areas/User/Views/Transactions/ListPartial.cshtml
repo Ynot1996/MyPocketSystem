@@ -31,8 +31,8 @@
                         {
                             <tr>
                                 <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
-                                <td>@Localizer[item.Category.CategoryName]</td>
-                                <td class="text-success fw-bold">+@item.Amount.ToString("N0")</td>
+                                <td><i class="bi @MyPocket.Web.Services.CategoryIcons.For(item.Category.CategoryName) me-2 text-muted"></i>@Localizer[item.Category.CategoryName]</td>
+                                <td class="text-success fw-bold">+@Currency.Format(item.Amount, item.Currency)</td>
                                 <td>@item.Description</td>
                                 <td>
                                     <form asp-action="Delete" method="post" class="d-inline">
@@ -79,8 +79,8 @@
                         {
                             <tr>
                                 <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
-                                <td>@Localizer[item.Category.CategoryName]</td>
-                                <td class="text-danger fw-bold">-@item.Amount.ToString("N0")</td>
+                                <td><i class="bi @MyPocket.Web.Services.CategoryIcons.For(item.Category.CategoryName) me-2 text-muted"></i>@Localizer[item.Category.CategoryName]</td>
+                                <td class="text-danger fw-bold">-@Currency.Format(item.Amount, item.Currency)</td>
                                 <td>@item.Description</td>
                                 <td>
                                     <form asp-action="Delete" method="post" class="d-inline">

@@ -110,6 +110,7 @@ namespace MyPocket.Services
                     UserId = userId,
                     CategoryId = model.CategoryId,
                     Amount = model.Amount,
+                    Currency = string.IsNullOrWhiteSpace(model.Currency) ? "GBP" : model.Currency.ToUpperInvariant(),
                     TransactionType = category.CategoryType,
                     TransactionDate = model.TransactionDate,
                     Description = model.Description,
