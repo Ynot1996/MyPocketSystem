@@ -74,6 +74,10 @@
                                 .OrderByDescending(t => t.Transaction.TransactionDate))
                             {
                                 var isFuture = txVm.Transaction.TransactionDate > DateTime.Now;
+                                // DB stores the raw Chinese literals "收入" / "支出";
+                                // translate for label colour & display.
+                                var isIncome = txVm.Transaction.TransactionType.Trim() == "收入";
+                                var typeLabel = isIncome ? Localizer["Income"] : Localizer["Expense"];
                                 <li class="list-group-item d-flex justify-content-between align-items-center @(isFuture ? "bg-light" : "")">
                                     <span>
                                         @txVm.Transaction.TransactionDate.ToString("MM-dd HH:mm")
@@ -82,11 +86,11 @@
                                             <small class="text-muted">(Scheduled)</small>
                                         }
                                     </span>
-                                    <span>@txVm.CategoryName</span>
-                                    <span class="fw-bold">@txVm.Transaction.Amount.ToString("N0")</span>
-                                    <span class="badge bg-@(txVm.Transaction.TransactionType == "Income" ? "success" : "danger")">
-                                        @txVm.Transaction.TransactionType
+                                    <span>
+                                        <i class="bi @MyPocket.Web.Services.CategoryIcons.For(txVm.CategoryName) me-2 text-muted"></i>@Localizer[txVm.CategoryName ?? string.Empty]
                                     </span>
+                                    <span class="fw-bold">@Currency.Format(txVm.Transaction.Amount, txVm.Transaction.Currency)</span>
+                                    <span class="badge bg-@(isIncome ? "success" : "danger")">@typeLabel</span>
                                 </li>
                             }
                         </ul>
