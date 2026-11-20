@@ -1,6 +1,8 @@
 {
   "Home": "首頁",
   "Login": "登入",
+  "SignInWithGoogle": "使用 Google 登入",
+  "Or": "或",
   "Logout": "登出",
   "Register": "註冊",
   "SignUp": "註冊",

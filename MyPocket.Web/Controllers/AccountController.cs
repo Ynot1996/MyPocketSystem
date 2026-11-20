@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPocket.DataAccess.Data;
@@ -13,17 +15,86 @@ namespace MyPocket.Web.Controllers
     {
         private readonly MyPocketDBContext _context;
         private readonly ISubscriptionService _subscriptionService;
-        public AccountController(MyPocketDBContext context, ISubscriptionService subscriptionService)
+        private readonly IConfiguration _configuration;
+
+        public AccountController(
+            MyPocketDBContext context,
+            ISubscriptionService subscriptionService,
+            IConfiguration configuration)
         {
             _context = context;
             _subscriptionService = subscriptionService;
+            _configuration = configuration;
         }
+
+        // True only when both Google secrets are configured; the Login view
+        // reads this to decide whether to render the "Sign in with Google"
+        // button (hidden during local dev before OAuth has been set up).
+        private bool GoogleEnabled =>
+            !string.IsNullOrEmpty(_configuration["Authentication:Google:ClientId"]) &&
+            !string.IsNullOrEmpty(_configuration["Authentication:Google:ClientSecret"]);
 
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+            ViewData["GoogleEnabled"] = GoogleEnabled;
             return View();
+        }
+
+        /// <summary>
+        /// Kicks off an external login flow (currently only Google). The
+        /// provider redirects the browser away; when it comes back, the
+        /// Google middleware's OnTicketReceived handler (see Program.cs)
+        /// creates or updates the local User row and signs them in.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public IActionResult ExternalLogin(string provider, string? returnUrl = null)
+        {
+            if (!GoogleEnabled || provider != GoogleDefaults.AuthenticationScheme)
+            {
+                TempData["ErrorMessage"] = "That sign-in provider is not configured.";
+                return RedirectToAction(nameof(Login), new { returnUrl });
+            }
+
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+            var props = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(props, provider);
+        }
+
+        /// <summary>
+        /// Lands here after Google signs the user in via the Cookie scheme.
+        /// By this point OnTicketReceived has already created the User row
+        /// and built our domain claims, so all we do is pick a landing page.
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
+        {
+            if (!string.IsNullOrEmpty(remoteError))
+            {
+                TempData["ErrorMessage"] = $"Sign-in failed: {remoteError}";
+                return RedirectToAction(nameof(Login), new { returnUrl });
+            }
+
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                TempData["ErrorMessage"] = "Sign-in was cancelled.";
+                return RedirectToAction(nameof(Login), new { returnUrl });
+            }
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            return role switch
+            {
+                "Admin" => RedirectToAction("Index", "Users", new { area = "Admin" }),
+                "PaidMember" => RedirectToAction("Index", "PaidMember", new { area = "User" }),
+                _ => RedirectToAction("Index", "Transactions", new { area = "User" })
+            };
         }
 
         [HttpPost]

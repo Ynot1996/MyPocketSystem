@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using System.Security.Claims;
 using MyPocket.DataAccess.Data;
 using MyPocket.Shared.Resources;
 using MyPocket.Services;
@@ -24,13 +25,98 @@ builder.Services.AddDbContext<MyPocketDBContext>(options =>
             maxRetryDelay: TimeSpan.FromSeconds(10),
             errorNumbersToAdd: null)));
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+// Cookie auth = how we remember a signed-in user across requests.
+// Google = one external identity provider the user can use to sign in.
+// External providers always still produce a *cookie* session afterwards,
+// so the pipeline is: Google -> validated identity -> cookie sign-in.
+var authBuilder = builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login";
         options.LogoutPath = "/Account/Logout";
         options.AccessDeniedPath = "/Account/AccessDenied";
     });
+
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    // Only register the Google scheme when both secrets are present.
+    // This lets the app run locally even if the dev hasn't configured OAuth yet;
+    // the "Sign in with Google" button checks the same flag before rendering.
+    authBuilder.AddGoogle(options =>
+    {
+        options.ClientId = googleClientId;
+        options.ClientSecret = googleClientSecret;
+        // Google redirects back here after the user grants consent. ASP.NET
+        // Core's middleware handles /signin-google automatically; we only
+        // need to make sure the same path is registered in Google Cloud Console.
+        options.CallbackPath = "/signin-google";
+        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+        // OnTicketReceived runs *after* Google verified the user but *before*
+        // the cookie is written. It's the one place where we can map
+        // Google's raw claims (email, name) to our own domain claims
+        // (UserId, Role) so downstream Authorize attributes behave normally.
+        options.Events.OnTicketReceived = async context =>
+        {
+            var db = context.HttpContext.RequestServices.GetRequiredService<MyPocketDBContext>();
+            var subs = context.HttpContext.RequestServices.GetRequiredService<MyPocket.Services.ISubscriptionService>();
+
+            var email = context.Principal?.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+            {
+                context.Fail("Google did not return an email address.");
+                return;
+            }
+
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+            if (user == null)
+            {
+                // First-time Google user → provision a local account. We still
+                // set a non-null PasswordHash because the column is NOT NULL,
+                // but it's an unguessable random value — the local password
+                // login path will always reject it.
+                user = new MyPocket.Core.Models.User
+                {
+                    UserId = Guid.NewGuid(),
+                    Email = email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString("N")),
+                    Nickname = context.Principal?.FindFirstValue(ClaimTypes.Name)
+                               ?? context.Principal?.FindFirstValue(ClaimTypes.GivenName)
+                               ?? email.Split('@')[0],
+                    Role = "FreeMember",
+                    CreationDate = DateTime.UtcNow,
+                    LastLoginDate = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                db.Users.Add(user);
+                await db.SaveChangesAsync();
+                await subs.SubscribeToBasicPlanAsync(user.UserId);
+            }
+            else
+            {
+                user.LastLoginDate = DateTime.UtcNow;
+                await db.SaveChangesAsync();
+            }
+
+            // Replace Google's raw principal with one carrying our domain claims
+            // (UserId, Role). Everything inside the app reads these via
+            // ClaimTypes.NameIdentifier / ClaimTypes.Role.
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim("Nickname", user.Nickname ?? user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
+            };
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            context.Principal = new ClaimsPrincipal(identity);
+        };
+    });
+}
 
 // Add localization service
 builder.Services.AddSingleton<ILocalizationService, JsonLocalizationService>();
