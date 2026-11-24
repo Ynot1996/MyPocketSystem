@@ -1,53 +1,37 @@
-﻿@model MyPocket.Core.Models.User
-
-@{
-    ViewData["Title"] = "Create";
+﻿@{
+    ViewData["Title"] = Localizer["AddUser"];
+    var roles = new[] { "FreeMember", "PaidMember", "Admin" };
 }
 
-<h1>Create</h1>
-
-<h4>User</h4>
+<h1>@Localizer["AddUser"]</h1>
 <hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
+    <div class="col-md-5">
+        <form asp-action="Create" method="post" autocomplete="off">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+            <div class="mb-3">
+                <label class="form-label" for="email">@Localizer["EmailAddress"]</label>
+                <input class="form-control" id="email" name="email" type="email" required />
             </div>
-            <div class="form-group">
-                <label asp-for="PasswordHash" class="control-label"></label>
-                <input asp-for="PasswordHash" class="form-control" />
-                <span asp-validation-for="PasswordHash" class="text-danger"></span>
+            <div class="mb-3">
+                <label class="form-label" for="password">@Localizer["Password"]</label>
+                <input class="form-control" id="password" name="password" type="password" minlength="8" required autocomplete="new-password" />
             </div>
-            <div class="form-group">
-                <label asp-for="Nickname" class="control-label"></label>
-                <input asp-for="Nickname" class="form-control" />
-                <span asp-validation-for="Nickname" class="text-danger"></span>
+            <div class="mb-3">
+                <label class="form-label" for="nickname">@Localizer["Nickname"]</label>
+                <input class="form-control" id="nickname" name="nickname" />
             </div>
-            <div class="form-group">
-                <label asp-for="Role" class="control-label"></label>
-                <input asp-for="Role" class="form-control" />
-                <span asp-validation-for="Role" class="text-danger"></span>
+            <div class="mb-3">
+                <label class="form-label" for="role">@Localizer["Role"]</label>
+                <select class="form-select" id="role" name="role">
+                    @foreach (var r in roles)
+                    {
+                        <option value="@r">@r</option>
+                    }
+                </select>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+            <button type="submit" class="btn btn-primary">@Localizer["Create"]</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@Localizer["BackToList"]</a>
         </form>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

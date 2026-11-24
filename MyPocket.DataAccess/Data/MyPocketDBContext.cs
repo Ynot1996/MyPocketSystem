@@ -25,6 +25,8 @@ namespace MyPocket.DataAccess.Data
         public virtual DbSet<Transaction> Transactions { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserSubscription> UserSubscriptions { get; set; }
+        public virtual DbSet<CoinLedgerEntry> CoinLedger { get; set; }
+        public virtual DbSet<UserItem> UserItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -101,6 +103,17 @@ namespace MyPocket.DataAccess.Data
                 entity.Property(e => e.SubscriptionId).HasDefaultValueSql("(newid())");
                 entity.HasOne(d => d.Plan).WithMany(p => p.UserSubscriptions).OnDelete(DeleteBehavior.Restrict); 
                 entity.HasOne(d => d.User).WithMany(p => p.UserSubscriptions).OnDelete(DeleteBehavior.Restrict); 
+            });
+
+            modelBuilder.Entity<CoinLedgerEntry>(entity =>
+            {
+                entity.HasIndex(e => new { e.UserId, e.CreatedAt });
+            });
+
+            modelBuilder.Entity<UserItem>(entity =>
+            {
+                // A user owns each catalog item at most once.
+                entity.HasIndex(e => new { e.UserId, e.ItemCode }).IsUnique();
             });
 
             OnModelCreatingPartial(modelBuilder);

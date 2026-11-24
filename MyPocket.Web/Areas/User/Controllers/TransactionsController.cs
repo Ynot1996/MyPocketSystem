@@ -17,19 +17,25 @@ namespace MyPocket.Web.Areas.User.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IBudgetService _budgetService;
         private readonly ILocalizationService _localizer;
+        private readonly IGamificationService _gamification;
+        private readonly MyPocket.Web.Infrastructure.IAppTelemetry _telemetry;
 
         public TransactionsController(
             ITransactionService transactionService,
             ISavingGoalService savingGoalService,
             ICategoryService categoryService,
             IBudgetService budgetService,
-            ILocalizationService localizer)
+            ILocalizationService localizer,
+            IGamificationService gamification,
+            MyPocket.Web.Infrastructure.IAppTelemetry telemetry)
         {
             _transactionService = transactionService;
             _savingGoalService = savingGoalService;
             _categoryService = categoryService;
             _budgetService = budgetService;
             _localizer = localizer;
+            _gamification = gamification;
+            _telemetry = telemetry;
         }
 
         // Translates a service-returned key. Service may encode an inner error
@@ -99,6 +105,13 @@ namespace MyPocket.Web.Areas.User.Controllers
                     .OrderBy(x => x.Group.Name)
                     .ThenBy(x => x.Text);
 
+                // Gamification panel: welcome bonus for accounts created before coins
+                // existed, then the city, balance and streak.
+                await _gamification.EnsureWelcomeBonusAsync(userId);
+                ViewBag.City = await _gamification.GetCityAsync(userId);
+                ViewBag.Coins = await _gamification.GetBalanceAsync(userId);
+                ViewBag.Streak = await _gamification.GetStreakAsync(userId);
+
                 return View(transactions);
             }
             catch (UnauthorizedAccessException)
@@ -122,7 +135,7 @@ namespace MyPocket.Web.Areas.User.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(TransactionCreateModel model)
+        public async Task<IActionResult> Create(TransactionCreateModel model, string? captureSource = null)
         {
             if (!ModelState.IsValid)
             {
@@ -139,9 +152,30 @@ namespace MyPocket.Web.Areas.User.Controllers
                 var (success, message, _) = await _transactionService.CreateTransactionAsync(userId, model);
 
                 if (success)
+                {
+                    // Entries that came from a receipt scan or voice/text capture earn a bonus.
+                    var autoCaptured = captureSource is "receipt" or "text";
+                    var award = await _gamification.AwardForTransactionAsync(userId, autoCaptured);
                     TempData["SuccessMessage"] = Translate(message);
+                    if (award.Coins > 0)
+                    {
+                        TempData["CoinsEarned"] = award.Coins;
+                        TempData["StreakDays"] = award.StreakDays;
+                    }
+                    else if (award.DailyCapReached)
+                    {
+                        TempData["CoinsCapReached"] = true;
+                    }
+                    _telemetry.TrackEvent("TransactionCreated", new Dictionary<string, string>
+                    {
+                        ["source"] = captureSource ?? "manual",
+                        ["currency"] = model.Currency
+                    });
+                }
                 else
+                {
                     TempData["ErrorMessage"] = Translate(message);
+                }
             }
             catch (UnauthorizedAccessException)
             {

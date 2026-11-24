@@ -1,7 +1,10 @@
-name: Build and deploy to Azure
+name: CI / Deploy
 
-# Auto-deploy the web app to Azure App Service whenever main is updated.
+# - Every pull request into main runs the test suite (fast feedback before review).
+# - Pushes to main run the tests again and, only if they pass, deploy to Azure.
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch: # allow manual runs from the Actions tab
@@ -16,7 +19,7 @@ env:
   PROJECT_PATH: MyPocket.Web/MyPocket.Web.csproj
 
 jobs:
-  build-and-deploy:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,9 +31,22 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Test
-        # Run unit tests before deploying; a failure aborts the deploy.
         # Targets the test project directly to avoid pulling in MyPocket.Mobile (MAUI).
         run: dotnet test MyPocket.Tests/MyPocket.Tests.csproj -c Release --logger "console;verbosity=normal"
+
+  deploy:
+    needs: test
+    # Never deploy from a PR — only from commits that landed on main.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Publish
         run: dotnet publish ${{ env.PROJECT_PATH }} -c Release -o ./publish

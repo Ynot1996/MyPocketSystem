@@ -3,10 +3,14 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using MyPocket.DataAccess.Data;
 using MyPocket.Services;
+using MyPocket.Services.Interfaces;
+using MyPocket.Shared.Resources;
 using MyPocket.Shared.ViewModels.Accounts;
+using MyPocket.Web.Infrastructure;
 using System.Security.Claims;
 
 namespace MyPocket.Web.Controllers
@@ -15,24 +19,85 @@ namespace MyPocket.Web.Controllers
     {
         private readonly MyPocketDBContext _context;
         private readonly ISubscriptionService _subscriptionService;
+        private readonly IAccountService _accounts;
+        private readonly IGamificationService _gamification;
+        private readonly ILocalizationService _localizer;
+        private readonly IAppTelemetry _telemetry;
         private readonly IConfiguration _configuration;
 
         public AccountController(
             MyPocketDBContext context,
             ISubscriptionService subscriptionService,
+            IAccountService accounts,
+            IGamificationService gamification,
+            ILocalizationService localizer,
+            IAppTelemetry telemetry,
             IConfiguration configuration)
         {
             _context = context;
             _subscriptionService = subscriptionService;
+            _accounts = accounts;
+            _gamification = gamification;
+            _localizer = localizer;
+            _telemetry = telemetry;
             _configuration = configuration;
         }
 
-        // True only when both Google secrets are configured; the Login view
-        // reads this to decide whether to render the "Sign in with Google"
-        // button (hidden during local dev before OAuth has been set up).
+        // True only when both Google secrets are configured; views use it to decide
+        // whether to render "Continue with Google".
         private bool GoogleEnabled =>
             !string.IsNullOrEmpty(_configuration["Authentication:Google:ClientId"]) &&
             !string.IsNullOrEmpty(_configuration["Authentication:Google:ClientSecret"]);
+
+        /// <summary>Everyone except admins lands on the main dashboard (the city view).</summary>
+        private IActionResult RedirectToLanding(string? role, string? returnUrl = null)
+        {
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+
+            return role == "Admin"
+                ? RedirectToAction("Index", "Users", new { area = "Admin" })
+                : RedirectToAction("Index", "Transactions", new { area = "User" });
+        }
+
+        // ------------------------------------------------------------------
+        // Guest mode ("try before you sign up")
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Shareable demo link (e.g. on a CV). Crawlers don't run JavaScript, so the
+        /// page auto-submits a POST for real browsers without letting bots create
+        /// accounts just by following a link.
+        /// </summary>
+        [HttpGet("/try")]
+        [AllowAnonymous]
+        public IActionResult Try()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToLanding(User.FindFirstValue(ClaimTypes.Role));
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        [EnableRateLimiting(RateLimitPolicies.GuestStart)]
+        public async Task<IActionResult> StartGuest()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToLanding(User.FindFirstValue(ClaimTypes.Role));
+
+            var guest = await _accounts.CreateGuestAsync();
+            await HttpContext.SignInAsync(guest);
+            _telemetry.TrackEvent("GuestStarted");
+
+            TempData["SuccessMessage"] = _localizer.GetString("GuestWelcome");
+            return RedirectToAction("Index", "Transactions", new { area = "User" });
+        }
+
+        // ------------------------------------------------------------------
+        // Password login
+        // ------------------------------------------------------------------
 
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
@@ -42,11 +107,40 @@ namespace MyPocket.Web.Controllers
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted && !u.IsGuest);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            {
+                ModelState.AddModelError(string.Empty, _localizer.GetString("InvalidLogin"));
+                ViewData["ReturnUrl"] = returnUrl;
+                ViewData["GoogleEnabled"] = GoogleEnabled;
+                return View();
+            }
+
+            // Logging into a real account from guest mode keeps what the guest entered.
+            var guestId = User.IsGuestUser() ? User.UserIdOrNull() : null;
+            if (guestId.HasValue)
+            {
+                await _accounts.MergeGuestIntoAsync(guestId.Value, user.UserId);
+            }
+
+            user.LastLoginDate = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            await HttpContext.SignInAsync(user);
+            return RedirectToLanding(user.Role, returnUrl);
+        }
+
+        // ------------------------------------------------------------------
+        // Google
+        // ------------------------------------------------------------------
+
         /// <summary>
-        /// Kicks off an external login flow (currently only Google). The
-        /// provider redirects the browser away; when it comes back, the
-        /// Google middleware's OnTicketReceived handler (see Program.cs)
-        /// creates or updates the local User row and signs them in.
+        /// Starts the Google flow. Account resolution (including upgrading or merging
+        /// a guest) happens in the Google OnTicketReceived handler in Program.cs.
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -55,88 +149,102 @@ namespace MyPocket.Web.Controllers
         {
             if (!GoogleEnabled || provider != GoogleDefaults.AuthenticationScheme)
             {
-                TempData["ErrorMessage"] = "That sign-in provider is not configured.";
+                TempData["ErrorMessage"] = _localizer.GetString("ProviderNotConfigured");
                 return RedirectToAction(nameof(Login), new { returnUrl });
             }
 
             var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
-            var props = new AuthenticationProperties { RedirectUri = redirectUrl };
-            return Challenge(props, provider);
+            return Challenge(new AuthenticationProperties { RedirectUri = redirectUrl }, provider);
         }
 
-        /// <summary>
-        /// Lands here after Google signs the user in via the Cookie scheme.
-        /// By this point OnTicketReceived has already created the User row
-        /// and built our domain claims, so all we do is pick a landing page.
-        /// </summary>
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
         {
-            if (!string.IsNullOrEmpty(remoteError))
+            if (!string.IsNullOrEmpty(remoteError) || User.Identity?.IsAuthenticated != true)
             {
-                TempData["ErrorMessage"] = $"Sign-in failed: {remoteError}";
+                TempData["ErrorMessage"] = _localizer.GetString("ExternalLoginFailed");
                 return RedirectToAction(nameof(Login), new { returnUrl });
             }
 
-            if (!User.Identity?.IsAuthenticated ?? true)
-            {
-                TempData["ErrorMessage"] = "Sign-in was cancelled.";
-                return RedirectToAction(nameof(Login), new { returnUrl });
-            }
+            return RedirectToLanding(User.FindFirstValue(ClaimTypes.Role), returnUrl);
+        }
 
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
+        // ------------------------------------------------------------------
+        // Registration
+        // ------------------------------------------------------------------
 
-            var role = User.FindFirstValue(ClaimTypes.Role);
-            return role switch
-            {
-                "Admin" => RedirectToAction("Index", "Users", new { area = "Admin" }),
-                "PaidMember" => RedirectToAction("Index", "PaidMember", new { area = "User" }),
-                _ => RedirectToAction("Index", "Transactions", new { area = "User" })
-            };
+        [HttpGet]
+        public IActionResult Register()
+        {
+            ViewData["GoogleEnabled"] = GoogleEnabled;
+            ViewData["IsGuest"] = User.IsGuestUser();
+            return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
-            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            ViewData["GoogleEnabled"] = GoogleEnabled;
+            ViewData["IsGuest"] = User.IsGuestUser();
+
+            if (model.Password != model.ConfirmPassword)
             {
-                user.LastLoginDate = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                    new Claim(ClaimTypes.Name, user.Email),
-                    new Claim("Nickname", user.Nickname ?? user.Email),
-                    new Claim(ClaimTypes.Role, user.Role)
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties { IsPersistent = true };
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity), authProperties);
-
-                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    return Redirect(returnUrl);
-
-                if (user.Role == "Admin")
-                    return RedirectToAction("Index", "Users", new { area = "Admin" });
-
-                else if (user.Role == "PaidMember")
-                    return RedirectToAction("Index", "PaidMember", new { area = "User" });
-
-                else if (user.Role == "FreeMember")
-                    return RedirectToAction("Index", "Transactions", new { area = "User" });
-
-                return RedirectToAction("Index", "Home");
+                ModelState.AddModelError(nameof(model.ConfirmPassword), _localizer.GetString("PasswordsDoNotMatch"));
             }
-            ModelState.AddModelError(string.Empty, "Invalid email or password.");
-            ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // Guest → real account: upgrade the existing row so nothing is lost.
+            var guestId = User.IsGuestUser() ? User.UserIdOrNull() : null;
+            if (guestId.HasValue)
+            {
+                var result = await _accounts.UpgradeGuestAsync(guestId.Value, model.Email, model.Password, model.Nickname);
+                if (result == GuestUpgradeResult.EmailTaken)
+                {
+                    ModelState.AddModelError(nameof(model.Email), _localizer.GetString("EmailAlreadyRegistered"));
+                    return View(model);
+                }
+                if (result == GuestUpgradeResult.Upgraded)
+                {
+                    var upgraded = await _context.Users.SingleAsync(u => u.UserId == guestId.Value);
+                    await HttpContext.SignInAsync(upgraded);
+                    _telemetry.TrackEvent("GuestConverted", new Dictionary<string, string> { ["method"] = "password" });
+                    TempData["SuccessMessage"] = _localizer.GetString("GuestUpgraded");
+                    return RedirectToLanding(upgraded.Role);
+                }
+            }
+
+            if (await _context.Users.AnyAsync(u => u.Email == model.Email && !u.IsDeleted))
+            {
+                ModelState.AddModelError(nameof(model.Email), _localizer.GetString("EmailAlreadyRegistered"));
+                return View(model);
+            }
+
+            var now = DateTime.UtcNow;
+            var user = new MyPocket.Core.Models.User
+            {
+                UserId = Guid.NewGuid(),
+                Email = model.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                Role = "FreeMember",
+                Nickname = string.IsNullOrWhiteSpace(model.Nickname) ? model.Email.Split('@')[0] : model.Nickname,
+                CreationDate = now,
+                LastLoginDate = now,
+                UpdatedAt = now
+            };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            await _subscriptionService.SubscribeToBasicPlanAsync(user.UserId);
+            await _gamification.EnsureWelcomeBonusAsync(user.UserId);
+            _telemetry.TrackEvent("UserRegistered", new Dictionary<string, string> { ["method"] = "password" });
+
+            // Sign straight in instead of bouncing the new user back to the login form.
+            await HttpContext.SignInAsync(user);
+            TempData["SuccessMessage"] = _localizer.GetString("RegistrationComplete");
+            return RedirectToLanding(user.Role);
         }
 
         [HttpPost]
@@ -150,54 +258,6 @@ namespace MyPocket.Web.Controllers
         public IActionResult AccessDenied()
         {
             return View();
-        }
-
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
-        {
-            // Password and confirm password match validation
-            if (model.Password != model.ConfirmPassword)
-            {
-                ModelState.AddModelError(nameof(model.ConfirmPassword), "Password and Confirm Password do not match.");
-            }
-
-            if (!ModelState.IsValid)
-                return View(model);
-
-            if (await _context.Users.AnyAsync(u => u.Email == model.Email && !u.IsDeleted))
-            {
-                ModelState.AddModelError("Email", "This email is already registered.");
-                return View(model);
-            }
-
-            var user = new MyPocket.Core.Models.User
-            {
-                UserId = Guid.NewGuid(),
-                Email = model.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
-                Role = "FreeMember",
-                Nickname = string.IsNullOrWhiteSpace(model.Nickname) ? model.Email.Split('@')[0] : model.Nickname,
-                CreationDate = DateTime.UtcNow,
-                LastLoginDate = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsDeleted = false
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            // Auto subscribe to basic plan
-            await _subscriptionService.SubscribeToBasicPlanAsync(user.UserId);
-
-            TempData["SuccessMessage"] = "Registration successful! You have been subscribed to the basic plan.";
-            return RedirectToAction("Login");
         }
     }
 }

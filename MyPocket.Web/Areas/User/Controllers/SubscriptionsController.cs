@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MyPocket.Services;
 using MyPocket.Shared.Resources;
-using ISubscriptionService = MyPocket.Services.ISubscriptionService;
+using MyPocket.Web.Infrastructure;
 using System.Security.Claims;
 
 namespace MyPocket.Web.Areas.User.Controllers
@@ -66,6 +66,14 @@ namespace MyPocket.Web.Areas.User.Controllers
             if (!Guid.TryParse(userIdString, out Guid userId))
             {
                 return RedirectToAction("Login", "Account", new { area = "" });
+            }
+
+            // Paying for a plan needs a real account; guest data would otherwise be
+            // tied to a disposable identity.
+            if (User.IsGuestUser())
+            {
+                TempData["ErrorMessage"] = _localizer.GetString("GuestMustRegisterToSubscribe");
+                return RedirectToAction("Register", "Account", new { area = "" });
             }
 
             var plan = await _subscriptionService.GetPlanByIdAsync(planId);

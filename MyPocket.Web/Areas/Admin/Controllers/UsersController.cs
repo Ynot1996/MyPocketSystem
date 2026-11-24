@@ -46,21 +46,46 @@ namespace MyPocket.Web.Areas.Admin.Controllers
             return View();
         }
 
-        // POST: Admin/Users/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        private static readonly string[] AllowedRoles = { "FreeMember", "PaidMember", "Admin" };
+
+        // Explicit parameters instead of binding the entity: the scaffolded form
+        // posted PasswordHash straight from a text box, so admin-created users
+        // were stored with a plaintext "hash" and could never log in.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserId,Email,PasswordHash,Nickname,Role,CreationDate,LastLoginDate,UpdatedAt,IsDeleted")] MyPocket.Core.Models.User user)
+        public async Task<IActionResult> Create(string email, string password, string? nickname, string role)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || password.Length < 8)
             {
-                user.UserId = Guid.NewGuid();
-                _context.Add(user);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError(string.Empty, "Email and a password of at least 8 characters are required.");
+                return View();
             }
-            return View(user);
+            if (!AllowedRoles.Contains(role))
+            {
+                ModelState.AddModelError(string.Empty, "Unknown role.");
+                return View();
+            }
+            if (await _context.Users.AnyAsync(u => u.Email == email && !u.IsDeleted))
+            {
+                ModelState.AddModelError(string.Empty, "This email is already registered.");
+                return View();
+            }
+
+            var now = DateTime.UtcNow;
+            _context.Users.Add(new MyPocket.Core.Models.User
+            {
+                UserId = Guid.NewGuid(),
+                Email = email.Trim(),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+                Nickname = string.IsNullOrWhiteSpace(nickname) ? email.Split('@')[0] : nickname.Trim(),
+                Role = role,
+                CreationDate = now,
+                LastLoginDate = now,
+                UpdatedAt = now,
+                IsDeleted = false
+            });
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Admin/Users/Edit/5
@@ -79,39 +104,47 @@ namespace MyPocket.Web.Areas.Admin.Controllers
             return View(user);
         }
 
-        // POST: Admin/Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // Loads the existing row and copies only admin-editable fields onto it, so
+        // the password hash and system timestamps are never round-tripped through
+        // the browser. A new password is applied only when one is supplied.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("UserId,Email,PasswordHash,Nickname,Role,CreationDate,LastLoginDate,UpdatedAt,IsDeleted")] MyPocket.Core.Models.User user)
+        public async Task<IActionResult> Edit(Guid id, string email, string? nickname, string role, bool isDeleted, string? newPassword)
         {
-            if (id != user.UserId)
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(email) || !AllowedRoles.Contains(role))
             {
-                try
-                {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserExists(user.UserId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError(string.Empty, "A valid email and role are required.");
+                return View(user);
             }
-            return View(user);
+            if (!string.IsNullOrEmpty(newPassword) && newPassword.Length < 8)
+            {
+                ModelState.AddModelError(string.Empty, "The new password must be at least 8 characters.");
+                return View(user);
+            }
+            if (await _context.Users.AnyAsync(u => u.Email == email && u.UserId != id && !u.IsDeleted))
+            {
+                ModelState.AddModelError(string.Empty, "Another account already uses this email.");
+                return View(user);
+            }
+
+            user.Email = email.Trim();
+            user.Nickname = string.IsNullOrWhiteSpace(nickname) ? user.Nickname : nickname.Trim();
+            user.Role = role;
+            user.IsDeleted = isDeleted;
+            if (!string.IsNullOrEmpty(newPassword))
+            {
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            }
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Admin/Users/Delete/5
@@ -145,11 +178,6 @@ namespace MyPocket.Web.Areas.Admin.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool UserExists(Guid id)
-        {
-            return _context.Users.Any(e => e.UserId == id);
         }
     }
 }

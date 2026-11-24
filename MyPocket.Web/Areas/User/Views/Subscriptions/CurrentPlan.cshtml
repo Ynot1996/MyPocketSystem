@@ -35,10 +35,8 @@
                         <a asp-action="Plans" class="btn btn-outline-primary">
                             @Localizer["ViewAllPlans"]
                         </a>
-                        <form asp-action="Cancel" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-danger"
-                                    onclick="return confirm('@confirmCancel');">
+                        <form asp-action="Cancel" method="post" class="d-inline" data-confirm="@confirmCancel">
+                            <button type="submit" class="btn btn-danger">
                                 @Localizer["CancelSubscription"]
                             </button>
                         </form>

@@ -1,10 +1,12 @@
-# MyPocket — Personal Finance Management System
+# MyPocket: Gamified, AI-assisted personal finance
 
-A full-stack personal finance web application built with **ASP.NET Core 8 (MVC)** and **Entity Framework Core**, deployed to **Azure App Service** with a **GitHub Actions CI/CD pipeline** that runs unit tests before every deploy.
+A full-stack personal finance web app built with **ASP.NET Core 8 (MVC)** and **Entity Framework Core**, deployed to **Azure App Service**. A **GitHub Actions** pipeline tests every pull request and deploys `main`.
 
-**🌐 Live demo:** <https://mypocket-web-app.azurewebsites.net/>
+**🌐 Live demo:** <https://mypocket-web-app.azurewebsites.net/>. Click **Try it now** to use it without signing up.
 
-Users can track income and expenses across **six currencies** (GBP, USD, EUR, TWD, JPY, KRW), set budgets and saving goals, and view analytics grouped by category, time period, and currency. The UI is bilingual (English / 繁體中文) via a cookie-driven culture switcher.
+MyPocket is built for people who live across currencies (international students, expats, frequent travellers). Logging a transaction takes seconds: snap a receipt, say it out loud, or type `coffee 3.5 GBP`. Every entry earns coins and grows an **isometric city**, where each spending category is a building. The **Insights** page explains where the money went in plain language, and Premium members get an **AI coach**.
+
+The UI is bilingual (English / 繁體中文) and supports six currencies (GBP, USD, EUR, TWD, JPY, KRW).
 
 ---
 
@@ -17,6 +19,7 @@ Users can track income and expenses across **six currencies** (GBP, USD, EUR, TW
 - [Testing](#testing)
 - [CI / CD](#ci--cd)
 - [Running locally](#running-locally)
+- [Configuration](#configuration)
 - [Default credentials](#default-credentials-demo-only)
 - [Deployment](#deployment)
 - [Project layout](#project-layout)
@@ -25,46 +28,59 @@ Users can track income and expenses across **six currencies** (GBP, USD, EUR, TW
 
 ## Feature highlights
 
-### End user
-- **Authentication** — email + BCrypt-hashed password, cookie-based auth.
-- **Transactions CRUD** — add / edit / delete, filter by month/year, delete-is-soft (`IsDeleted` flag).
-- **Per-transaction currency** — each row stores its own ISO 4217 code; UI shows the native symbol (£ / $ / € / NT$ / ¥ / ₩).
-- **Amount entry UX** — free-form decimal input, ± stepper that respects each currency's natural step (GBP 0.5, JPY 100), and quick-select presets per currency.
-- **Budgets** per month, with spent/remaining progress bars; **saving goals** auto-rolled monthly/yearly.
-- **Analytics** — pie chart of expense-by-category with Today / This Month / This Year / All Time filters; totals convert all rows to a chosen display currency via a **reference exchange-rate service**, alongside a per-currency breakdown that keeps the original amounts intact.
-- **Subscription plans** — Free / Premium (Monthly / Quarterly / Half-yearly / Yearly), with upgrade and cancellation flows.
-- **Bilingual UI** — language picker in the navbar, backed by a JSON-based `IStringLocalizer`-equivalent service.
+### Onboarding
+- **Try first, sign up later.** `/try` creates a real guest account with a week of multi-currency demo data. It is rate-limited to 5 per hour per IP.
+- A banner reminds guests that **registering or linking Google keeps their data**. Upgrading converts the same database row in place, so nothing is copied or lost. Logging into an existing account merges the guest's data into it.
+- **Google Sign-In** through ASP.NET Core external authentication. Guest accounts older than 7 days are cleaned up on startup.
 
-### Admin area
-- User management (view, deactivate), bulk subscription updates, category management, announcements CRUD.
+### Capture (the fastest path from spending to a record)
+- **Receipt scan.** Take a photo (it opens the rear camera on phones) and Claude's vision model extracts the amount, currency, date, merchant and category into the form. Images are processed in memory and never stored.
+- **Voice input** uses the browser's Web Speech API. The transcript goes through the same parser as typed text.
+- **Natural-language entry** like `lunch 12.5 pounds yesterday`. If the AI is not configured or unavailable, a **rule-based parser** (currency symbols and words, keyword-to-category matching, en/zh) handles it, so the feature never hard-fails.
+
+### Gamification
+- **Coins:** +10 per entry (daily cap of 10 entries), +5 for scanned or spoken entries, plus a **streak bonus** on the first entry of each day. Coins are stored in an append-only ledger.
+- **City:** one building per category. Buildings level up by **number of entries, not amount spent**, so the game rewards the tracking habit rather than spending. It is rendered as isometric SVG with day/dusk/night skies, level-up animations and walking residents.
+- **Shop:** buy decorations, residents and outfits with coins.
+
+### Insights
+- KPIs, a category doughnut, a six-month income/expense trend, a per-currency breakdown, and **plain-language highlights** such as "Dining is 38% of your spending".
+- Free members see the conclusions only; the calculation logic stays server-side. **The AI coach is Premium-only.** It receives monthly category totals, never individual transactions, and returns at most three actionable tips.
+
+### Core finance
+- Transactions CRUD with per-row currency, budgets with progress, saving goals, and custom categories.
+- Cross-currency totals use reference exchange rates.
+- Subscription plans (Free / Premium).
+- Admin area: users, bulk subscription updates, categories and announcements.
 
 ---
 
 ## Architecture
 
-The solution is split into seven projects, following a layered architecture:
-
 ```
 MyPocketSystem.sln
-├── MyPocket.Core         Domain entities (POCO models — no EF dependencies).
-├── MyPocket.DataAccess   EF Core DbContext + fluent configuration + seeding.
-├── MyPocket.Services     Business logic, exposed via interfaces (DI-friendly).
-├── MyPocket.Shared       DTOs, ViewModels, localization service + resource JSON,
-│                         validation attributes, metadata.
-├── MyPocket.Web          ASP.NET Core MVC host — controllers, Razor views,
-│                         currency/exchange-rate/icon helpers.
-├── MyPocket.API          REST API project (for future mobile client).
-├── MyPocket.Mobile       .NET MAUI shell (starter — not deployed).
-└── MyPocket.Tests        xUnit unit tests (31) using EF Core InMemory.
+├── MyPocket.Core         Domain entities (User, Transaction, CoinLedgerEntry, UserItem, …)
+├── MyPocket.DataAccess   EF Core DbContext + seeding + idempotent startup DDL
+├── MyPocket.Services     Business logic behind interfaces
+│   ├── Accounts/         Guest create / upgrade / merge / cleanup
+│   ├── Gamification/     Coin ledger, streaks, city model, shop catalog
+│   └── Ai/               Claude client, receipt scanner, text parser, spending coach
+├── MyPocket.Shared       ViewModels, localization service + en/zh JSON
+├── MyPocket.Web          MVC host: controllers, Razor views, JS (city, capture)
+├── MyPocket.API          REST API project (for the future mobile client)
+├── MyPocket.Mobile       .NET MAUI shell (starter, not deployed)
+└── MyPocket.Tests        xUnit tests (71) on EF Core InMemory
 ```
 
-Dependency direction is one-way: `Web` → `Services` → `DataAccess` → `Core`. `Shared` is referenced by everything that needs cross-cutting types (ViewModels, resource strings).
+Dependencies point one way: `Web` → `Services` → `DataAccess` → `Core`.
 
-Key architectural choices:
+Key design decisions:
 
-- **Repository-less** — `Services` take `DbContext` directly; EF Core *is* the data-access abstraction. Keeps the layer thin and the service surface explicit.
-- **Service-layer returns result keys, not strings** — e.g. `(false, "InvalidCategory", null)`. Controllers translate those keys through `ILocalizationService` before putting them in `TempData`, which makes the services language-agnostic and easy to unit-test.
-- **Idempotent schema upgrades on startup** — `DbInitializer.ApplySchemaFixes` runs guarded `ALTER TABLE` statements on every boot so already-deployed databases can be reshaped without migrations.
+- **AI behind an interface with a deterministic fallback.** `IAiJsonClient` wraps the Anthropic SDK. Every AI feature degrades gracefully: the text parser falls back to rules, the scanner hides itself when the API is not configured, and insights are computed without AI. Tests use a fake client, so the suite never calls the network.
+- **Structured outputs, not prompt-and-pray.** Each AI call sends a JSON Schema (`additionalProperties: false`), and the result is validated again server-side. For example, a category must be one of the user's real categories, and the currency must be supported.
+- **Guest = real user row (`IsGuest`).** Every feature works for guests unchanged, and upgrading is an `UPDATE`, not a migration of data out of localStorage.
+- **Append-only coin ledger.** The balance is the sum of the entries, so it is auditable and race-tolerant, and there is no mutable balance column to drift.
+- **Services return result keys, not strings.** Controllers localize them, which keeps services language-agnostic and testable.
 
 ---
 
@@ -72,38 +88,37 @@ Key architectural choices:
 
 | Layer | Choice |
 |---|---|
-| Runtime | .NET 8 |
-| Web framework | ASP.NET Core MVC (Razor views) |
-| ORM | Entity Framework Core 9 (SQL Server provider) |
-| Database (prod) | Azure SQL Database — Serverless (Free offer) |
-| Database (test) | EF Core InMemory provider |
-| Auth | Cookie authentication + BCrypt.Net password hashing |
-| Internationalization | Custom `JsonLocalizationService` + `CookieRequestCultureProvider`, en-US / zh-TW |
-| Charts | Chart.js + chartjs-plugin-datalabels |
-| UI | Bootstrap 5 + Bootstrap Icons |
-| Testing | xUnit + EF Core InMemory |
-| Hosting | Azure App Service (Linux, F1 free tier) |
-| CI / CD | GitHub Actions with Azure OIDC federated identity (no long-lived secrets) |
+| Runtime | .NET 8 (`TimeProvider` for testable clocks) |
+| Web | ASP.NET Core MVC, Razor views, ViewComponents |
+| ORM / DB | EF Core 9 → Azure SQL Serverless (prod), InMemory (tests and zero-config local) |
+| Auth | Cookie auth + BCrypt, Google OAuth, guest accounts, cookie re-validation |
+| AI | Anthropic C# SDK: Claude with structured JSON output, vision (receipts), server-side model fallback |
+| Voice | Web Speech API (in-browser speech-to-text) |
+| Abuse / cost control | ASP.NET Core rate limiter (guest creation, AI calls), `IMemoryCache` for advice |
+| Observability | Application Insights (custom events: GuestStarted, TransactionCreated, ReceiptScanned, …), structured logging, `/healthz` |
+| Front end | Bootstrap 5, hand-written isometric SVG renderer, Chart.js 4 |
+| i18n | Custom JSON localization, en-US / zh-TW |
+| CI / CD | GitHub Actions: tests on every PR, OIDC deploy to App Service from `main` |
 
 ---
 
 ## Engineering highlights (for recruiters)
 
-A few non-trivial things that show up in the code history:
-
-1. **CI/CD with OIDC federated identity.** Deploys go `git push` → GitHub Actions → `dotnet test` gate → publish → Azure App Service, authenticated with OIDC (no `AZURE_PUBLISH_PROFILE` secret stored anywhere). Workflow: [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
-
-2. **Resilient Azure SQL access.** The DB runs on the free Serverless tier, which auto-pauses when idle. The DbContext registers `EnableRetryOnFailure(6, 10s, null)` so cold-start calls are retried transparently, and `DbInitializer` wraps itself in an exponential-backoff loop (up to 8 attempts) so the first request after a wake-up doesn't 500. See [`MyPocket.Web/Program.cs`](MyPocket.Web/Program.cs).
-
-3. **Online schema migration without EF Migrations.** The project was originally scaffolded with a buggy `IsFixedLength()` on `TransactionType` (which produced `NCHAR(1)` and truncated `"支出"` on insert) and lacked a `Currency` column. Rather than reset the database, [`DbInitializer.ApplySchemaFixes`](MyPocket.DataAccess/Data/DbInitializer.cs) runs guarded `ALTER TABLE` statements on every boot that are safe to re-run.
-
-4. **Multi-currency, no FX service.** Each transaction stores its own ISO 4217 code. `ICurrencyService` formats per-row amounts in the currency they were entered in, and `IExchangeRateService` provides a static reference table so cross-currency totals can be rendered in any display currency. No live FX dependency — honest about what it is, and easy to swap for a real feed later. See [`MyPocket.Web/Services/`](MyPocket.Web/Services/).
-
-5. **Bilingual UI driven by data, not forked views.** A single set of Razor views renders in English or Traditional Chinese based on a cookie. DB-stored labels (e.g. `CategoryName = "餐飲"`) are kept in their original form; the UI looks them up as translation keys at display time (`@Localizer[item.CategoryName]`), so switching language costs zero extra DB rows.
-
-6. **Unit tests gate the deploy.** 31 xUnit tests exercise the full CRUD surface of every service — including ownership checks ("Bob can't edit Alice's transaction") and decimal-precision regression tests ("1.80 must not round to 2"). The GitHub Actions job fails the deploy if any test fails.
-
-7. **Honest UX feedback loop.** Controllers write every outcome to a `TempData["SuccessMessage" / "ErrorMessage"]` channel; a shared `_FlashMessages` partial in the layout surfaces them as alerts. Found and fixed a silent-failure class: the app was swallowing `DbUpdateException`s before this partial existed.
+1. **Guest mode with in-place upgrade and merge** ([`AccountService`](MyPocket.Services/Accounts/AccountService.cs)). This is the same idea as Firebase anonymous-account linking: try instantly, keep your data when you sign up, and when you log into an existing account the guest's records are merged with de-duplication.
+2. **LLM integration built for production** ([`MyPocket.Services/Ai`](MyPocket.Services/Ai)):
+   - Structured JSON output with schema validation.
+   - Refusal handling.
+   - Low effort for cheap extraction.
+   - Server-side model fallbacks.
+   - A configurable model.
+   - Per-user daily rate limits and a 6-hour advice cache.
+   - A rule-based fallback that keeps the feature working with no API key.
+3. **Privacy by design.** Receipt images are never persisted, and the coach sees only aggregates.
+4. **Gamification that doesn't reward spending.** Levels are count-based, coins have a daily cap, and streaks are computed from the ledger. It is covered by 16 tests that use a fixed `TimeProvider`.
+5. **Security fixes found in review.** These included an anonymous-reachable admin controller, over-posting on admin user edit, CSRF gaps, a hardcoded DB password in config, and stale cookies that outlived deleted or cleaned-up users (now re-validated every 5 minutes, see [`CookieUserValidator`](MyPocket.Web/Infrastructure/CookieUserValidator.cs)).
+6. **Resilient Azure SQL Serverless.** Retry-on-failure and a backoff loop around seeding handle cold starts. Guarded startup DDL reshapes already-deployed databases.
+7. **Observability.** Product events feed Application Insights (a funnel from guest started to registered to transactions created), and there is a `/healthz` endpoint for App Service health checks.
+8. **CI that gates merges.** Pull requests run the test suite, and only `main` deploys.
 
 ---
 
@@ -113,76 +128,76 @@ A few non-trivial things that show up in the code history:
 dotnet test MyPocket.Tests/MyPocket.Tests.csproj
 ```
 
-- **31 tests**, grouped by service (`CategoryServiceTests`, `TransactionServiceTests`, `BudgetServiceTests`, `SavingGoalServiceTests`, `SubscriptionServiceTests`).
-- Each test spins up a fresh **EF Core InMemory** database (via [`TestHelper.NewContext()`](MyPocket.Tests/TestHelper.cs)) so tests are independent and don't need a SQL Server instance.
-- Includes regression tests for real bugs found during development, e.g. `Create_PreservesDecimalAmount` (1.80 GBP must stay 1.80, not 2) and `Update_ChangesFields_AndOnlyForOwner` (cross-user write attempt returns `false` and leaves the row alone).
+The suite has **71 tests**:
+
+| Area | Test files | What they cover |
+|---|---|---|
+| Services | `Category`, `Transaction`, `Budget`, `SavingGoal`, `Subscription` | CRUD, including ownership checks |
+| Gamification | `GamificationServiceTests` | Caps, streaks across midnight, city levels |
+| Shop | `ShopServiceTests` | Purchases and outfit toggling |
+| Accounts | `AccountServiceTests` | Guest create, upgrade, merge and cleanup |
+| AI | `AiCaptureTests` | AI path vs fallback path, hallucinated categories rejected, coach insights |
+
+- Each test gets a fresh EF Core InMemory database.
+- AI tests use a `FakeAiClient`, so they never touch the network.
 
 ---
 
 ## CI / CD
 
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) runs on every push to `main`:
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml):
 
-1. `actions/setup-dotnet@v4` with .NET 8.
-2. `dotnet test MyPocket.Tests/...` — a failure aborts the deploy.
-3. `dotnet publish MyPocket.Web -c Release -o ./publish`.
-4. `azure/login@v2` using OIDC with three repo secrets (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`) — **no publish profile, no long-lived credentials**.
-5. `azure/webapps-deploy@v3` ships the published folder to the App Service.
-
-Can also be triggered manually from the Actions tab (`workflow_dispatch`).
+- **Pull requests:** restore, then `dotnet test`. A red test blocks the merge.
+- **Push to `main`:** run the tests, then `dotnet publish`, then `azure/login@v2` (OIDC, no publish profile), then `azure/webapps-deploy@v3`.
 
 ---
 
 ## Running locally
 
-### Prerequisites
-
-- .NET 8 SDK
-- A SQL Server instance (LocalDB, Docker, or your own) — the production database is Azure SQL, but anything SQL Server-compatible works for local dev.
-
-### Steps
-
 ```bash
-# 1. Clone
 git clone https://github.com/Ynot1996/MyPocketSystem.git
 cd MyPocketSystem
-
-# 2. Set the connection string via user-secrets (preferred) or appsettings.Development.json
-dotnet user-secrets init --project MyPocket.Web
-dotnet user-secrets set "ConnectionStrings:MyPocketDBConnection" \
-  "Server=(localdb)\\mssqllocaldb;Database=MyPocketDB;Trusted_Connection=True;" \
-  --project MyPocket.Web
-
-# 3. Run — DbInitializer will create the schema and seed admin + default categories
-dotnet run --project MyPocket.Web
+dotnet run --project MyPocket.Web --launch-profile http
 ```
 
-The app binds to `http://localhost:5244` by default. First launch seeds the admin account plus 16 default categories and the 5 subscription plans.
+It runs at `http://localhost:5244`.
 
-In production, the connection string is injected as the App Service environment variable `ConnectionStrings__MyPocketDBConnection` (double underscore — the standard .NET config override).
+**No database needed.** When no connection string is configured, the app uses an in-memory database that resets on restart. To use SQL Server instead:
+
+```bash
+dotnet user-secrets set "ConnectionStrings:MyPocketDBConnection" "<your connection string>" --project MyPocket.Web
+```
+
+---
+
+## Configuration
+
+All settings are optional. Each feature switches off cleanly when its setting is missing.
+
+| Setting (App Service env var form) | Enables |
+|---|---|
+| `ConnectionStrings__MyPocketDBConnection` | SQL Server instead of InMemory |
+| `Authentication__Google__ClientId` / `Authentication__Google__ClientSecret` | Google Sign-In |
+| `Ai__AnthropicApiKey` (or `ANTHROPIC_API_KEY`) | Receipt scan, AI text parsing, AI coach |
+| `Ai__Model` | Overrides the default `claude-opus-5-5`, e.g. `claude-haiku-5-5` for lower cost |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Telemetry and traffic monitoring |
+
+Locally, use `dotnet user-secrets set "<Key:With:Colons>" "<value>" --project MyPocket.Web`. Never commit secrets.
 
 ---
 
 ## Default credentials (demo only)
 
-The seeder in [`DbInitializer`](MyPocket.DataAccess/Data/DbInitializer.cs) creates:
+- **Admin:** `admin@example.com` / `12345678`
+- **Free member:** `freemember@example.com` / `12345678`
 
-- **Admin** — `admin@example.com` / `12345678`
-- **Free member** — `freemember@example.com` / `12345678`
-
-These are placeholders for local development and the public demo. Rotate them before any real use.
+These are placeholders for local development and the public demo.
 
 ---
 
 ## Deployment
 
-The step-by-step Azure setup (resource group, SQL Server, App Service, OIDC trust, GitHub secrets) is documented in [DEPLOY_AZURE.md](DEPLOY_AZURE.md).
-
-Current production target:
-
-- Resource group: `mypocket-rg`
-- SQL Server: `mypocket-db-server` (Serverless Free offer, SE Asia region)
-- App Service: `mypocket-web-app` (Linux F1 free tier)
+See [DEPLOY_AZURE.md](DEPLOY_AZURE.md) for the resource group, SQL Server, App Service, OIDC trust and GitHub secrets.
 
 ---
 
@@ -190,33 +205,27 @@ Current production target:
 
 ```
 MyPocketSystem/
-├── .github/workflows/deploy.yml        # CI/CD (test → publish → OIDC → Azure)
-├── MyPocket.Core/Models/               # Entity POCOs (Transaction, Category, Budget, …)
-├── MyPocket.DataAccess/Data/
-│   ├── MyPocketDBContext.cs            # EF Core fluent config
-│   └── DbInitializer.cs                # Seed + idempotent ALTER TABLE on startup
-├── MyPocket.Services/                  # Business logic (6 services)
-│   └── Interfaces/                     # DI contracts
+├── .github/workflows/deploy.yml          # PR: test · main: test → publish → OIDC → Azure
+├── MyPocket.Core/Models/                 # Entities incl. CoinLedgerEntry, UserItem
+├── MyPocket.DataAccess/Data/             # DbContext, DbInitializer (seed + startup DDL)
+├── MyPocket.Services/
+│   ├── Accounts/AccountService.cs        # Guest lifecycle
+│   ├── Gamification/                     # GamificationService, ShopService, City/Shop catalogs
+│   ├── Ai/                               # AiJsonClient, CaptureServices, SpendingCoach
+│   └── Interfaces/
 ├── MyPocket.Shared/
-│   ├── Resources/
-│   │   ├── JsonLocalizationService.cs  # Culture-aware string lookup + goal-name decoding
-│   │   └── locales/{en-US,zh-TW}.json
-│   ├── ViewModels/                     # Form / display models
-│   ├── DTOs/
-│   └── Validation/                     # Localized validation attributes
+│   ├── Resources/locales/{en-US,zh-TW}.json
+│   └── ViewModels/{Gamification,Capture}/
 ├── MyPocket.Web/
-│   ├── Program.cs                      # DI, localization, EF retry policy, seed-with-retry
-│   ├── Areas/{User,Admin}/             # MVC areas with their own controllers + views
-│   ├── Controllers/                    # Account, Home, Language, Currency
-│   ├── Services/
-│   │   ├── CurrencyService.cs          # 6-currency metadata + formatter
-│   │   ├── ExchangeRateService.cs      # Static reference rates
-│   │   └── CategoryIcons.cs            # Category → Bootstrap Icon mapping
-│   └── Views/Shared/                   # _LayoutUser/_LayoutAdmin, _FlashMessages,
-│                                       # _LanguageSwitcher, _CurrencySwitcher
-├── MyPocket.Tests/                     # xUnit + EF Core InMemory (31 tests)
-├── DEPLOY_AZURE.md                     # Step-by-step cloud setup
-└── README.md
+│   ├── Program.cs                        # DI, auth, rate limits, telemetry, health checks
+│   ├── Infrastructure/                   # Claims, rate-limit policies, telemetry, cookie validator
+│   ├── ViewComponents/CoinBadge…         # Nav coin counter
+│   ├── Areas/User/Controllers/           # Transactions (dashboard), Capture, Insights, Shop, …
+│   └── wwwroot/
+│       ├── css/app.css                   # v2 design system
+│       └── js/{city,capture,transaction-form}.js
+├── MyPocket.Tests/                       # 71 xUnit tests
+└── DEPLOY_AZURE.md
 ```
 
 ---

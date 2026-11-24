@@ -16,6 +16,13 @@ namespace MyPocket.Web.Controllers
 
         public IActionResult Index()
         {
+            // Signed-in visitors (including guests) go straight to their own space.
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return User.IsInRole("Admin")
+                    ? RedirectToAction("Index", "Users", new { area = "Admin" })
+                    : RedirectToAction("Index", "Transactions", new { area = "User" });
+            }
             return View();
         }
 

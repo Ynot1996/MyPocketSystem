@@ -1,42 +1,86 @@
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = Localizer["Home"];
+    var googleEnabled = !string.IsNullOrEmpty(Configuration["Authentication:Google:ClientId"])
+                        && !string.IsNullOrEmpty(Configuration["Authentication:Google:ClientSecret"]);
 }
 
-<!-- Notion-style Hero Section -->
-<div class="container-fluid px-0" style="background: linear-gradient(135deg, #fff 0%, #f6f7fb 100%); min-height: 80vh;">
-    <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
-        <div class="col-lg-7 text-center py-5">
-            <h1 class="display-2 fw-bold mb-3" style="color:#222; letter-spacing:-2px;">@Localizer["HeroTitle"]</h1>
-            <p class="lead mb-4" style="color:#555; font-size:1.5rem;">@Html.Raw(Localizer["HeroSubtitle"])</p>
-            <a href="/Account/Register" class="btn btn-dark btn-lg px-5 shadow-sm me-2" style="border-radius: 8px;">@Localizer["GetStarted"]</a>
-            <a href="/Account/Login" class="btn btn-outline-dark btn-lg px-5" style="border-radius: 8px;">@Localizer["AlreadyHaveAccountLogIn"]</a>
+<section class="landing">
+    <div class="container">
+        <div class="row align-items-center g-5 py-5">
+            <div class="col-lg-6">
+                <div class="landing-kicker">@Localizer["LandingKicker"]</div>
+                <h1 class="landing-title">@Localizer["LandingTitle"]</h1>
+                <p class="landing-lead">@Localizer["LandingSubtitle"]</p>
+
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <a href="/try" class="btn btn-dark btn-lg px-4"><i class="bi bi-play-fill me-1"></i>@Localizer["TryItNow"]</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-dark btn-lg px-4">@Localizer["GetStarted"]</a>
+                    @if (googleEnabled)
+                    {
+                        <form asp-controller="Account" asp-action="ExternalLogin" method="post" class="d-inline">
+                            <input type="hidden" name="provider" value="Google" />
+                            <button type="submit" class="btn btn-light btn-lg px-4 border"><i class="bi bi-google me-1"></i>Google</button>
+                        </form>
+                    }
+                </div>
+                <div class="small text-muted mb-3">@Localizer["TryNoSignup"]</div>
+                <a asp-controller="Account" asp-action="Login" class="small link-dark">@Localizer["AlreadyHaveAccountLogIn"]</a>
+            </div>
+
+            <div class="col-lg-6">
+                @* Decorative preview of the city, drawn by the same renderer as the dashboard. *@
+                <div class="landing-preview city-card">
+                    <div id="city" class="city"></div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="row justify-content-center mt-5 pb-5">
-        <div class="col-md-10">
-            <div class="row g-4">
-                <div class="col-md-4 text-center">
-                    <div class="p-4 bg-white rounded-4 shadow-sm h-100 border border-1">
-                        <i class="bi bi-graph-up display-5 text-primary mb-3"></i>
-                        <h5 class="fw-bold mb-2">@Localizer["RealTimeReports"]</h5>
-                        <p class="text-muted">@Localizer["ReportsDescription"]</p>
-                    </div>
+
+        <div class="row g-4 pb-5">
+            <div class="col-md-4">
+                <div class="mp-card h-100 landing-feature">
+                    <div class="landing-feature-icon">📸</div>
+                    <h5 class="fw-bold">@Localizer["FeatureCaptureTitle"]</h5>
+                    <p class="text-muted mb-0">@Localizer["FeatureCaptureBody"]</p>
                 </div>
-                <div class="col-md-4 text-center">
-                    <div class="p-4 bg-white rounded-4 shadow-sm h-100 border border-1">
-                        <i class="bi bi-wallet display-5 text-success mb-3"></i>
-                        <h5 class="fw-bold mb-2">@Localizer["MultiAccountManagement"]</h5>
-                        <p class="text-muted">@Localizer["AccountsDescription"]</p>
-                    </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mp-card h-100 landing-feature">
+                    <div class="landing-feature-icon">🏙️</div>
+                    <h5 class="fw-bold">@Localizer["FeatureCityTitle"]</h5>
+                    <p class="text-muted mb-0">@Localizer["FeatureCityBody"]</p>
                 </div>
-                <div class="col-md-4 text-center">
-                    <div class="p-4 bg-white rounded-4 shadow-sm h-100 border border-1">
-                        <i class="bi bi-cloud display-5 text-info mb-3"></i>
-                        <h5 class="fw-bold mb-2">@Localizer["CloudSecurity"]</h5>
-                        <p class="text-muted">@Localizer["SecurityDescription"]</p>
-                    </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mp-card h-100 landing-feature">
+                    <div class="landing-feature-icon">📊</div>
+                    <h5 class="fw-bold">@Localizer["FeatureInsightTitle"]</h5>
+                    <p class="text-muted mb-0">@Localizer["FeatureInsightBody"]</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<script type="application/json" id="cityData">
+{
+  "buildings": [
+    { "emoji": "☕", "color": "#f59e0b", "level": 3, "slot": 14, "name": "Café", "count": 9, "next": 15 },
+    { "emoji": "🚉", "color": "#3b82f6", "level": 2, "slot": 15, "name": "Station", "count": 4, "next": 7 },
+    { "emoji": "🏢", "color": "#64748b", "level": 4, "slot": 21, "name": "Office", "count": 18, "next": 30 },
+    { "emoji": "🛍️", "color": "#ec4899", "level": 2, "slot": 20, "name": "Mall", "count": 5, "next": 7 },
+    { "emoji": "🏠", "color": "#8b5cf6", "level": 1, "slot": 13, "name": "Apartment", "count": 1, "next": 3 },
+    { "emoji": "🎬", "color": "#ef4444", "level": 1, "slot": 22, "name": "Cinema", "count": 2, "next": 3 }
+  ],
+  "decorations": [ { "emoji": "🌳", "slot": 9 }, { "emoji": "⛲", "slot": 27 } ],
+  "characters": [ { "emoji": "🐱" }, { "emoji": "🧑" } ],
+  "outfit": "🎩",
+  "grid": 6,
+  "preview": true,
+  "labels": { "aria": "City preview", "level": "Lv", "entries": "entries", "nextAt": "next", "maxLevel": "max", "empty": "" }
+}
+</script>
+
+@section Scripts {
+    <script src="~/js/city.js" asp-append-version="true"></script>
+}
