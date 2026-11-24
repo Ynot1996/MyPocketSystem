@@ -76,6 +76,34 @@ namespace MyPocket.Tests
             return category;
         }
 
+        public static Transaction SeedTransaction(
+            MyPocketDBContext context,
+            Guid userId,
+            Category category,
+            decimal amount,
+            DateTime? createdAt = null,
+            bool isDeleted = false,
+            string currency = "GBP")
+        {
+            var at = createdAt ?? DateTime.UtcNow;
+            var transaction = new Transaction
+            {
+                TransactionId = Guid.NewGuid(),
+                UserId = userId,
+                CategoryId = category.CategoryId,
+                Amount = amount,
+                Currency = currency,
+                TransactionType = category.CategoryType,
+                TransactionDate = at,
+                CreatedAt = at,
+                UpdatedAt = at,
+                IsDeleted = isDeleted
+            };
+            context.Transactions.Add(transaction);
+            context.SaveChanges();
+            return transaction;
+        }
+
         public static SubscriptionPlan SeedPlan(MyPocketDBContext context, string name, decimal price, int durationDays)
         {
             var plan = new SubscriptionPlan

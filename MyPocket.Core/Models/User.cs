@@ -27,6 +27,12 @@ public partial class User
 
     public bool IsDeleted { get; set; }
 
+    /// <summary>
+    /// True for anonymous "try it first" accounts. A guest is a real row so every
+    /// feature works unchanged; signing up or linking Google upgrades it in place.
+    /// </summary>
+    public bool IsGuest { get; set; }
+
     [InverseProperty("Admin")]
     public virtual ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
 

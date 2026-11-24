@@ -163,6 +163,11 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<MyPocket.Services.ISubscriptionService, SubscriptionService>();
 
+// Gamification: coins, streaks, the city view and the item shop.
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<IGamificationService, MyPocket.Services.Gamification.GamificationService>();
+builder.Services.AddScoped<IShopService, MyPocket.Services.Gamification.ShopService>();
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();
 

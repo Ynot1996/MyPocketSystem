@@ -175,6 +175,48 @@ namespace MyPocket.DataAccess.Data
                     ALTER TABLE [dbo].[Transaction] ADD [Currency] NVARCHAR(3) NOT NULL CONSTRAINT DF_Transaction_Currency DEFAULT (N'GBP');
                 END
             ");
+
+            // Guest ("try it first") accounts.
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM sys.columns
+                    WHERE object_id = OBJECT_ID(N'[dbo].[User]') AND name = N'IsGuest'
+                )
+                BEGIN
+                    ALTER TABLE [dbo].[User] ADD [IsGuest] BIT NOT NULL CONSTRAINT DF_User_IsGuest DEFAULT (0);
+                END
+            ");
+
+            // Coin ledger (gamification). EnsureCreated never adds tables to an
+            // existing database, so new tables are created here instead.
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF OBJECT_ID(N'[dbo].[CoinLedger]', N'U') IS NULL
+                BEGIN
+                    CREATE TABLE [dbo].[CoinLedger] (
+                        [EntryId]   UNIQUEIDENTIFIER NOT NULL CONSTRAINT PK_CoinLedger PRIMARY KEY,
+                        [UserId]    UNIQUEIDENTIFIER NOT NULL,
+                        [Amount]    INT              NOT NULL,
+                        [Reason]    NVARCHAR(60)     NOT NULL,
+                        [CreatedAt] DATETIME2        NOT NULL
+                    );
+                    CREATE INDEX IX_CoinLedger_UserId_CreatedAt ON [dbo].[CoinLedger] ([UserId], [CreatedAt]);
+                END
+            ");
+
+            // Shop items a user owns.
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF OBJECT_ID(N'[dbo].[UserItem]', N'U') IS NULL
+                BEGIN
+                    CREATE TABLE [dbo].[UserItem] (
+                        [UserItemId]  UNIQUEIDENTIFIER NOT NULL CONSTRAINT PK_UserItem PRIMARY KEY,
+                        [UserId]      UNIQUEIDENTIFIER NOT NULL,
+                        [ItemCode]    NVARCHAR(40)     NOT NULL,
+                        [IsEquipped]  BIT              NOT NULL,
+                        [PurchasedAt] DATETIME2        NOT NULL
+                    );
+                    CREATE UNIQUE INDEX IX_UserItem_UserId_ItemCode ON [dbo].[UserItem] ([UserId], [ItemCode]);
+                END
+            ");
         }
     }
 }
