@@ -1,12 +1,17 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 using MyPocket.DataAccess.Data;
 using MyPocket.Shared.Resources;
 using MyPocket.Services;
 using MyPocket.Services.Interfaces;
+using MyPocket.Web.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +22,9 @@ builder.Services.AddControllersWithViews()
             factory.Create(typeof(MyPocket.Shared.Resources.JsonLocalizationService));
     });
 
+// ---------------------------------------------------------------------------
+// Database
+// ---------------------------------------------------------------------------
 // With no connection string configured (fresh clone, CI smoke runs, recruiters
 // trying the repo) fall back to an in-memory database so `dotnet run` works with
 // zero setup. Production always supplies ConnectionStrings__MyPocketDBConnection.
@@ -42,10 +50,11 @@ builder.Services.AddDbContext<MyPocketDBContext>(options =>
 // JSON/AJAX endpoints send the antiforgery token in this header instead of a form field.
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 
-// Cookie auth = how we remember a signed-in user across requests.
-// Google = one external identity provider the user can use to sign in.
-// External providers always still produce a *cookie* session afterwards,
-// so the pipeline is: Google -> validated identity -> cookie sign-in.
+// ---------------------------------------------------------------------------
+// Authentication: cookie session + optional Google
+// ---------------------------------------------------------------------------
+// External providers always still produce a *cookie* session afterwards:
+// Google -> validated identity -> our own claims -> cookie sign-in.
 var authBuilder = builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -53,92 +62,113 @@ var authBuilder = builder.Services
         options.LoginPath = "/Account/Login";
         options.LogoutPath = "/Account/Logout";
         options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromDays(14);
+        options.SlidingExpiration = true;
     });
 
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
 {
-    // Only register the Google scheme when both secrets are present.
-    // This lets the app run locally even if the dev hasn't configured OAuth yet;
-    // the "Sign in with Google" button checks the same flag before rendering.
+    // Registered only when both secrets exist, so local dev runs without OAuth set up.
     authBuilder.AddGoogle(options =>
     {
         options.ClientId = googleClientId;
         options.ClientSecret = googleClientSecret;
-        // Google redirects back here after the user grants consent. ASP.NET
-        // Core's middleware handles /signin-google automatically; we only
-        // need to make sure the same path is registered in Google Cloud Console.
         options.CallbackPath = "/signin-google";
         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
-        // OnTicketReceived runs *after* Google verified the user but *before*
-        // the cookie is written. It's the one place where we can map
-        // Google's raw claims (email, name) to our own domain claims
-        // (UserId, Role) so downstream Authorize attributes behave normally.
+        // Runs after Google verified the user but before our cookie is written:
+        // map Google's identity onto a local account and our own claims.
         options.Events.OnTicketReceived = async context =>
         {
-            var db = context.HttpContext.RequestServices.GetRequiredService<MyPocketDBContext>();
-            var subs = context.HttpContext.RequestServices.GetRequiredService<MyPocket.Services.ISubscriptionService>();
-
             var email = context.Principal?.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
             {
                 context.Fail("Google did not return an email address.");
                 return;
             }
+            var displayName = context.Principal?.FindFirstValue(ClaimTypes.Name)
+                              ?? context.Principal?.FindFirstValue(ClaimTypes.GivenName);
 
-            var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
-            if (user == null)
-            {
-                // First-time Google user → provision a local account. We still
-                // set a non-null PasswordHash because the column is NOT NULL,
-                // but it's an unguessable random value — the local password
-                // login path will always reject it.
-                user = new MyPocket.Core.Models.User
-                {
-                    UserId = Guid.NewGuid(),
-                    Email = email,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString("N")),
-                    Nickname = context.Principal?.FindFirstValue(ClaimTypes.Name)
-                               ?? context.Principal?.FindFirstValue(ClaimTypes.GivenName)
-                               ?? email.Split('@')[0],
-                    Role = "FreeMember",
-                    CreationDate = DateTime.UtcNow,
-                    LastLoginDate = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    IsDeleted = false
-                };
-                db.Users.Add(user);
-                await db.SaveChangesAsync();
-                await subs.SubscribeToBasicPlanAsync(user.UserId);
-            }
-            else
-            {
-                user.LastLoginDate = DateTime.UtcNow;
-                await db.SaveChangesAsync();
-            }
+            // The authentication middleware handles /signin-google before it
+            // populates HttpContext.User, so read the existing (guest) cookie explicitly.
+            var existingSession = await context.HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var guestId = existingSession.Succeeded && existingSession.Principal!.IsGuestUser()
+                ? existingSession.Principal!.UserIdOrNull()
+                : null;
 
-            // Replace Google's raw principal with one carrying our domain claims
-            // (UserId, Role). Everything inside the app reads these via
-            // ClaimTypes.NameIdentifier / ClaimTypes.Role.
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim("Nickname", user.Nickname ?? user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            context.Principal = new ClaimsPrincipal(identity);
+            var accounts = context.HttpContext.RequestServices.GetRequiredService<IAccountService>();
+            var user = await accounts.ResolveExternalLoginAsync(email, displayName, guestId);
+
+            var telemetry = context.HttpContext.RequestServices.GetRequiredService<IAppTelemetry>();
+            telemetry.TrackEvent(guestId.HasValue ? "GuestConverted" : "GoogleSignIn",
+                new Dictionary<string, string> { ["method"] = "google" });
+
+            context.Principal = UserClaims.Build(user);
         };
     });
 }
 
-// Add localization service
-builder.Services.AddSingleton<ILocalizationService, JsonLocalizationService>();
+// ---------------------------------------------------------------------------
+// Rate limiting (abuse + cost protection)
+// ---------------------------------------------------------------------------
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-// Currency formatting service (cookie-based preference, default GBP)
+    // Anonymous guest creation: 5 per hour per IP.
+    options.AddPolicy(RateLimitPolicies.GuestStart, http =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromHours(1),
+                QueueLimit = 0
+            }));
+
+    // AI features call a paid API: 30 requests per day per signed-in user.
+    options.AddPolicy(RateLimitPolicies.Ai, http =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: http.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                          ?? http.Connection.RemoteIpAddress?.ToString()
+                          ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 30,
+                Window = TimeSpan.FromDays(1),
+                QueueLimit = 0
+            }));
+});
+
+// Azure App Service terminates TLS at a front end and forwards the client IP in
+// X-Forwarded-For; without this every request appears to come from the proxy,
+// which would make the per-IP rate limit global.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+// ---------------------------------------------------------------------------
+// Monitoring
+// ---------------------------------------------------------------------------
+// Application Insights is enabled only when a connection string is configured
+// (App Service setting APPLICATIONINSIGHTS_CONNECTION_STRING). It collects
+// requests, dependencies, exceptions and the custom product events below.
+if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+{
+    builder.Services.AddApplicationInsightsTelemetry();
+}
+builder.Services.AddSingleton<IAppTelemetry, AppTelemetry>();
+builder.Services.AddHealthChecks();
+
+// ---------------------------------------------------------------------------
+// Localization & currency
+// ---------------------------------------------------------------------------
+builder.Services.AddSingleton<ILocalizationService, JsonLocalizationService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<MyPocket.Web.Services.ICurrencyService, MyPocket.Web.Services.CurrencyService>();
 builder.Services.AddSingleton<MyPocket.Web.Services.IExchangeRateService, MyPocket.Web.Services.ExchangeRateService>();
@@ -156,12 +186,16 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = supportedCultures;
 });
 
+// ---------------------------------------------------------------------------
+// Domain services
+// ---------------------------------------------------------------------------
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ISavingGoalService, SavingGoalService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<MyPocket.Services.ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IAccountService, MyPocket.Services.Accounts.AccountService>();
 
 // Gamification: coins, streaks, the city view and the item shop.
 builder.Services.AddSingleton(TimeProvider.System);
@@ -177,6 +211,11 @@ using (var scope = app.Services.CreateScope())
     var logger = services.GetRequiredService<ILogger<Program>>();
     var context = services.GetRequiredService<MyPocketDBContext>();
 
+    if (useInMemoryDb)
+    {
+        logger.LogWarning("No connection string configured: using an in-memory database. Data resets on restart.");
+    }
+
     // Azure SQL Serverless may be paused on cold start; retry seeding until the DB is reachable.
     const int maxAttempts = 8;
     for (int attempt = 1; attempt <= maxAttempts; attempt++)
@@ -185,6 +224,10 @@ using (var scope = app.Services.CreateScope())
         {
             await DbInitializer.Initialize(context);
             logger.LogInformation("Database seed completed on attempt {Attempt}.", attempt);
+
+            // Guest accounts are disposable; close ones nobody converted within a week.
+            var closed = await services.GetRequiredService<IAccountService>().CleanupStaleGuestsAsync(TimeSpan.FromDays(7));
+            if (closed > 0) logger.LogInformation("Closed {Count} stale guest accounts.", closed);
             break;
         }
         catch (Exception ex) when (attempt < maxAttempts)
@@ -199,6 +242,8 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
+
+app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -215,6 +260,10 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
+
+// Liveness probe for uptime monitors / App Service health check.
+app.MapHealthChecks("/healthz");
 
 app.MapControllerRoute(
     name: "areas",

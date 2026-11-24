@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using MyPocket.DataAccess.Data;
 using MyPocket.Services;
 using MyPocket.Shared.Resources;
-using ISubscriptionService = MyPocket.Services.ISubscriptionService;
 
 namespace MyPocket.Web.Areas.Admin.Controllers
 {

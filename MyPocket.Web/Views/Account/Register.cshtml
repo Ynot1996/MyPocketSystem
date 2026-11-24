@@ -3,13 +3,37 @@
 @{
     ViewData["Title"] = Localizer["SignUp"];
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var googleEnabled = ViewData["GoogleEnabled"] as bool? ?? false;
+    var isGuest = ViewData["IsGuest"] as bool? ?? false;
 }
 
 <div class="container py-5" style="min-height: 80vh; background: linear-gradient(135deg, #fff 0%, #f6f7fb 100%);">
     <div class="row justify-content-center">
         <div class="col-lg-6">
             <div class="bg-white rounded-4 shadow-sm p-5 border border-1">
-                <h2 class="fw-bold mb-4 text-center" style="color:#222; letter-spacing:-1px;">@Localizer["CreateYourAccount"]</h2>
+                <h2 class="fw-bold mb-2 text-center" style="color:#222; letter-spacing:-1px;">@Localizer[isGuest ? "SaveYourDemo" : "CreateYourAccount"]</h2>
+                @if (isGuest)
+                {
+                    <p class="text-center text-muted mb-4">@Localizer["GuestKeepDataHint"]</p>
+                }
+                else
+                {
+                    <div class="mb-4"></div>
+                }
+
+                @if (googleEnabled)
+                {
+                    <form asp-action="ExternalLogin" method="post" class="mb-3">
+                        <input type="hidden" name="provider" value="Google" />
+                        <button type="submit" class="btn btn-outline-dark btn-lg w-100 d-flex align-items-center justify-content-center gap-2" style="border-radius:8px;">
+                            <i class="bi bi-google"></i><span>@Localizer["SignInWithGoogle"]</span>
+                        </button>
+                    </form>
+                    <div class="d-flex align-items-center my-3 text-muted">
+                        <hr class="flex-grow-1" /><small class="px-2">@Localizer["Or"]</small><hr class="flex-grow-1" />
+                    </div>
+                }
+
                 <form asp-action="Register" method="post" autocomplete="off">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     <div class="mb-3">
