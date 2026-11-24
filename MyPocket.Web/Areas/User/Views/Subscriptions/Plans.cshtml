@@ -49,7 +49,7 @@
                                 <div class="alert alert-success">
                                     <small>@Localizer["CurrentPlanLabel"] (@Localizer["ExpiresOn"]: @currentSubscription.EndDate.ToLocalTime().ToString("yyyy/MM/dd"))</small>
                                 </div>
-                                <form asp-action="Cancel" method="post" onsubmit="return confirm('@confirmCancel');">
+                                <form asp-action="Cancel" method="post" data-confirm="@confirmCancel">
                                     <button type="submit" class="w-100 btn btn-outline-danger">@Localizer["CancelSubscription"]</button>
                                 </form>
                             }

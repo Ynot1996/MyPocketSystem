@@ -1,0 +1,212 @@
+@model MyPocket.Web.Areas.User.Controllers.InsightsController.InsightsViewModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = Localizer["Insights"];
+    var s = Model.Summary;
+    var catLabels = s.ThisMonth.Select(c => Localizer[c.CategoryKey].ToString()).ToList();
+    var catColors = s.ThisMonth.Select(c => MyPocket.Services.Gamification.CityCatalog.For(c.CategoryKey).Color).ToList();
+    var chartJson = JsonSerializer.Serialize(new
+    {
+        currency = Currency.CurrentSymbol,
+        categories = new { labels = catLabels, values = s.ThisMonth.Select(c => c.Amount), colors = catColors },
+        trend = new
+        {
+            labels = Model.Trend.Select(t => t.Label),
+            income = Model.Trend.Select(t => t.Income),
+            expense = Model.Trend.Select(t => t.Expense),
+            incomeLabel = Localizer["Income"].ToString(),
+            expenseLabel = Localizer["Expense"].ToString()
+        }
+    });
+}
+
+<div class="dash">
+    <div class="dash-head">
+        <div>
+            <h1 class="dash-title">@Localizer["Insights"]</h1>
+            <div class="text-muted small">@string.Format(Localizer["InsightsSubtitle"], Model.Currency)</div>
+        </div>
+        <a asp-controller="Transactions" asp-action="Index" class="btn btn-outline-dark btn-sm"><i class="bi bi-arrow-left me-1"></i>@Localizer["Dashboard"]</a>
+    </div>
+
+    <div class="kpi-strip">
+        <div class="kpi"><span class="kpi-label">@Localizer["IncomeThisMonth"]</span><span class="kpi-value text-success">@Currency.Format(s.IncomeThisMonth)</span></div>
+        <div class="kpi"><span class="kpi-label">@Localizer["ExpenseThisMonth"]</span><span class="kpi-value text-danger">@Currency.Format(s.ExpenseThisMonth)</span></div>
+        <div class="kpi"><span class="kpi-label">@Localizer["ExpenseLastMonth"]</span><span class="kpi-value">@Currency.Format(s.ExpenseLastMonth)</span></div>
+        <div class="kpi"><span class="kpi-label">@Localizer["Balance"]</span><span class="kpi-value">@Currency.Format(s.IncomeThisMonth - s.ExpenseThisMonth)</span></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="mp-card h-100">
+                <h5 class="fw-bold mb-3">@Localizer["WhereItWent"]</h5>
+                @if (s.ThisMonth.Any())
+                {
+                    <div class="doughnut-wrap">
+                        <canvas id="categoryChart" aria-label="@Localizer["ExpenseByCategory"]"></canvas>
+                        <div class="doughnut-centre">
+                            <div class="small text-muted">@Localizer["Spent"]</div>
+                            <div class="fw-bold fs-5">@Currency.Format(s.ExpenseThisMonth)</div>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled mt-3 mb-0 legend-list">
+                        @for (var i = 0; i < s.ThisMonth.Count; i++)
+                        {
+                            var c = s.ThisMonth[i];
+                            var pct = s.ExpenseThisMonth == 0 ? 0 : (int)Math.Round(c.Amount / s.ExpenseThisMonth * 100);
+                            <li>
+                                <span class="legend-swatch" style="background:@catColors[i]"></span>
+                                <i class="bi @MyPocket.Web.Services.CategoryIcons.For(c.CategoryKey) mx-1 text-muted"></i>@catLabels[i]
+                                <span class="ms-auto fw-semibold">@Currency.Format(c.Amount)</span>
+                                <span class="text-muted small ms-2">@pct%</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="empty-state"><div class="empty-state-emoji">📊</div><div class="text-muted">@Localizer["NoSpendingThisMonth"]</div></div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="mp-card mb-4">
+                <h5 class="fw-bold mb-3">@Localizer["SixMonthTrend"]</h5>
+                <div style="height:240px"><canvas id="trendChart" aria-label="@Localizer["SixMonthTrend"]"></canvas></div>
+            </div>
+
+            <div class="mp-card">
+                <h5 class="fw-bold mb-3"><i class="bi bi-lightbulb me-1"></i>@Localizer["Highlights"]</h5>
+                @foreach (var insight in Model.Insights)
+                {
+                    var args = insight.CategoryKey != null
+                        ? new object[] { Localizer[insight.CategoryKey] }.Concat(insight.Args).ToArray()
+                        : insight.Args.Cast<object>().ToArray();
+                    <div class="insight insight-@insight.Tone">
+                        <i class="bi @(insight.Tone == "good" ? "bi-emoji-smile" : insight.Tone == "warn" ? "bi-exclamation-circle" : "bi-info-circle")"></i>
+                        <span>@string.Format(Localizer[insight.Key], args)</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-lg-5">
+            <div class="mp-card h-100">
+                <h5 class="fw-bold mb-3"><i class="bi bi-currency-exchange me-1"></i>@Localizer["SpentByCurrency"]</h5>
+                @if (Model.ByCurrency.Any())
+                {
+                    <ul class="list-unstyled mb-2">
+                        @foreach (var (code, amount) in Model.ByCurrency)
+                        {
+                            <li class="d-flex justify-content-between py-1 border-bottom">
+                                <span class="fw-semibold">@code</span>
+                                <span>@Currency.Format(amount, code)</span>
+                            </li>
+                        }
+                    </ul>
+                    <div class="small text-muted"><i class="bi bi-info-circle me-1"></i>@Localizer["ExchangeRateDisclaimer"]</div>
+                }
+                else
+                {
+                    <div class="text-muted small">—</div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="mp-card coach-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0">✨ @Localizer["AiCoach"]</h5>
+                    <span class="badge text-bg-warning">@Localizer["Premium"]</span>
+                </div>
+                @if (!Model.IsPremium)
+                {
+                    <p class="text-muted mb-3">@Localizer["AiCoachPitch"]</p>
+                    <a asp-controller="Subscriptions" asp-action="Plans" class="btn btn-dark">@Localizer["UpgradeToUnlock"]</a>
+                }
+                else if (!Model.AiAvailable)
+                {
+                    <p class="text-muted mb-0">@Localizer["AiNotConfigured"]</p>
+                }
+                else
+                {
+                    <p class="text-muted">@Localizer["AiCoachIntro"]</p>
+                    <form id="adviceForm" asp-action="Advice" method="post">
+                        <button type="submit" class="btn btn-dark" id="adviceBtn">@Localizer["GetAdvice"]</button>
+                    </form>
+                    <div id="adviceOut" class="mt-3" aria-live="polite"
+                         data-msg-loading="@Localizer["AdviceLoading"]"
+                         data-msg-error="@Localizer["AdviceUnavailable"]"
+                         data-msg-limit="@Localizer["CaptureLimitReached"]"></div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="application/json" id="chartData">@Html.Raw(chartJson)</script>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            const d = JSON.parse(document.getElementById('chartData').textContent);
+            const money = v => d.currency + Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
+
+            const cat = document.getElementById('categoryChart');
+            if (cat && d.categories.values.length) {
+                new Chart(cat, {
+                    type: 'doughnut',
+                    data: { labels: d.categories.labels, datasets: [{ data: d.categories.values, backgroundColor: d.categories.colors, borderWidth: 2, borderColor: '#fff' }] },
+                    options: { cutout: '72%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.label}: ${money(c.raw)}` } } } }
+                });
+            }
+
+            new Chart(document.getElementById('trendChart'), {
+                type: 'bar',
+                data: {
+                    labels: d.trend.labels,
+                    datasets: [
+                        { label: d.trend.incomeLabel, data: d.trend.income, backgroundColor: '#22c55e', borderRadius: 6 },
+                        { label: d.trend.expenseLabel, data: d.trend.expense, backgroundColor: '#f87171', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { callback: v => money(v) } }, x: { grid: { display: false } } },
+                    plugins: { tooltip: { callbacks: { label: c => `${c.dataset.label}: ${money(c.raw)}` } } }
+                }
+            });
+
+            // Premium AI coach (fetched on demand so the page itself never waits on the API).
+            const form = document.getElementById('adviceForm');
+            if (!form) return;
+            const out = document.getElementById('adviceOut');
+            const esc = s => s.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+            form.addEventListener('submit', async e => {
+                e.preventDefault();
+                const btn = document.getElementById('adviceBtn');
+                btn.disabled = true;
+                out.innerHTML = `<div class="text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>${esc(out.dataset.msgLoading)}</div>`;
+                try {
+                    const res = await fetch(form.action, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': form.querySelector('input[name="__RequestVerificationToken"]').value }
+                    });
+                    if (res.status === 429) { out.textContent = out.dataset.msgLimit; return; }
+                    if (!res.ok) { out.textContent = out.dataset.msgError; return; }
+                    const a = await res.json();
+                    out.innerHTML = `<div class="fw-bold mb-2">${esc(a.headline)}</div>` +
+                        a.tips.map(t => `<div class="coach-tip"><div class="fw-semibold">${esc(t.title)}</div><div class="small">${esc(t.body)}</div></div>`).join('');
+                } catch {
+                    out.textContent = out.dataset.msgError;
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        })();
+    </script>
+}

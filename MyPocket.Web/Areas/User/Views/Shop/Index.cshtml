@@ -1,0 +1,62 @@
+@model IReadOnlyList<MyPocket.Shared.ViewModels.Gamification.ShopEntry>
+@using MyPocket.Shared.ViewModels.Gamification
+@{
+    ViewData["Title"] = Localizer["Shop"];
+    var coins = (int?)ViewBag.Coins ?? 0;
+    var groups = new[] { ShopItemKind.Decoration, ShopItemKind.Character, ShopItemKind.Outfit };
+}
+
+<div class="dash">
+    <div class="dash-head">
+        <div>
+            <h1 class="dash-title">@Localizer["Shop"]</h1>
+            <div class="text-muted small">@Localizer["ShopSubtitle"]</div>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="coin-chip">🪙 @coins</span>
+            <a asp-controller="Transactions" asp-action="Index" class="btn btn-outline-dark btn-sm"><i class="bi bi-buildings me-1"></i>@Localizer["YourCity"]</a>
+        </div>
+    </div>
+
+    <div class="mp-card mb-4 earn-card">
+        <div class="fw-semibold mb-1">@Localizer["HowToEarn"]</div>
+        <div class="small text-muted">@Localizer["HowToEarnBody"]</div>
+    </div>
+
+    @foreach (var kind in groups)
+    {
+        <h5 class="fw-bold mt-4 mb-3">@Localizer["ShopKind_" + kind]</h5>
+        <div class="shop-grid">
+            @foreach (var entry in Model.Where(e => e.Item.Kind == kind))
+            {
+                var affordable = coins >= entry.Item.Price;
+                <div class="shop-item @(entry.Owned ? "is-owned" : "") @(entry.Equipped ? "is-equipped" : "")">
+                    <div class="shop-emoji">@entry.Item.Emoji</div>
+                    <div class="fw-semibold">@Localizer[entry.Item.NameKey]</div>
+                    @if (!entry.Owned)
+                    {
+                        <div class="small text-muted mb-2">🪙 @entry.Item.Price</div>
+                        <form asp-action="Buy" method="post">
+                            <input type="hidden" name="itemCode" value="@entry.Item.Code" />
+                            <button type="submit" class="btn btn-sm @(affordable ? "btn-dark" : "btn-outline-secondary")" @(affordable ? "" : "disabled")>
+                                @(affordable ? Localizer["Buy"] : Localizer["NotEnoughCoins"])
+                            </button>
+                        </form>
+                    }
+                    else if (kind == ShopItemKind.Outfit)
+                    {
+                        <div class="small text-muted mb-2">@Localizer["Owned"]</div>
+                        <form asp-action="Wear" method="post">
+                            <input type="hidden" name="itemCode" value="@entry.Item.Code" />
+                            <button type="submit" class="btn btn-sm btn-outline-dark">@(entry.Equipped ? Localizer["TakeOff"] : Localizer["Wear"])</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="small text-success"><i class="bi bi-check-circle me-1"></i>@Localizer["InYourCity"]</div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

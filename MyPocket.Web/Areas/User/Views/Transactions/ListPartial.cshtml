@@ -1,109 +1,71 @@
 @model IEnumerable<MyPocket.Core.Models.Transaction>
 @{
-    var incomeList = Model.Where(x => x.TransactionType.Trim() == "收入").ToList();
-    var expenseList = Model.Where(x => x.TransactionType.Trim() == "支出").ToList();
-    var confirmDelete = Localizer["ConfirmDeleteTransaction"];
+    var rows = Model.OrderByDescending(t => t.TransactionDate).ToList();
+    const int initiallyShown = 10;
 }
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h5 class="card-title mb-3 fw-bold text-success">@Localizer["IncomeRecords"]</h5>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>@Localizer["Date"]</th>
-                        <th>@Localizer["Category"]</th>
-                        <th>@Localizer["Amount"]</th>
-                        <th>@Localizer["Description"]</th>
-                        <th>@Localizer["Action"]</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!incomeList.Any())
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">@Localizer["NoIncomeRecords"]</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        foreach (var item in incomeList)
-                        {
-                            <tr>
-                                <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
-                                <td><i class="bi @MyPocket.Web.Services.CategoryIcons.For(item.Category.CategoryName) me-2 text-muted"></i>@Localizer[item.Category.CategoryName]</td>
-                                <td class="text-success fw-bold">+@Currency.Format(item.Amount, item.Currency)</td>
-                                <td>@item.Description</td>
-                                <td>
-                                    <a asp-action="Edit" asp-route-id="@item.TransactionId"
-                                       class="btn btn-sm btn-outline-primary me-1">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form asp-action="Delete" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@item.TransactionId" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('@confirmDelete');">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-1"></i>@Localizer["RecentActivity"]</h5>
+    <input type="search" class="form-control form-control-sm activity-search" id="tableFilter"
+           placeholder="@Localizer["Search"]…" aria-label="@Localizer["Search"]" />
 </div>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h5 class="card-title mb-3 fw-bold text-danger">@Localizer["ExpenseRecords"]</h5>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>@Localizer["Date"]</th>
-                        <th>@Localizer["Category"]</th>
-                        <th>@Localizer["Amount"]</th>
-                        <th>@Localizer["Description"]</th>
-                        <th>@Localizer["Action"]</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!expenseList.Any())
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">@Localizer["NoExpenseRecords"]</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        foreach (var item in expenseList)
-                        {
-                            <tr>
-                                <td>@item.TransactionDate.ToString("yyyy/MM/dd HH:mm")</td>
-                                <td><i class="bi @MyPocket.Web.Services.CategoryIcons.For(item.Category.CategoryName) me-2 text-muted"></i>@Localizer[item.Category.CategoryName]</td>
-                                <td class="text-danger fw-bold">-@Currency.Format(item.Amount, item.Currency)</td>
-                                <td>@item.Description</td>
-                                <td>
-                                    <a asp-action="Edit" asp-route-id="@item.TransactionId"
-                                       class="btn btn-sm btn-outline-primary me-1">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form asp-action="Delete" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@item.TransactionId" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('@confirmDelete');">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
+@if (!rows.Any())
+{
+    <div class="empty-state">
+        <div class="empty-state-emoji">🧾</div>
+        <div class="fw-semibold">@Localizer["NoActivityYet"]</div>
+        <div class="text-muted small">@Localizer["NoActivityHint"]</div>
     </div>
-</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table activity-table align-middle mb-0">
+            <tbody>
+                @for (var i = 0; i < rows.Count; i++)
+                {
+                    var t = rows[i];
+                    var isIncome = t.TransactionType.Trim() == "收入";
+                    <tr class="@(i >= initiallyShown ? "activity-extra d-none" : "")">
+                        <td class="activity-icon">
+                            <span class="cat-dot @(isIncome ? "cat-dot-in" : "")">
+                                <i class="bi @MyPocket.Web.Services.CategoryIcons.For(t.Category.CategoryName)"></i>
+                            </span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@Localizer[t.Category.CategoryName]</div>
+                            <div class="text-muted small text-truncate activity-desc">@t.Description</div>
+                        </td>
+                        <td class="text-muted small text-nowrap d-none d-sm-table-cell">@t.TransactionDate.ToString("dd MMM, HH:mm")</td>
+                        <td class="text-end fw-bold text-nowrap @(isIncome ? "text-success" : "")">
+                            @(isIncome ? "+" : "−")@Currency.Format(t.Amount, t.Currency)
+                        </td>
+                        <td class="text-end text-nowrap activity-actions">
+                            <a asp-action="Edit" asp-route-id="@t.TransactionId" class="btn btn-sm btn-link text-secondary" title="@Localizer["Edit"]" aria-label="@Localizer["Edit"]">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form asp-action="Delete" method="post" class="d-inline" data-confirm="@Localizer["ConfirmDeleteTransaction"]">
+                                <input type="hidden" name="id" value="@t.TransactionId" />
+                                <button type="submit" class="btn btn-sm btn-link text-danger" title="@Localizer["Delete"]" aria-label="@Localizer["Delete"]">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (rows.Count > initiallyShown)
+    {
+        <button type="button" class="btn btn-sm btn-outline-secondary w-100 mt-3" id="showAllActivity">
+            @string.Format(Localizer["ShowAllCount"], rows.Count)
+        </button>
+        <script>
+            document.getElementById('showAllActivity').addEventListener('click', function () {
+                document.querySelectorAll('.activity-extra').forEach(r => r.classList.remove('d-none'));
+                this.remove();
+            });
+        </script>
+    }
+}

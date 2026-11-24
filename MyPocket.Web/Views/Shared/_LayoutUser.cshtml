@@ -1,15 +1,18 @@
 @* User Member Layout *@
 @{
     Layout = null;
+    var controller = ViewContext.RouteData.Values["Controller"]?.ToString();
+    string Active(string name) => controller == name ? "active" : "";
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MyPocket.Web</title>
+    <title>@ViewData["Title"] - MyPocket</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MyPocket.Web.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
@@ -21,7 +24,7 @@
         }
 
         .navbar-brand {
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: #212529 !important;
             padding: 0.5rem 1rem;
@@ -38,7 +41,7 @@
         .navbar .nav-link {
             position: relative;
             margin: 0 0.25rem;
-            padding: 0.7rem 1rem;
+            padding: 0.6rem 0.75rem;
             border-radius: 6px;
             transition: all 0.3s ease;
             color: #495057 !important;
@@ -127,53 +130,54 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="User" asp-controller="Home" asp-action="index">
+                <a class="navbar-brand" asp-area="User" asp-controller="Transactions" asp-action="Index">
                     MyPocket
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between" id="navbarContent">
+                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between" id="navbarContent">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Transactions" ? "active" : "")"
-                               asp-area="User" asp-controller="Transactions" asp-action="Index">
-                                <i class="bi bi-journal-text"></i> @Localizer["Transactions"]
+                            <a class="nav-link @Active("Transactions")" asp-area="User" asp-controller="Transactions" asp-action="Index">
+                                <i class="bi bi-buildings"></i> @Localizer["Dashboard"]
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Categories" ? "active" : "")"
-                               asp-area="User" asp-controller="Categories" asp-action="Index">
-                                <i class="bi bi-tags"></i> @Localizer["Categories"]
+                            <a class="nav-link @Active("Insights")" asp-area="User" asp-controller="Insights" asp-action="Index">
+                                <i class="bi bi-graph-up"></i> @Localizer["Insights"]
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Budgets" ? "active" : "")"
-                               asp-area="User" asp-controller="Budgets" asp-action="Index">
+                            <a class="nav-link @Active("Budgets")" asp-area="User" asp-controller="Budgets" asp-action="Index">
                                 <i class="bi bi-wallet2"></i> @Localizer["Budgets"]
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "SavingGoals" ? "active" : "")"
-                               asp-area="User" asp-controller="SavingGoals" asp-action="Index">
+                            <a class="nav-link @Active("SavingGoals")" asp-area="User" asp-controller="SavingGoals" asp-action="Index">
                                 <i class="bi bi-piggy-bank"></i> @Localizer["SavingGoals"]
                             </a>
                         </li>
-                        @if (User.IsInRole("PaidMember"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "PaidMember" ? "active" : "")"
-                                   asp-area="User" asp-controller="PaidMember" asp-action="Index">
-                                    <i class="bi bi-gem"></i> @Localizer["PremiumArea"]
-                                </a>
-                            </li>
-                        }
+                        <li class="nav-item">
+                            <a class="nav-link @Active("Categories")" asp-area="User" asp-controller="Categories" asp-action="Index">
+                                <i class="bi bi-tags"></i> @Localizer["Categories"]
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @Active("Shop")" asp-area="User" asp-controller="Shop" asp-action="Index">
+                                <i class="bi bi-bag-heart"></i> @Localizer["Shop"]
+                            </a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav align-items-center">
+                        <li class="nav-item me-1">
+                            @await Component.InvokeAsync("CoinBadge")
+                        </li>
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Subscriptions" ? "active" : "")"
+                            <a class="nav-link @Active("Subscriptions")"
                                asp-area="User" asp-controller="Subscriptions" asp-action="Plans">
                                 <i class="bi bi-star"></i> @Localizer["Plans"]
                                 @if (User.IsInRole("FreeMember"))

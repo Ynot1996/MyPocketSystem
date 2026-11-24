@@ -1,52 +1,88 @@
 @model IEnumerable<MyPocket.Core.Models.Transaction>
 @using MyPocket.Web.Services
+@inject MyPocket.Services.Ai.IReceiptScanner ReceiptScanner
 @{
     var categoryError = ViewData.ModelState["CategoryId"]?.Errors.FirstOrDefault()?.ErrorMessage;
     var categories = ViewBag.Categories as IEnumerable<SelectListItem>;
     var defaultCurrency = Currency.CurrentCode;
     var defaultMeta = Currency.Get(defaultCurrency);
+    var speechLang = System.Globalization.CultureInfo.CurrentUICulture.Name == "zh-TW" ? "zh-TW" : "en-GB";
 }
-<div class="card shadow-sm">
-    <div class="card-body">
-        <h5 class="card-title mb-3 fw-bold text-primary">@Localizer["AddTransaction"]</h5>
-        <form asp-action="Create" method="post" autocomplete="off" id="createTransactionForm">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+<div class="mp-card quick-add" id="quickAdd">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="mb-0 fw-bold">@Localizer["AddTransaction"]</h5>
+        <span class="coin-chip coin-chip-sm" title="@Localizer["CoinsPerEntryHint"]">+10 🪙</span>
+    </div>
 
-            <div class="mb-3">
-                <label for="CategoryId" class="form-label">@Localizer["Category"] <span class="text-danger">*</span></label>
-                <select name="CategoryId" id="CategoryId" class="form-select" required>
-                    <option value="">-- @Localizer["SelectCategory"] --</option>
-                    @if (categories != null && categories.Any())
-                    {
-                        foreach (var categoryGroup in categories.Where(c => c.Group != null).GroupBy(c => c.Group.Name))
-                        {
-                            <optgroup label="@Localizer[categoryGroup.Key]">
-                                @foreach (var category in categoryGroup)
-                                {
-                                    <option value="@category.Value">@Localizer[category.Text]</option>
-                                }
-                            </optgroup>
-                        }
-                        var noGroupCategories = categories.Where(c => c.Group == null);
-                        foreach (var category in noGroupCategories)
-                        {
-                            <option value="@category.Value">@Localizer[category.Text]</option>
-                        }
-                    }
-                    else
-                    {
-                        <option value="">@Localizer["NoCategoriesFound"]</option>
-                    }
-                </select>
-                @if (!string.IsNullOrEmpty(categoryError))
+    @* Capture bar: three ways to avoid typing the form by hand. *@
+    <div class="capture-bar mb-3"
+         data-receipt-url="@Url.Action("Receipt", "Capture", new { area = "User" })"
+         data-text-url="@Url.Action("Text", "Capture", new { area = "User" })"
+         data-speech-lang="@speechLang"
+         data-msg-scanning="@Localizer["CaptureScanning"]"
+         data-msg-parsing="@Localizer["CaptureParsing"]"
+         data-msg-listening="@Localizer["CaptureListening"]"
+         data-msg-filled="@Localizer["CaptureFilled"]"
+         data-msg-filled-offline="@Localizer["CaptureFilledOffline"]"
+         data-msg-limit="@Localizer["CaptureLimitReached"]"
+         data-msg-error="@Localizer["CaptureFailed"]">
+        <div class="d-flex gap-2">
+            @if (ReceiptScanner.IsAvailable)
+            {
+                <label class="capture-btn" title="@Localizer["ScanReceiptHint"]">
+                    <i class="bi bi-camera"></i><span>@Localizer["ScanReceipt"]</span>
+                    @* capture="environment" opens the rear camera on phones. *@
+                    <input type="file" id="receiptInput" accept="image/*" capture="environment" hidden />
+                </label>
+            }
+            <button type="button" class="capture-btn" id="voiceBtn" title="@Localizer["VoiceHint"]" hidden>
+                <i class="bi bi-mic"></i><span>@Localizer["Speak"]</span>
+            </button>
+        </div>
+        <div class="input-group input-group-sm mt-2">
+            <span class="input-group-text"><i class="bi bi-lightning-charge"></i></span>
+            <input type="text" class="form-control" id="quickText" maxlength="300"
+                   placeholder="@Localizer["QuickTextPlaceholder"]" aria-label="@Localizer["QuickTextPlaceholder"]" />
+            <button class="btn btn-dark" type="button" id="quickTextBtn">@Localizer["Fill"]</button>
+        </div>
+        <div class="capture-status small mt-2" id="captureStatus" role="status" aria-live="polite"></div>
+    </div>
+
+    <form asp-action="Create" method="post" autocomplete="off" id="createTransactionForm">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+        <input type="hidden" name="captureSource" id="captureSource" value="" />
+
+        <div class="mb-3">
+            <label for="CategoryId" class="form-label">@Localizer["Category"] <span class="text-danger">*</span></label>
+            <select name="CategoryId" id="CategoryId" class="form-select" required>
+                <option value="">-- @Localizer["SelectCategory"] --</option>
+                @if (categories != null && categories.Any())
                 {
-                    <span class="text-danger small">@categoryError</span>
+                    foreach (var categoryGroup in categories.Where(c => c.Group != null).GroupBy(c => c.Group.Name))
+                    {
+                        <optgroup label="@Localizer[categoryGroup.Key]">
+                            @foreach (var category in categoryGroup)
+                            {
+                                <option value="@category.Value">@Localizer[category.Text]</option>
+                            }
+                        </optgroup>
+                    }
                 }
-            </div>
+                else
+                {
+                    <option value="">@Localizer["NoCategoriesFound"]</option>
+                }
+            </select>
+            @if (!string.IsNullOrEmpty(categoryError))
+            {
+                <span class="text-danger small">@categoryError</span>
+            }
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label">@Localizer["Currency"] <span class="text-danger">*</span></label>
-                <select name="Currency" id="Currency" class="form-select" data-decimals="@defaultMeta.Decimals" data-step="@defaultMeta.Step">
+        <div class="row g-2 mb-2">
+            <div class="col-5">
+                <label class="form-label" for="Currency">@Localizer["Currency"]</label>
+                <select name="Currency" id="Currency" class="form-select">
                     @foreach (var c in Currency.Supported)
                     {
                         <option value="@c.Code"
@@ -55,104 +91,41 @@
                                 data-step="@c.Step"
                                 data-presets="@string.Join(",", c.Presets)"
                                 selected="@(c.Code == defaultCurrency)">
-                            @c.Symbol @c.Code — @c.DisplayName
+                            @c.Symbol @c.Code
                         </option>
                     }
                 </select>
             </div>
-
-            <div class="mb-2">
+            <div class="col-7">
                 <label for="Amount" class="form-label">@Localizer["Amount"] <span class="text-danger">*</span></label>
                 <div class="input-group">
+                    <button type="button" class="btn btn-outline-secondary" id="amountDown" aria-label="−">−</button>
                     <span class="input-group-text" id="amountSymbol">@defaultMeta.Symbol</span>
-                    <button type="button" class="btn btn-outline-secondary" id="amountDown" title="−">−</button>
-                    <input type="number" name="Amount" id="Amount"
-                           class="form-control text-center"
-                           step="any"
-                           min="0"
-                           inputmode="decimal"
-                           required />
-                    <button type="button" class="btn btn-outline-secondary" id="amountUp" title="+">+</button>
+                    <input type="number" name="Amount" id="Amount" class="form-control text-center"
+                           step="any" min="0" inputmode="decimal" required />
+                    <button type="button" class="btn btn-outline-secondary" id="amountUp" aria-label="+">+</button>
                 </div>
             </div>
-            <div class="mb-3 d-flex flex-wrap gap-1" id="amountPresets">
-                @foreach (var preset in defaultMeta.Presets)
-                {
-                    <button type="button" class="btn btn-sm btn-outline-primary preset-btn" data-value="@preset.ToString(System.Globalization.CultureInfo.InvariantCulture)">
-                        @defaultMeta.Symbol@preset.ToString("N" + defaultMeta.Decimals, System.Globalization.CultureInfo.InvariantCulture)
-                    </button>
-                }
-            </div>
-
-            <div class="mb-3">
-                <label for="TransactionDate" class="form-label">@Localizer["TransactionDate"] <span class="text-danger">*</span></label>
-                <input type="datetime-local" name="TransactionDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
-            </div>
-
-            <div class="mb-3">
-                <label for="Description" class="form-label">@Localizer["Description"]</label>
-                <textarea name="Description" class="form-control" rows="2" maxlength="100"></textarea>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">@Localizer["Add"]</button>
-        </form>
-    </div>
-</div>
-
-<script>
-    (function () {
-        const select = document.getElementById('Currency');
-        const symbolEl = document.getElementById('amountSymbol');
-        const amount = document.getElementById('Amount');
-        const presets = document.getElementById('amountPresets');
-        const upBtn = document.getElementById('amountUp');
-        const downBtn = document.getElementById('amountDown');
-
-        function applyCurrency() {
-            const opt = select.options[select.selectedIndex];
-            const symbol = opt.dataset.symbol;
-            const decimals = parseInt(opt.dataset.decimals, 10);
-            const presetList = opt.dataset.presets.split(',').map(Number);
-
-            symbolEl.textContent = symbol;
-            // Keep `step="any"` on the field so the user can type any decimal
-            // (e.g. £3.67). The per-currency step is only used by the ± buttons.
-
-            // Snap current value to the new decimals (avoid stale precision).
-            const current = parseFloat(amount.value);
-            if (!isNaN(current)) {
-                amount.value = current.toFixed(decimals);
+        </div>
+        <div class="mb-3 d-flex flex-wrap gap-1" id="amountPresets">
+            @foreach (var preset in defaultMeta.Presets)
+            {
+                <button type="button" class="btn btn-sm btn-outline-primary preset-btn" data-value="@preset.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                    @defaultMeta.Symbol@preset.ToString("N" + defaultMeta.Decimals, System.Globalization.CultureInfo.InvariantCulture)
+                </button>
             }
+        </div>
 
-            // Rebuild preset buttons for the chosen currency.
-            presets.innerHTML = '';
-            presetList.forEach(v => {
-                const b = document.createElement('button');
-                b.type = 'button';
-                b.className = 'btn btn-sm btn-outline-primary preset-btn';
-                b.dataset.value = v;
-                b.textContent = symbol + v.toFixed(decimals);
-                b.addEventListener('click', () => { amount.value = v.toFixed(decimals); });
-                presets.appendChild(b);
-            });
-        }
+        <div class="mb-3">
+            <label for="TransactionDate" class="form-label">@Localizer["TransactionDate"] <span class="text-danger">*</span></label>
+            <input type="datetime-local" name="TransactionDate" id="TransactionDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
+        </div>
 
-        function nudge(direction) {
-            const opt = select.options[select.selectedIndex];
-            const step = parseFloat(opt.dataset.step);
-            const decimals = parseInt(opt.dataset.decimals, 10);
-            const current = parseFloat(amount.value) || 0;
-            const next = Math.max(0, current + direction * step);
-            amount.value = next.toFixed(decimals);
-        }
+        <div class="mb-3">
+            <label for="Description" class="form-label">@Localizer["Description"]</label>
+            <input type="text" name="Description" id="Description" class="form-control" maxlength="100" />
+        </div>
 
-        select.addEventListener('change', applyCurrency);
-        upBtn.addEventListener('click', () => nudge(1));
-        downBtn.addEventListener('click', () => nudge(-1));
-
-        // Wire the initially-rendered preset buttons too.
-        presets.querySelectorAll('.preset-btn').forEach(b => {
-            b.addEventListener('click', () => { amount.value = b.dataset.value; });
-        });
-    })();
-</script>
+        <button type="submit" class="btn btn-primary w-100 btn-lg">@Localizer["Add"]</button>
+    </form>
+</div>

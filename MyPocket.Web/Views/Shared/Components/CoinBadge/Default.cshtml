@@ -1,0 +1,3 @@
+@model int
+<a class="coin-chip text-decoration-none" asp-area="User" asp-controller="Shop" asp-action="Index"
+   title="@Localizer["Coins"]" aria-label="@Model @Localizer["Coins"]">🪙 <span data-coin-balance>@Model</span></a>

@@ -1,542 +1,167 @@
 @model IEnumerable<MyPocket.Core.Models.Transaction>
+@using System.Text.Json
+@using MyPocket.Shared.ViewModels.Gamification
 @{
-    ViewData["Title"] = Localizer["Transactions"];
-    var incomeList = Model.Where(x => x.TransactionType.Trim() == "收入").ToList();
-    var expenseList = Model.Where(x => x.TransactionType.Trim() == "支出").ToList();
+    ViewData["Title"] = Localizer["Dashboard"];
+    var city = ViewBag.City as CityViewModel;
+    var coins = (int?)ViewBag.Coins ?? 0;
+    var streak = (int?)ViewBag.Streak ?? 0;
+    var budgets = ViewBag.Budgets as List<MyPocket.Shared.ViewModels.Budgets.BudgetViewModel> ?? new();
+    var goal = (ViewBag.SavingGoals as List<MyPocket.Core.Models.SavingGoal>)?.FirstOrDefault();
 
-    // Display-currency totals: convert every row from its own currency into
-    // the user's chosen view currency using reference rates.
-    var displayCurrency = Currency.CurrentCode;
-    decimal Sum(IEnumerable<MyPocket.Core.Models.Transaction> rows) =>
-        rows.Sum(r => ExchangeRates.Convert(r.Amount, string.IsNullOrEmpty(r.Currency) ? "GBP" : r.Currency, displayCurrency));
+    // This month's totals, every row converted into the display currency first.
+    var display = Currency.CurrentCode;
+    var monthStart = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+    var thisMonth = Model.Where(t => t.TransactionDate >= monthStart).ToList();
+    decimal Total(string type) => thisMonth
+        .Where(t => t.TransactionType.Trim() == type)
+        .Sum(t => ExchangeRates.Convert(t.Amount, string.IsNullOrEmpty(t.Currency) ? "GBP" : t.Currency, display));
+    var income = Total("收入");
+    var expense = Total("支出");
 
-    var totalIncome = Sum(incomeList);
-    var totalExpense = Sum(expenseList);
-    var balance = totalIncome - totalExpense;
+    var budgetTotal = budgets.Sum(b => b.Amount);
+    var budgetSpent = budgets.Sum(b => b.Spent);
+    var budgetPct = budgetTotal == 0 ? 0 : (int)Math.Min(100, budgetSpent / budgetTotal * 100);
 
-    // Per-currency breakdown for the "by currency" detail panel.
-    var incomeByCurrency = incomeList
-        .GroupBy(r => string.IsNullOrEmpty(r.Currency) ? "GBP" : r.Currency)
-        .Select(g => new { Code = g.Key, Amount = g.Sum(r => r.Amount) })
-        .OrderByDescending(g => g.Amount)
-        .ToList();
-    var expenseByCurrency = expenseList
-        .GroupBy(r => string.IsNullOrEmpty(r.Currency) ? "GBP" : r.Currency)
-        .Select(g => new { Code = g.Key, Amount = g.Sum(r => r.Amount) })
-        .OrderByDescending(g => g.Amount)
-        .ToList();
-    // Convert each row to display currency *before* summing so the chart
-    // legend reflects accurate cross-currency totals (no naive Sum across GBP/JPY/etc.).
-    decimal Converted(MyPocket.Core.Models.Transaction t) =>
-        ExchangeRates.Convert(t.Amount, string.IsNullOrEmpty(t.Currency) ? "GBP" : t.Currency, displayCurrency);
+    var cityJson = city == null ? "null" : JsonSerializer.Serialize(new
+    {
+        grid = city.GridSize,
+        buildings = city.Buildings.Select(b => new
+        {
+            slot = b.Slot,
+            level = b.Level,
+            emoji = b.Emoji,
+            color = b.Color,
+            category = b.CategoryKey,
+            name = $"{Localizer["Building_" + b.BuildingType]} ({Localizer[b.CategoryKey]})",
+            count = b.TransactionCount,
+            next = b.NextLevelAt
+        }),
+        decorations = city.Decorations.Select(d => new { slot = d.Slot, emoji = d.Emoji }),
+        characters = city.Characters.Select(c => new { emoji = c.Emoji }),
+        outfit = city.EquippedOutfitEmoji,
+        labels = new
+        {
+            level = Localizer["Level"].ToString(),
+            entries = Localizer["Entries"].ToString(),
+            nextAt = Localizer["NextLevelAt"].ToString(),
+            maxLevel = Localizer["MaxLevel"].ToString(),
+            empty = Localizer["CityEmpty"].ToString(),
+            aria = Localizer["CityAria"].ToString()
+        }
+    });
 
-    // Group by raw CategoryName (DB literal) and translate at projection time.
-    var expenseByCategory = expenseList
-        .GroupBy(x => x.Category.CategoryName)
-        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(Converted) })
-        .ToList();
-    var now = DateTime.UtcNow;
-    var budgets = ViewBag.Budgets as List<MyPocket.Shared.ViewModels.Budgets.BudgetViewModel>;
-    var totalBudget = budgets?.Sum(b => b.Amount) ?? 0;
-    var totalBudgetSpent = budgets?.Sum(b => b.Spent) ?? 0;
-    var totalBudgetRemaining = totalBudget - totalBudgetSpent;
-    var percent = totalBudget == 0 ? 0 : Math.Min(100, (int)((totalBudgetSpent / totalBudget) * 100));
-    var savingGoals = ViewBag.SavingGoals as List<MyPocket.Core.Models.SavingGoal>;
-    var selectedGoal = savingGoals?.FirstOrDefault();
-    var savingPercent = (selectedGoal != null && selectedGoal.TargetAmount > 0) ? Math.Min(100, (int)((selectedGoal.CurrentAmount / selectedGoal.TargetAmount) * 100)) : 0;
-
-    // Add time filter variables
-    var today = DateTime.Now.Date;
-    var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
-    var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-    var firstDayOfYear = new DateTime(now.Year, 1, 1);
-    var lastDayOfYear = new DateTime(now.Year, 12, 31);
-
-    // Inclusive end-date filter for monthly/yearly buckets.
-    var dailyExpenses = expenseList.Where(x => x.TransactionDate.Date == today);
-    var monthlyExpenses = expenseList.Where(x => 
-        x.TransactionDate.Date >= firstDayOfMonth && 
-        x.TransactionDate.Date <= lastDayOfMonth);
-    var yearlyExpenses = expenseList.Where(x => 
-        x.TransactionDate.Date >= firstDayOfYear && 
-        x.TransactionDate.Date <= lastDayOfYear);
-
-    // Same conversion-before-sum applies for the time-bucketed pies.
-    var dailyExpensesByCategory = dailyExpenses
-        .GroupBy(x => x.Category.CategoryName)
-        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(Converted) })
-        .ToList();
-
-    var monthlyExpensesByCategory = monthlyExpenses
-        .GroupBy(x => x.Category.CategoryName)
-        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(Converted) })
-        .ToList();
-
-    var yearlyExpensesByCategory = yearlyExpenses
-        .GroupBy(x => x.Category.CategoryName)
-        .Select(g => new { Category = Localizer[g.Key].ToString(), Amount = g.Sum(Converted) })
-        .ToList();
+    var coinsEarned = TempData["CoinsEarned"] as int?;
+    var streakDays = TempData["StreakDays"] as int?;
+    var capReached = TempData["CoinsCapReached"] as bool? ?? false;
 }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
-<style>
-    .hover-shadow:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 25px rgba(0,0,0,.1) !important;
-        transition: all .3s ease;
-    }
-
-    .stat-card {
-        border-radius: 15px;
-        border: none;
-        transition: all .3s ease;
-    }
-
-    .stat-icon {
-        font-size: 2rem;
-        height: 60px;
-        width: 60px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-    }
-
-    .progress {
-        border-radius: 10px;
-        background-color: rgba(0,0,0,.05);
-    }
-
-    .progress-bar {
-        border-radius: 10px;
-    }
-
-    .custom-btn {
-        border-radius: 20px;
-        padding: 8px 20px;
-        transition: all .3s ease;
-    }
-
-        .custom-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,.1);
-        }
-
-    .card {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
-    }
-
-    .list-group-item {
-        border: none;
-        padding: 0.75rem 0;
-    }
-
-        .list-group-item:not(:last-child) {
-            border-bottom: 1px solid rgba(0,0,0,.05);
-        }
-
-    .expense-category-list {
-        height: 390px;
-        overflow-y: auto;
-        margin-right: -1rem;
-        padding-right: 1rem;
-        scroll-behavior: smooth;
-    }
-
-        .expense-category-list::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .expense-category-list::-webkit-scrollbar-track {
-            background: #f8f9fa;
-            border-radius: 2px;
-        }
-
-        .expense-category-list::-webkit-scrollbar-thumb {
-            background: #dee2e6;
-            border-radius: 2px;
-        }
-
-            .expense-category-list::-webkit-scrollbar-thumb:hover {
-                background: #adb5bd;
+@if (coinsEarned.HasValue)
+{
+    <div class="coin-toast" role="status">
+        <span class="coin-toast-coin">🪙</span>
+        <div>
+            <div class="fw-bold">+@coinsEarned @Localizer["Coins"]</div>
+            @if (streakDays > 1)
+            {
+                <div class="small">🔥 @string.Format(Localizer["StreakDaysLabel"], streakDays)</div>
             }
+        </div>
+    </div>
+}
+else if (capReached)
+{
+    <div class="coin-toast coin-toast-muted" role="status"><div class="small">@Localizer["DailyCoinCapReached"]</div></div>
+}
 
-        .expense-category-list .list-group-item {
-            padding: 0.6rem 0;
-        }
+<div class="dash">
+    <div class="dash-head">
+        <div>
+            <h1 class="dash-title">@string.Format(Localizer["HelloName"], User.FindFirst("Nickname")?.Value ?? "")</h1>
+            <div class="text-muted small">@Localizer["DashboardSubtitle"]</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-controller="Shop" asp-action="Index" class="coin-chip" title="@Localizer["OpenShop"]">🪙 @coins</a>
+            <span class="streak-chip" title="@Localizer["StreakHint"]">🔥 @streak</span>
+        </div>
+    </div>
 
-    .chart-container {
-        height: 390px;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-    }
-
-    #expensePieChart {
-        max-width: 100%;
-        height: 100% !important;
-    }
-</style>
-
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-md-8 mb-3 mb-md-0">
-            <div class="card stat-card shadow-sm mb-3 hover-shadow">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-baseline mb-2">
-                        <div class="text-muted small">
-                            @Localizer["TotalsInDisplayCurrency"]: <strong>@displayCurrency</strong>
-                            <i class="bi bi-info-circle ms-1" title="@Localizer["ExchangeRateDisclaimer"]"></i>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-around align-items-center">
-                        <div class="text-center">
-                            <div class="stat-icon bg-success bg-opacity-10">
-                                <i class="bi bi-arrow-down-circle text-success"></i>
-                            </div>
-                            <div class="fw-bold text-success" style="font-size:1.2rem">@Localizer["TotalIncome"]</div>
-                            <div class="fs-4 fw-bold text-success">@Currency.Format(totalIncome)</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="stat-icon bg-danger bg-opacity-10">
-                                <i class="bi bi-arrow-up-circle text-danger"></i>
-                            </div>
-                            <div class="fw-bold text-danger" style="font-size:1.2rem">@Localizer["TotalExpense"]</div>
-                            <div class="fs-4 fw-bold text-danger">@Currency.Format(totalExpense)</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="stat-icon bg-primary bg-opacity-10">
-                                <i class="bi bi-cash-stack text-primary"></i>
-                            </div>
-                            <div class="fw-bold text-primary" style="font-size:1.2rem">@Localizer["Balance"]</div>
-                            <div class="fs-4 fw-bold text-primary">@Currency.Format(balance)</div>
-                        </div>
-                    </div>
-                    @if ((incomeByCurrency.Count + expenseByCurrency.Count) > 0)
-                    {
-                        <hr />
-                        <div class="row small">
-                            <div class="col-md-6">
-                                <div class="text-success fw-bold mb-1">@Localizer["IncomeByCurrency"]</div>
-                                @if (incomeByCurrency.Any())
-                                {
-                                    <ul class="list-unstyled mb-0">
-                                        @foreach (var b in incomeByCurrency)
-                                        {
-                                            <li>@b.Code — <strong>@Currency.Format(b.Amount, b.Code)</strong></li>
-                                        }
-                                    </ul>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">—</span>
-                                }
-                            </div>
-                            <div class="col-md-6">
-                                <div class="text-danger fw-bold mb-1">@Localizer["ExpenseByCurrency"]</div>
-                                @if (expenseByCurrency.Any())
-                                {
-                                    <ul class="list-unstyled mb-0">
-                                        @foreach (var b in expenseByCurrency)
-                                        {
-                                            <li>@b.Code — <strong>@Currency.Format(b.Amount, b.Code)</strong></li>
-                                        }
-                                    </ul>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">—</span>
-                                }
-                            </div>
-                        </div>
-                    }
+    <div class="kpi-strip">
+        <div class="kpi"><span class="kpi-label">@Localizer["IncomeThisMonth"]</span><span class="kpi-value text-success">@Currency.Format(income)</span></div>
+        <div class="kpi"><span class="kpi-label">@Localizer["ExpenseThisMonth"]</span><span class="kpi-value text-danger">@Currency.Format(expense)</span></div>
+        <div class="kpi"><span class="kpi-label">@Localizer["Balance"]</span><span class="kpi-value">@Currency.Format(income - expense)</span></div>
+        <div class="kpi">
+            <span class="kpi-label">@Localizer["MonthlyBudget"]</span>
+            @if (budgetTotal > 0)
+            {
+                <div class="progress kpi-progress" role="progressbar" aria-valuenow="@budgetPct" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar @(budgetSpent > budgetTotal ? "bg-danger" : "bg-primary")" style="width:@budgetPct%"></div>
                 </div>
+                <span class="small text-muted">@budgetPct% · @Currency.Format(budgetTotal - budgetSpent) @Localizer["Left"]</span>
+            }
+            else
+            {
+                <a asp-controller="Budgets" asp-action="Create" class="small">@Localizer["SetABudget"]</a>
+            }
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="mp-card city-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-buildings me-1"></i>@Localizer["YourCity"]</h5>
+                    <div class="d-flex gap-2">
+                        <a asp-controller="Shop" asp-action="Index" class="btn btn-sm btn-outline-dark"><i class="bi bi-bag-heart me-1"></i>@Localizer["Shop"]</a>
+                        <a asp-controller="Insights" asp-action="Index" class="btn btn-sm btn-outline-dark"><i class="bi bi-graph-up me-1"></i>@Localizer["Insights"]</a>
+                    </div>
+                </div>
+                <div id="city" class="city"></div>
+                <script type="application/json" id="cityData">@Html.Raw(cityJson)</script>
+                <div class="text-muted small mt-2"><i class="bi bi-info-circle me-1"></i>@Localizer["CityHowItWorks"]</div>
             </div>
-            <div class="card stat-card shadow-sm mb-3 hover-shadow">
-                <div class="card-body p-4">
-                    <div class="row">
-                        <div class="col-md-7">
-                            <div class="d-flex justify-content-center mb-3">
-                                <div class="btn-group" role="group" aria-label="Time filter">
-                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="daily">@Localizer["Today"]</button>
-                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="monthly">@Localizer["ThisMonth"]</button>
-                                    <button type="button" class="btn btn-outline-primary time-filter" data-period="yearly">@Localizer["ThisYear"]</button>
-                                    <button type="button" class="btn btn-outline-primary time-filter active" data-period="all">@Localizer["AllTime"]</button>
-                                </div>
-                            </div>
-                            <div class="chart-container">
-                                <canvas id="expensePieChart"></canvas>
-                            </div>
-                        </div>
-                        <div class="col-md-5 align-self-center">
-                            <div class="fw-bold mb-3">
-                                <i class="bi bi-pie-chart-fill me-2"></i>@Localizer["ExpenseByCategory"]
-                            </div>
-                            <div class="expense-category-list" id="categoryList">
-                                <ul class="list-group list-group-flush">
-                                    @foreach (var item in expenseByCategory)
-                                    {
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span><i class="bi bi-tag me-2 text-muted"></i>@Localizer[item.Category]</span>
-                                            <span class="fw-bold">@Currency.Format(item.Amount)</span>
-                                        </li>
-                                    }
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+            <div class="mp-card mt-4">
+                @await Html.PartialAsync("ListPartial", Model)
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card stat-card shadow-sm mb-3 hover-shadow">
-                <div class="card-body text-center p-4">
-                    <div class="stat-icon bg-primary bg-opacity-10">
-                        <i class="bi bi-wallet2 text-primary"></i>
+        <div class="col-lg-4">
+            @await Html.PartialAsync("CreatePartial", Model)
+
+            @if (goal != null)
+            {
+                var goalPct = goal.TargetAmount > 0 ? (int)Math.Min(100, goal.CurrentAmount / goal.TargetAmount * 100) : 0;
+                <div class="mp-card mt-4">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="fw-bold mb-1"><i class="bi bi-piggy-bank me-1"></i>@Localizer.LocalizeGoalName(goal.GoalName)</h6>
+                        <a asp-controller="SavingGoals" asp-action="Index" class="small">@Localizer["Manage"]</a>
                     </div>
-                    <div class="fw-bold mb-2">@Localizer["MonthlyBudget"]</div>
-                    <div class="fs-4 fw-bold">@Currency.Format(totalBudget)</div>
-                    <div class="mb-3">
-                        <div class="text-danger mb-1">
-                            <i class="bi bi-dash-circle me-1"></i>@Localizer["Spent"]: @Currency.Format(totalBudgetSpent)
-                        </div>
-                        <div class="text-success">
-                            <i class="bi bi-plus-circle me-1"></i>@Localizer["Remaining"]: @Currency.Format(totalBudgetRemaining)
-                        </div>
-                    </div>
-                    <div class="progress mb-3" style="height: 1.2rem;">
-                        <div class="progress-bar @(totalBudgetSpent > totalBudget ? "bg-danger" : "bg-primary")"
-                             role="progressbar" style="width: @percent%" aria-valuenow="@percent"
-                             aria-valuemin="0" aria-valuemax="100">
-                            @percent%
-                        </div>
-                    </div>
-                    <a href="@Url.Action("Index", "Budgets", new { area = "User" })"
-                       class="btn btn-outline-primary btn-sm custom-btn">
-                        <i class="bi bi-gear me-1"></i>@Localizer["ManageBudget"]
-                    </a>
-                </div>
-            </div>
-            <div class="card stat-card shadow-sm mb-3 hover-shadow">
-                <div class="card-body text-center p-4">
-                    <div class="stat-icon bg-success bg-opacity-10">
-                        <i class="bi bi-piggy-bank text-success"></i>
-                    </div>
-                    <div class="fw-bold mb-3">@Localizer["SavingGoalsProgress"]</div>
-                    @if (selectedGoal != null)
+                    @if (goal.TargetAmount > 0)
                     {
-                        <div class="mb-2">
-                            <i class="bi bi-bullseye me-1"></i>@Localizer.LocalizeGoalName(selectedGoal.GoalName)
-                        </div>
-                        <div class="mb-2">
-                            @Localizer["TargetAmount"]: <span class="fw-bold">@Currency.Format(selectedGoal.TargetAmount)</span>
-                        </div>
-                        <div class="mb-2">
-                            @Localizer["CurrentAmount"]: <span class="fw-bold">@Currency.Format(selectedGoal.CurrentAmount)</span>
-                        </div>
-                        <div class="progress mb-3" style="height: 1.2rem;">
-                            <div class="progress-bar @(savingPercent >= 100 ? "bg-success" : "bg-info")"
-                                 role="progressbar" style="width: @savingPercent%"
-                                 aria-valuenow="@savingPercent" aria-valuemin="0" aria-valuemax="100">
-                                @savingPercent%
-                            </div>
-                        </div>
-                        @if (savingPercent >= 100)
-                        {
-                            <div class="alert alert-success mt-3">
-                                <i class="bi bi-trophy me-2"></i>@Localizer["GoalAchieved"]
-                            </div>
-                        }
-                        <a href="@Url.Action("Index", "SavingGoals", new { area = "User" })"
-                           class="btn btn-outline-success btn-sm custom-btn">
-                            <i class="bi bi-gear me-1"></i>@Localizer["ManageGoals"]
-                        </a>
+                        <div class="progress my-2" style="height:.6rem"><div class="progress-bar bg-success" style="width:@goalPct%"></div></div>
+                        <div class="small text-muted">@Currency.Format(goal.CurrentAmount) / @Currency.Format(goal.TargetAmount)</div>
                     }
                     else
                     {
-                        <div class="text-muted mb-3">
-                            <i class="bi bi-info-circle me-1"></i>@Localizer["NoSavingGoalsSet"]
-                        </div>
-                        <a href="@Url.Action("Index", "SavingGoals", new { area = "User" })"
-                           class="btn btn-outline-success btn-sm custom-btn">
-                            <i class="bi bi-plus me-1"></i>@Localizer["AddGoal"]
-                        </a>
+                        <a asp-controller="SavingGoals" asp-action="Edit" asp-route-id="@goal.GoalId" class="small">@Localizer["SetATarget"]</a>
                     }
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4">
-            @await Html.PartialAsync("CreatePartial", Model)
-        </div>
-        <div class="col-md-8">
-            @await Html.PartialAsync("ListPartial", Model)
+            }
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="~/js/transaction-form.js" asp-append-version="true"></script>
+    <script src="~/js/capture.js" asp-append-version="true"></script>
+    <script src="~/js/city.js" asp-append-version="true"></script>
     <script>
-        const CURRENCY_SYMBOL = '@Currency.CurrentSymbol';
-        // Register datalabels plugin
-        Chart.register(ChartDataLabels);
-
-        let expensePieChart;
-        const chartColors = [
-            '#f87171', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa',
-            '#f472b6', '#facc15', '#38bdf8', '#4ade80', '#fca5a5'
-        ];
-
-        const expenseData = {
-            all: {
-                categories: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(expenseByCategory.Select(x => x.Category).ToList())),
-                amounts: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(expenseByCategory.Select(x => x.Amount).ToList()))
-            },
-            daily: {
-                categories: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(dailyExpensesByCategory.Select(x => x.Category).ToList())),
-                amounts: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(dailyExpensesByCategory.Select(x => x.Amount).ToList()))
-            },
-            monthly: {
-                categories: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(monthlyExpensesByCategory.Select(x => x.Category).ToList())),
-                amounts: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(monthlyExpensesByCategory.Select(x => x.Amount).ToList()))
-            },
-            yearly: {
-                categories: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(yearlyExpensesByCategory.Select(x => x.Category).ToList())),
-                amounts: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(yearlyExpensesByCategory.Select(x => x.Amount).ToList()))
-            }
-        };
-
-        function updateChart(period) {
-            const data = expenseData[period];
-
-            if (expensePieChart) {
-                expensePieChart.destroy();
-            }
-
-            // Total amount, used for percentage calculation
-            const total = data.amounts.reduce((a, b) => a + b, 0);
-
-            const ctx = document.getElementById('expensePieChart').getContext('2d');
-            expensePieChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: data.categories,
-                    datasets: [{
-                        data: data.amounts,
-                        backgroundColor: chartColors,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: 20
-                    },
-                    plugins: {
-                        // datalabels options
-                        datalabels: {
-                            formatter: (value, ctx) => {
-                                const percentage = ((value / total) * 100).toFixed(1);
-                                return `${percentage}%`;
-                            },
-                            color: '#fff',
-                            font: {
-                                weight: 'bold',
-                                size: 14
-                            },
-                            textAlign: 'center',
-                            // Drop shadow improves label readability against slice colors
-                            textShadow: true,
-                            shadowBlur: 3,
-                            shadowColor: 'rgba(0,0,0,0.5)',
-                            // Only render the label when the slice is large enough to fit it.
-                            display: function(context) {
-                                const dataset = context.dataset;
-                                const value = dataset.data[context.dataIndex];
-                                const percentage = value / total * 100;
-                                return percentage > 3; // hide labels below 3% to avoid clutter
-                            }
-                        },
-                        legend: {
-                            position: 'right',
-                            align: 'center',
-                            labels: {
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Expenses by Category',
-                            font: {
-                                size: 16
-                            },
-                            padding: {
-                                top: 10,
-                                bottom: 20
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.raw;
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return `${CURRENCY_SYMBOL}${value.toLocaleString()} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Update category list
-            const categoryList = document.getElementById('categoryList');
-            categoryList.innerHTML = `
-                <ul class="list-group list-group-flush">
-                    ${data.categories.map((category, index) => {
-                        const percentage = ((data.amounts[index] / total) * 100).toFixed(1);
-                        return `
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span><i class="bi bi-tag me-2 text-muted"></i>${category}</span>
-                                <div class="text-end">
-                                    <div class="fw-bold">${CURRENCY_SYMBOL}${data.amounts[index].toLocaleString()}</div>
-                                    <small class="text-muted">${percentage}%</small>
-                                </div>
-                            </li>
-                        `;
-                    }).join('')}
-                </ul>
-            `;
-        }
-
-        // Initialize chart with all-time data
-        updateChart('all');
-
-        // Add click event listeners to filter buttons
-        document.querySelectorAll('.time-filter').forEach(button => {
-            button.addEventListener('click', function() {
-                // Remove active class from all buttons
-                document.querySelectorAll('.time-filter').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                // Add active class to clicked button
-                this.classList.add('active');
-                // Update chart with selected period
-                updateChart(this.dataset.period);
-            });
+        // Keyboard shortcut: press "n" anywhere (outside a field) to jump to the form.
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'n' || e.metaKey || e.ctrlKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+            e.preventDefault();
+            document.getElementById('quickText')?.focus();
         });
     </script>
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

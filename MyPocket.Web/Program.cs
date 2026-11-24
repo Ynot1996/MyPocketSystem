@@ -64,6 +64,7 @@ var authBuilder = builder.Services
         options.AccessDeniedPath = "/Account/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromDays(14);
         options.SlidingExpiration = true;
+        options.Events.OnValidatePrincipal = CookieUserValidator.ValidateAsync;
     });
 
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];

@@ -122,7 +122,7 @@
             $("#updateSelected").click(function (e) {
                 e.preventDefault();
 
-                if (!confirm("@confirmBulkUpdate")) {
+                if (!confirm(@Json.Serialize(confirmBulkUpdate.ToString()))) {
                     return;
                 }
 
@@ -152,12 +152,12 @@
                             alert(result.message);
                             location.reload();
                         } else {
-                            alert('@errorPrefix' + result.message);
+                            alert(@Json.Serialize(errorPrefix.ToString()) + result.message);
                             updateButtonState();
                         }
                     },
                     error: function (xhr, status, error) {
-                        alert('@bulkUpdateErrorPrefix' + error);
+                        alert(@Json.Serialize(bulkUpdateErrorPrefix.ToString()) + error);
                         updateButtonState();
                     }
                 });
