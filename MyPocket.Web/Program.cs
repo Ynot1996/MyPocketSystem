@@ -202,6 +202,15 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IGamificationService, MyPocket.Services.Gamification.GamificationService>();
 builder.Services.AddScoped<IShopService, MyPocket.Services.Gamification.ShopService>();
 
+// AI capture & coaching (Claude). Enabled when Ai:AnthropicApiKey (App Service
+// setting Ai__AnthropicApiKey) or ANTHROPIC_API_KEY is set; without it, receipt
+// scanning is hidden and text capture uses the offline rule-based parser.
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<MyPocket.Services.Ai.IAiJsonClient, MyPocket.Services.Ai.AnthropicJsonClient>();
+builder.Services.AddSingleton<MyPocket.Services.Ai.IReceiptScanner, MyPocket.Services.Ai.ReceiptScanner>();
+builder.Services.AddSingleton<MyPocket.Services.Ai.ITransactionTextParser, MyPocket.Services.Ai.TransactionTextParser>();
+builder.Services.AddSingleton<MyPocket.Services.Ai.ISpendingCoach, MyPocket.Services.Ai.SpendingCoach>();
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();
 
