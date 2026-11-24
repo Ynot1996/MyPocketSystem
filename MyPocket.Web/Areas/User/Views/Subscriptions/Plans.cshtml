@@ -75,22 +75,3 @@
         }
     </div>
 </div>
-
-@section Scripts {
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <script>
-            $(document).ready(function() {
-                toastr.success('@TempData["SuccessMessage"]');
-            });
-        </script>
-    }
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <script>
-            $(document).ready(function() {
-                toastr.error('@TempData["ErrorMessage"]');
-            });
-        </script>
-    }
-}

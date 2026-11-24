@@ -206,6 +206,9 @@
   "EndDate": "結束日期",
 
   "AddUser": "新增使用者",
+  "EditUser": "編輯使用者",
+  "NewPasswordOptional": "新密碼（選填）",
+  "NewPasswordHint": "留空則保留原密碼，至少 8 個字元。",
   "Disabled": "已停用",
   "Active": "啟用中",
   "SubscriptionManagement": "訂閱管理",

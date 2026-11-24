@@ -29,6 +29,7 @@ namespace MyPocket.Web.Areas.User.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string newCategoryName, string newCategoryType)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -39,6 +40,7 @@ namespace MyPocket.Web.Areas.User.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);

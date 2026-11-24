@@ -17,13 +17,30 @@ builder.Services.AddControllersWithViews()
             factory.Create(typeof(MyPocket.Shared.Resources.JsonLocalizationService));
     });
 
+// With no connection string configured (fresh clone, CI smoke runs, recruiters
+// trying the repo) fall back to an in-memory database so `dotnet run` works with
+// zero setup. Production always supplies ConnectionStrings__MyPocketDBConnection.
+var connectionString = builder.Configuration.GetConnectionString("MyPocketDBConnection");
+var useInMemoryDb = string.IsNullOrWhiteSpace(connectionString);
 builder.Services.AddDbContext<MyPocketDBContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("MyPocketDBConnection"),
-        sql => sql.EnableRetryOnFailure(
-            maxRetryCount: 6,
-            maxRetryDelay: TimeSpan.FromSeconds(10),
-            errorNumbersToAdd: null)));
+{
+    if (useInMemoryDb)
+    {
+        options.UseInMemoryDatabase("MyPocketLocal");
+    }
+    else
+    {
+        options.UseSqlServer(
+            connectionString,
+            sql => sql.EnableRetryOnFailure(
+                maxRetryCount: 6,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null));
+    }
+});
+
+// JSON/AJAX endpoints send the antiforgery token in this header instead of a form field.
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 
 // Cookie auth = how we remember a signed-in user across requests.
 // Google = one external identity provider the user can use to sign in.

@@ -58,38 +58,17 @@ namespace MyPocket.Web.Areas.User.Controllers
                 return View();
             }
 
-            string goalName;
-            DateTime targetDate;
-            if (goalType == "Monthly")
-            {
-                goalName = $"{year} Monthly Goal ({month:00})";
-                targetDate = new DateTime(year, month!.Value, DateTime.DaysInMonth(year, month.Value));
-            }
-            else
-            {
-                goalName = $"{year} Yearly Goal";
-                targetDate = new DateTime(year, 12, 31);
-            }
+            // Reuse the service's get-or-create so a goal for a period has exactly one
+            // row. The old code built its own name ("2026 Monthly Goal (06)") which
+            // never matched the service's "MonthlyGoal:2026-06", creating duplicates.
+            var goal = goalType == "Monthly"
+                ? await _savingGoalService.GetOrCreateMonthlyGoalAsync(userId, year, month!.Value)
+                : await _savingGoalService.GetOrCreateYearlyGoalAsync(userId, year);
 
-            // Calculate current amount (balance) for the target month/year
-            DateTime startDate = goalType == "Monthly" ? new DateTime(year, month!.Value, 1) : new DateTime(year, 1, 1);
-            DateTime endDate = targetDate;
-            var currentAmount = await _savingGoalService.CalculateCurrentSavingAsync(userId, startDate, endDate);
-
-            var model = new SavingGoal
-            {
-                GoalId = Guid.NewGuid(),
-                UserId = userId,
-                GoalName = goalName,
-                TargetAmount = targetAmount,
-                CurrentAmount = currentAmount,
-                TargetDate = targetDate,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsDeleted = false
-            };
-            await _savingGoalService.CreateOrUpdateGoalAsync(model);
-            TempData["SuccessMessage"] = "Saving goal created successfully.";
+            goal.TargetAmount = targetAmount;
+            goal.UpdatedAt = DateTime.UtcNow;
+            await _savingGoalService.CreateOrUpdateGoalAsync(goal);
+            TempData["SuccessMessage"] = "Saving goal saved successfully.";
             return RedirectToAction(nameof(Index));
         }
 

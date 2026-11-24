@@ -54,6 +54,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateSubscription(Guid userId, Guid planId)
         {
             try
@@ -71,7 +72,10 @@ namespace MyPocket.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(UserSubscriptionHistory), new { userId });
         }
 
+        // JSON endpoint: the antiforgery token travels in the RequestVerificationToken
+        // header (configured in Program.cs) rather than as a form field.
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateSelectedSubscriptions([FromBody] UpdateSubscriptionRequest request)
         {
             if (request?.UserIds == null || request.UserIds.Count == 0 || request.PlanId == Guid.Empty)
@@ -98,6 +102,7 @@ namespace MyPocket.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateAllUsersToFreeMember()
         {
             try

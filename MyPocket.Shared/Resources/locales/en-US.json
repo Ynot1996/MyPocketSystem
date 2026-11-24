@@ -206,6 +206,9 @@
   "EndDate": "End Date",
 
   "AddUser": "Add User",
+  "EditUser": "Edit User",
+  "NewPasswordOptional": "New password (optional)",
+  "NewPasswordHint": "Leave blank to keep the current password. Minimum 8 characters.",
   "Disabled": "Disabled",
   "Active": "Active",
   "SubscriptionManagement": "Subscription Management",
